@@ -2,12 +2,12 @@ import weakref
 import contextlib
 from inspect import iscoroutinefunction
 
-import sentry_sdk
-from sentry_sdk.api import continue_trace
-from sentry_sdk.consts import OP
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.api import continue_trace
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import TransactionSource
+from debugg_ai_sdk.utils import (
     HAS_REAL_CONTEXTVARS,
     CONTEXTVARS_ERROR_MESSAGE,
     ensure_integration_enabled,
@@ -15,13 +15,13 @@ from sentry_sdk.utils import (
     capture_internal_exceptions,
     transaction_from_function,
 )
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.integrations._wsgi_common import (
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.integrations._wsgi_common import (
     RequestExtractor,
     _filter_headers,
     _is_json_content_type,
 )
-from sentry_sdk.integrations.logging import ignore_logger
+from debugg_ai_sdk.integrations.logging import ignore_logger
 
 try:
     from tornado import version_info as TORNADO_VERSION
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from typing import Callable
     from typing import Generator
 
-    from sentry_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk._types import Event, EventProcessor
 
 
 class TornadoIntegration(Integration):
@@ -97,14 +97,14 @@ class TornadoIntegration(Integration):
 @contextlib.contextmanager
 def _handle_request_impl(self):
     # type: (RequestHandler) -> Generator[None, None, None]
-    integration = sentry_sdk.get_client().get_integration(TornadoIntegration)
+    integration = debugg_ai_sdk.get_client().get_integration(TornadoIntegration)
 
     if integration is None:
         yield
 
     weak_handler = weakref.ref(self)
 
-    with sentry_sdk.isolation_scope() as scope:
+    with debugg_ai_sdk.isolation_scope() as scope:
         headers = self.request.headers
 
         scope.clear_breadcrumbs()
@@ -123,7 +123,7 @@ def _handle_request_impl(self):
             origin=TornadoIntegration.origin,
         )
 
-        with sentry_sdk.start_transaction(
+        with debugg_ai_sdk.start_transaction(
             transaction, custom_sampling_context={"tornado_request": self.request}
         ):
             yield
@@ -137,11 +137,11 @@ def _capture_exception(ty, value, tb):
 
     event, hint = event_from_exception(
         (ty, value, tb),
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": "tornado", "handled": False},
     )
 
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _make_event_processor(weak_handler):

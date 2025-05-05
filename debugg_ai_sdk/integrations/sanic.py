@@ -3,14 +3,14 @@ import weakref
 from inspect import isawaitable
 from urllib.parse import urlsplit
 
-import sentry_sdk
-from sentry_sdk import continue_trace
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.integrations._wsgi_common import RequestExtractor, _filter_headers
-from sentry_sdk.integrations.logging import ignore_logger
-from sentry_sdk.tracing import TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk import continue_trace
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.integrations._wsgi_common import RequestExtractor, _filter_headers
+from debugg_ai_sdk.integrations.logging import ignore_logger
+from debugg_ai_sdk.tracing import TransactionSource
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from sanic.request import Request, RequestParameters
     from sanic.response import BaseHTTPResponse
 
-    from sentry_sdk._types import Event, EventProcessor, ExcInfo, Hint
+    from debugg_ai_sdk._types import Event, EventProcessor, ExcInfo, Hint
     from sanic.router import Route
 
 try:
@@ -175,14 +175,14 @@ async def _startup(self):
 async def _context_enter(request):
     # type: (Request) -> None
     request.ctx._sentry_do_integration = (
-        sentry_sdk.get_client().get_integration(SanicIntegration) is not None
+        debugg_ai_sdk.get_client().get_integration(SanicIntegration) is not None
     )
 
     if not request.ctx._sentry_do_integration:
         return
 
     weak_request = weakref.ref(request)
-    request.ctx._sentry_scope = sentry_sdk.isolation_scope()
+    request.ctx._sentry_scope = debugg_ai_sdk.isolation_scope()
     scope = request.ctx._sentry_scope.__enter__()
     scope.clear_breadcrumbs()
     scope.add_event_processor(_make_request_processor(weak_request))
@@ -195,7 +195,7 @@ async def _context_enter(request):
         source=TransactionSource.URL,
         origin=SanicIntegration.origin,
     )
-    request.ctx._sentry_transaction = sentry_sdk.start_transaction(
+    request.ctx._sentry_transaction = debugg_ai_sdk.start_transaction(
         transaction
     ).__enter__()
 
@@ -206,7 +206,7 @@ async def _context_exit(request, response=None):
         if not request.ctx._sentry_do_integration:
             return
 
-        integration = sentry_sdk.get_client().get_integration(SanicIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(SanicIntegration)
 
         response_status = None if response is None else response.status
 
@@ -227,7 +227,7 @@ async def _set_transaction(request, route, **_):
     # type: (Request, Route, **Any) -> None
     if request.ctx._sentry_do_integration:
         with capture_internal_exceptions():
-            scope = sentry_sdk.get_current_scope()
+            scope = debugg_ai_sdk.get_current_scope()
             route_name = route.name.replace(request.app.name, "").strip(".")
             scope.set_transaction_name(route_name, source=TransactionSource.COMPONENT)
 
@@ -240,7 +240,7 @@ def _sentry_error_handler_lookup(self, exception, *args, **kwargs):
     if old_error_handler is None:
         return None
 
-    if sentry_sdk.get_client().get_integration(SanicIntegration) is None:
+    if debugg_ai_sdk.get_client().get_integration(SanicIntegration) is None:
         return old_error_handler
 
     async def sentry_wrapped_error_handler(request, exception):
@@ -268,12 +268,12 @@ def _sentry_error_handler_lookup(self, exception, *args, **kwargs):
 
 async def _legacy_handle_request(self, request, *args, **kwargs):
     # type: (Any, Request, *Any, **Any) -> Any
-    if sentry_sdk.get_client().get_integration(SanicIntegration) is None:
+    if debugg_ai_sdk.get_client().get_integration(SanicIntegration) is None:
         return await old_handle_request(self, request, *args, **kwargs)
 
     weak_request = weakref.ref(request)
 
-    with sentry_sdk.isolation_scope() as scope:
+    with debugg_ai_sdk.isolation_scope() as scope:
         scope.clear_breadcrumbs()
         scope.add_event_processor(_make_request_processor(weak_request))
 
@@ -287,9 +287,9 @@ async def _legacy_handle_request(self, request, *args, **kwargs):
 def _legacy_router_get(self, *args):
     # type: (Any, Union[Any, Request]) -> Any
     rv = old_router_get(self, *args)
-    if sentry_sdk.get_client().get_integration(SanicIntegration) is not None:
+    if debugg_ai_sdk.get_client().get_integration(SanicIntegration) is not None:
         with capture_internal_exceptions():
-            scope = sentry_sdk.get_isolation_scope()
+            scope = debugg_ai_sdk.get_isolation_scope()
             if SanicIntegration.version and SanicIntegration.version >= (21, 3):
                 # Sanic versions above and including 21.3 append the app name to the
                 # route name, and so we need to remove it from Route name so the
@@ -320,14 +320,14 @@ def _capture_exception(exception):
     with capture_internal_exceptions():
         event, hint = event_from_exception(
             exception,
-            client_options=sentry_sdk.get_client().options,
+            client_options=debugg_ai_sdk.get_client().options,
             mechanism={"type": "sanic", "handled": False},
         )
 
         if hint and hasattr(hint["exc_info"][0], "quiet") and hint["exc_info"][0].quiet:
             return
 
-        sentry_sdk.capture_event(event, hint=hint)
+        debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _make_request_processor(weak_request):

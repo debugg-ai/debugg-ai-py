@@ -1,5 +1,5 @@
-import sentry_sdk
-from sentry_sdk.hub import Hub
+import debugg_ai_sdk
+from debugg_ai_sdk.hub import Hub
 
 """
 Those tests are meant to check the compatibility of the new scopes in SDK 2.0 with the old Hub/Scope system in SDK 1.x.
@@ -21,16 +21,16 @@ def test_configure_scope_sdk1(sentry_init, capture_events):
 
     events = capture_events()
 
-    sentry_sdk.set_tag("A", 1)
-    sentry_sdk.capture_message("Event A")
+    debugg_ai_sdk.set_tag("A", 1)
+    debugg_ai_sdk.capture_message("Event A")
 
-    with sentry_sdk.configure_scope() as scope:  # configure scope
-        sentry_sdk.set_tag("B1", 1)
+    with debugg_ai_sdk.configure_scope() as scope:  # configure scope
+        debugg_ai_sdk.set_tag("B1", 1)
         scope.set_tag("B2", 1)
-        sentry_sdk.capture_message("Event B")
+        debugg_ai_sdk.capture_message("Event B")
 
-    sentry_sdk.set_tag("Z", 1)
-    sentry_sdk.capture_message("Event Z")
+    debugg_ai_sdk.set_tag("Z", 1)
+    debugg_ai_sdk.capture_message("Event Z")
 
     (event_a, event_b, event_z) = events
 
@@ -50,16 +50,16 @@ def test_push_scope_sdk1(sentry_init, capture_events):
 
     events = capture_events()
 
-    sentry_sdk.set_tag("A", 1)
-    sentry_sdk.capture_message("Event A")
+    debugg_ai_sdk.set_tag("A", 1)
+    debugg_ai_sdk.capture_message("Event A")
 
-    with sentry_sdk.push_scope() as scope:  # push scope
-        sentry_sdk.set_tag("B1", 1)
+    with debugg_ai_sdk.push_scope() as scope:  # push scope
+        debugg_ai_sdk.set_tag("B1", 1)
         scope.set_tag("B2", 1)
-        sentry_sdk.capture_message("Event B")
+        debugg_ai_sdk.capture_message("Event B")
 
-    sentry_sdk.set_tag("Z", 1)
-    sentry_sdk.capture_message("Event Z")
+    debugg_ai_sdk.set_tag("Z", 1)
+    debugg_ai_sdk.capture_message("Event Z")
 
     (event_a, event_b, event_z) = events
 
@@ -79,16 +79,16 @@ def test_with_hub_sdk1(sentry_init, capture_events):
 
     events = capture_events()
 
-    sentry_sdk.set_tag("A", 1)
-    sentry_sdk.capture_message("Event A")
+    debugg_ai_sdk.set_tag("A", 1)
+    debugg_ai_sdk.capture_message("Event A")
 
     with Hub.current as hub:  # with hub
-        sentry_sdk.set_tag("B1", 1)
+        debugg_ai_sdk.set_tag("B1", 1)
         hub.scope.set_tag("B2", 1)
-        sentry_sdk.capture_message("Event B")
+        debugg_ai_sdk.capture_message("Event B")
 
-    sentry_sdk.set_tag("Z", 1)
-    sentry_sdk.capture_message("Event Z")
+    debugg_ai_sdk.set_tag("Z", 1)
+    debugg_ai_sdk.capture_message("Event Z")
 
     (event_a, event_b, event_z) = events
 
@@ -108,21 +108,21 @@ def test_with_hub_configure_scope_sdk1(sentry_init, capture_events):
 
     events = capture_events()
 
-    sentry_sdk.set_tag("A", 1)
-    sentry_sdk.capture_message("Event A")
+    debugg_ai_sdk.set_tag("A", 1)
+    debugg_ai_sdk.capture_message("Event A")
 
     with Hub.current as hub:  # with hub
-        sentry_sdk.set_tag("B1", 1)
+        debugg_ai_sdk.set_tag("B1", 1)
         with hub.configure_scope() as scope:  # configure scope
-            sentry_sdk.set_tag("B2", 1)
+            debugg_ai_sdk.set_tag("B2", 1)
             hub.scope.set_tag("B3", 1)
             scope.set_tag("B4", 1)
-            sentry_sdk.capture_message("Event B")
-        sentry_sdk.set_tag("B5", 1)
-        sentry_sdk.capture_message("Event C")
+            debugg_ai_sdk.capture_message("Event B")
+        debugg_ai_sdk.set_tag("B5", 1)
+        debugg_ai_sdk.capture_message("Event C")
 
-    sentry_sdk.set_tag("Z", 1)
-    sentry_sdk.capture_message("Event Z")
+    debugg_ai_sdk.set_tag("Z", 1)
+    debugg_ai_sdk.capture_message("Event Z")
 
     (event_a, event_b, event_c, event_z) = events
 
@@ -151,21 +151,21 @@ def test_with_hub_push_scope_sdk1(sentry_init, capture_events):
 
     events = capture_events()
 
-    sentry_sdk.set_tag("A", 1)
-    sentry_sdk.capture_message("Event A")
+    debugg_ai_sdk.set_tag("A", 1)
+    debugg_ai_sdk.capture_message("Event A")
 
     with Hub.current as hub:  # with hub
-        sentry_sdk.set_tag("B1", 1)
+        debugg_ai_sdk.set_tag("B1", 1)
         with hub.push_scope() as scope:  # push scope
-            sentry_sdk.set_tag("B2", 1)
+            debugg_ai_sdk.set_tag("B2", 1)
             hub.scope.set_tag("B3", 1)
             scope.set_tag("B4", 1)
-            sentry_sdk.capture_message("Event B")
-        sentry_sdk.set_tag("B5", 1)
-        sentry_sdk.capture_message("Event C")
+            debugg_ai_sdk.capture_message("Event B")
+        debugg_ai_sdk.set_tag("B5", 1)
+        debugg_ai_sdk.capture_message("Event C")
 
-    sentry_sdk.set_tag("Z", 1)
-    sentry_sdk.capture_message("Event Z")
+    debugg_ai_sdk.set_tag("Z", 1)
+    debugg_ai_sdk.capture_message("Event Z")
 
     (event_a, event_b, event_c, event_z) = events
 
@@ -186,16 +186,16 @@ def test_with_cloned_hub_sdk1(sentry_init, capture_events):
 
     events = capture_events()
 
-    sentry_sdk.set_tag("A", 1)
-    sentry_sdk.capture_message("Event A")
+    debugg_ai_sdk.set_tag("A", 1)
+    debugg_ai_sdk.capture_message("Event A")
 
     with Hub(Hub.current) as hub:  # clone hub
-        sentry_sdk.set_tag("B1", 1)
+        debugg_ai_sdk.set_tag("B1", 1)
         hub.scope.set_tag("B2", 1)
-        sentry_sdk.capture_message("Event B")
+        debugg_ai_sdk.capture_message("Event B")
 
-    sentry_sdk.set_tag("Z", 1)
-    sentry_sdk.capture_message("Event Z")
+    debugg_ai_sdk.set_tag("Z", 1)
+    debugg_ai_sdk.capture_message("Event Z")
 
     (event_a, event_b, event_z) = events
 
@@ -215,21 +215,21 @@ def test_with_cloned_hub_configure_scope_sdk1(sentry_init, capture_events):
 
     events = capture_events()
 
-    sentry_sdk.set_tag("A", 1)
-    sentry_sdk.capture_message("Event A")
+    debugg_ai_sdk.set_tag("A", 1)
+    debugg_ai_sdk.capture_message("Event A")
 
     with Hub(Hub.current) as hub:  # clone hub
-        sentry_sdk.set_tag("B1", 1)
+        debugg_ai_sdk.set_tag("B1", 1)
         with hub.configure_scope() as scope:  # configure scope
-            sentry_sdk.set_tag("B2", 1)
+            debugg_ai_sdk.set_tag("B2", 1)
             hub.scope.set_tag("B3", 1)
             scope.set_tag("B4", 1)
-            sentry_sdk.capture_message("Event B")
-        sentry_sdk.set_tag("B5", 1)
-        sentry_sdk.capture_message("Event C")
+            debugg_ai_sdk.capture_message("Event B")
+        debugg_ai_sdk.set_tag("B5", 1)
+        debugg_ai_sdk.capture_message("Event C")
 
-    sentry_sdk.set_tag("Z", 1)
-    sentry_sdk.capture_message("Event Z")
+    debugg_ai_sdk.set_tag("Z", 1)
+    debugg_ai_sdk.capture_message("Event Z")
 
     (event_a, event_b, event_c, event_z) = events
 
@@ -250,21 +250,21 @@ def test_with_cloned_hub_push_scope_sdk1(sentry_init, capture_events):
 
     events = capture_events()
 
-    sentry_sdk.set_tag("A", 1)
-    sentry_sdk.capture_message("Event A")
+    debugg_ai_sdk.set_tag("A", 1)
+    debugg_ai_sdk.capture_message("Event A")
 
     with Hub(Hub.current) as hub:  # clone hub
-        sentry_sdk.set_tag("B1", 1)
+        debugg_ai_sdk.set_tag("B1", 1)
         with hub.push_scope() as scope:  # push scope
-            sentry_sdk.set_tag("B2", 1)
+            debugg_ai_sdk.set_tag("B2", 1)
             hub.scope.set_tag("B3", 1)
             scope.set_tag("B4", 1)
-            sentry_sdk.capture_message("Event B")
-        sentry_sdk.set_tag("B5", 1)
-        sentry_sdk.capture_message("Event C")
+            debugg_ai_sdk.capture_message("Event B")
+        debugg_ai_sdk.set_tag("B5", 1)
+        debugg_ai_sdk.capture_message("Event C")
 
-    sentry_sdk.set_tag("Z", 1)
-    sentry_sdk.capture_message("Event Z")
+    debugg_ai_sdk.set_tag("Z", 1)
+    debugg_ai_sdk.capture_message("Event Z")
 
     (event_a, event_b, event_c, event_z) = events
 

@@ -1,12 +1,12 @@
-import sentry_sdk
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.utils import (
     event_from_exception,
     ensure_integration_enabled,
     parse_version,
 )
 
-from sentry_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
-from sentry_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
+from debugg_ai_sdk.scope import should_send_default_pii
 
 try:
     import gql  # type: ignore[import-not-found]
@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Dict, Tuple, Union
-    from sentry_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk._types import Event, EventProcessor
 
     EventDataType = Dict[str, Union[str, Tuple[VariableDefinitionNode, ...]]]
 
@@ -94,7 +94,7 @@ def _patch_execute():
     @ensure_integration_enabled(GQLIntegration, real_execute)
     def sentry_patched_execute(self, document, *args, **kwargs):
         # type: (gql.Client, DocumentNode, Any, Any) -> Any
-        scope = sentry_sdk.get_isolation_scope()
+        scope = debugg_ai_sdk.get_isolation_scope()
         scope.add_event_processor(_make_gql_event_processor(self, document))
 
         try:
@@ -102,11 +102,11 @@ def _patch_execute():
         except TransportQueryError as e:
             event, hint = event_from_exception(
                 e,
-                client_options=sentry_sdk.get_client().options,
+                client_options=debugg_ai_sdk.get_client().options,
                 mechanism={"type": "gql", "handled": False},
             )
 
-            sentry_sdk.capture_event(event, hint)
+            debugg_ai_sdk.capture_event(event, hint)
             raise e
 
     gql.Client.execute = sentry_patched_execute

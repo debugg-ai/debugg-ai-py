@@ -6,8 +6,8 @@ from openai.types.chat.chat_completion import Choice
 from openai.types.chat.chat_completion_chunk import ChoiceDelta, Choice as DeltaChoice
 from openai.types.create_embedding_response import Usage as EmbeddingTokenUsage
 
-from sentry_sdk import start_transaction
-from sentry_sdk.integrations.openai import (
+from debugg_ai_sdk import start_transaction
+from debugg_ai_sdk.integrations.openai import (
     OpenAIIntegration,
     _calculate_chat_completion_usage,
 )

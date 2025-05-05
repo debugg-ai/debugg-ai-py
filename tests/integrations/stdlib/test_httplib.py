@@ -6,10 +6,10 @@ from unittest import mock
 
 import pytest
 
-from sentry_sdk import capture_message, start_transaction
-from sentry_sdk.consts import MATCH_ALL, SPANDATA
-from sentry_sdk.tracing import Transaction
-from sentry_sdk.integrations.stdlib import StdlibIntegration
+from debugg_ai_sdk import capture_message, start_transaction
+from debugg_ai_sdk.consts import MATCH_ALL, SPANDATA
+from debugg_ai_sdk.tracing import Transaction
+from debugg_ai_sdk.integrations.stdlib import StdlibIntegration
 
 from tests.conftest import ApproxDict, create_mock_http_server
 

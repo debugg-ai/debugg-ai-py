@@ -1,7 +1,7 @@
 from dataclasses import asdict, dataclass
 from typing import Optional, List
 
-from sentry_sdk.tracing_utils import _should_be_included, Baggage
+from debugg_ai_sdk.tracing_utils import _should_be_included, Baggage
 import pytest
 
 

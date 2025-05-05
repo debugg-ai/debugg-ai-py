@@ -1,9 +1,9 @@
 import json
 
-import sentry_sdk
-from sentry_sdk.integrations import Integration
-from sentry_sdk.integrations._wsgi_common import request_body_within_bounds
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.integrations._wsgi_common import request_body_within_bounds
+from debugg_ai_sdk.utils import (
     AnnotatedValue,
     capture_internal_exceptions,
     event_from_exception,
@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict, Optional, Union
-    from sentry_sdk._types import Event, Hint
+    from debugg_ai_sdk._types import Event, Hint
 
 
 class DramatiqIntegration(Integration):
@@ -47,7 +47,7 @@ def _patch_dramatiq_broker():
 
     def sentry_patched_broker__init__(self, *args, **kw):
         # type: (Broker, *Any, **Any) -> None
-        integration = sentry_sdk.get_client().get_integration(DramatiqIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(DramatiqIntegration)
 
         try:
             middleware = kw.pop("middleware")
@@ -87,21 +87,21 @@ class SentryMiddleware(Middleware):  # type: ignore[misc]
 
     def before_process_message(self, broker, message):
         # type: (Broker, Message) -> None
-        integration = sentry_sdk.get_client().get_integration(DramatiqIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(DramatiqIntegration)
         if integration is None:
             return
 
-        message._scope_manager = sentry_sdk.new_scope()
+        message._scope_manager = debugg_ai_sdk.new_scope()
         message._scope_manager.__enter__()
 
-        scope = sentry_sdk.get_current_scope()
+        scope = debugg_ai_sdk.get_current_scope()
         scope.set_transaction_name(message.actor_name)
         scope.set_extra("dramatiq_message_id", message.message_id)
         scope.add_event_processor(_make_message_event_processor(message, integration))
 
     def after_process_message(self, broker, message, *, result=None, exception=None):
         # type: (Broker, Message, Any, Optional[Any], Optional[Exception]) -> None
-        integration = sentry_sdk.get_client().get_integration(DramatiqIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(DramatiqIntegration)
         if integration is None:
             return
 
@@ -116,13 +116,13 @@ class SentryMiddleware(Middleware):  # type: ignore[misc]
             ):
                 event, hint = event_from_exception(
                     exception,
-                    client_options=sentry_sdk.get_client().options,
+                    client_options=debugg_ai_sdk.get_client().options,
                     mechanism={
                         "type": DramatiqIntegration.identifier,
                         "handled": False,
                     },
                 )
-                sentry_sdk.capture_event(event, hint=hint)
+                debugg_ai_sdk.capture_event(event, hint=hint)
         finally:
             message._scope_manager.__exit__(None, None, None)
 
@@ -151,7 +151,7 @@ class DramatiqMessageExtractor:
 
     def extract_into_event(self, event):
         # type: (Event) -> None
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
         if not client.is_active():
             return
 

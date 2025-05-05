@@ -7,8 +7,8 @@ from huggingface_hub import (
 )
 from huggingface_hub.errors import OverloadedError
 
-from sentry_sdk import start_transaction
-from sentry_sdk.integrations.huggingface_hub import HuggingfaceHubIntegration
+from debugg_ai_sdk import start_transaction
+from debugg_ai_sdk.integrations.huggingface_hub import HuggingfaceHubIntegration
 
 
 def mock_client_post(client, post_mock):

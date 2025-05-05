@@ -34,11 +34,11 @@ import json
 from enum import Enum, auto
 from typing import Any, Callable, Dict, Tuple, Optional
 
-import sentry_sdk
-from sentry_sdk.integrations import Integration
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import Span as SentrySpan
-from sentry_sdk.utils import SENSITIVE_DATA_SUBSTITUTE
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import Span as SentrySpan
+from debugg_ai_sdk.utils import SENSITIVE_DATA_SUBSTITUTE
 
 TraceState = Optional[Tuple[Optional[SentrySpan], SentrySpan]]
 
@@ -59,7 +59,7 @@ class EventTypeMapping(Enum):
 
 
 def tracing_level_to_sentry_level(level):
-    # type: (str) -> sentry_sdk._types.LogLevelStr
+    # type: (str) -> debugg_ai_sdk._types.LogLevelStr
     level = RustTracingLevel(level)
     if level in (RustTracingLevel.Trace, RustTracingLevel.Debug):
         return "debug"
@@ -99,7 +99,7 @@ def process_event(event: Dict[str, Any]) -> None:
 
     logger = metadata.get("target")
     level = tracing_level_to_sentry_level(metadata.get("level"))
-    message = event.get("message")  # type: sentry_sdk._types.Any
+    message = event.get("message")  # type: debugg_ai_sdk._types.Any
     contexts = extract_contexts(event)
 
     sentry_event = {
@@ -107,9 +107,9 @@ def process_event(event: Dict[str, Any]) -> None:
         "level": level,
         "message": message,
         "contexts": contexts,
-    }  # type: sentry_sdk._types.Event
+    }  # type: debugg_ai_sdk._types.Event
 
-    sentry_sdk.capture_event(sentry_event)
+    debugg_ai_sdk.capture_event(sentry_event)
 
 
 def process_exception(event: Dict[str, Any]) -> None:
@@ -120,7 +120,7 @@ def process_breadcrumb(event: Dict[str, Any]) -> None:
     level = tracing_level_to_sentry_level(event.get("metadata", {}).get("level"))
     message = event.get("message")
 
-    sentry_sdk.add_breadcrumb(level=level, message=message)
+    debugg_ai_sdk.add_breadcrumb(level=level, message=message)
 
 
 def default_span_filter(metadata: Dict[str, Any]) -> bool:
@@ -211,7 +211,7 @@ class RustTracingLayer:
             "origin": self.origin,
         }
 
-        scope = sentry_sdk.get_current_scope()
+        scope = debugg_ai_sdk.get_current_scope()
         parent_sentry_span = scope.span
         if parent_sentry_span:
             sentry_span = parent_sentry_span.start_child(**kwargs)
@@ -234,7 +234,7 @@ class RustTracingLayer:
 
         parent_sentry_span, sentry_span = span_state
         sentry_span.finish()
-        sentry_sdk.get_current_scope().span = parent_sentry_span
+        debugg_ai_sdk.get_current_scope().span = parent_sentry_span
 
     def on_record(self, span_id: str, values: str, span_state: TraceState) -> None:
         if span_state is None:

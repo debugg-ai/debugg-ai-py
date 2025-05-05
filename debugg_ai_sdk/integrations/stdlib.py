@@ -4,12 +4,12 @@ import sys
 import platform
 from http.client import HTTPConnection
 
-import sentry_sdk
-from sentry_sdk.consts import OP, SPANDATA
-from sentry_sdk.integrations import Integration
-from sentry_sdk.scope import add_global_event_processor
-from sentry_sdk.tracing_utils import EnvironHeaders, should_propagate_trace
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP, SPANDATA
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.scope import add_global_event_processor
+from debugg_ai_sdk.tracing_utils import EnvironHeaders, should_propagate_trace
+from debugg_ai_sdk.utils import (
     SENSITIVE_DATA_SUBSTITUTE,
     capture_internal_exceptions,
     ensure_integration_enabled,
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import List
 
-    from sentry_sdk._types import Event, Hint
+    from debugg_ai_sdk._types import Event, Hint
 
 
 _RUNTIME_CONTEXT = {
@@ -50,7 +50,7 @@ class StdlibIntegration(Integration):
         @add_global_event_processor
         def add_python_runtime_context(event, hint):
             # type: (Event, Hint) -> Optional[Event]
-            if sentry_sdk.get_client().get_integration(StdlibIntegration) is not None:
+            if debugg_ai_sdk.get_client().get_integration(StdlibIntegration) is not None:
                 contexts = event.setdefault("contexts", {})
                 if isinstance(contexts, dict) and "runtime" not in contexts:
                     contexts["runtime"] = _RUNTIME_CONTEXT
@@ -69,7 +69,7 @@ def _install_httplib():
         port = self.port
         default_port = self.default_port
 
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
         if client.get_integration(StdlibIntegration) is None or is_sentry_url(
             client, host
         ):
@@ -88,7 +88,7 @@ def _install_httplib():
         with capture_internal_exceptions():
             parsed_url = parse_url(real_url, sanitize=False)
 
-        span = sentry_sdk.start_span(
+        span = debugg_ai_sdk.start_span(
             op=OP.HTTP_CLIENT,
             name="%s %s"
             % (method, parsed_url.url if parsed_url else SENSITIVE_DATA_SUBSTITUTE),
@@ -106,7 +106,7 @@ def _install_httplib():
             for (
                 key,
                 value,
-            ) in sentry_sdk.get_current_scope().iter_trace_propagation_headers(
+            ) in debugg_ai_sdk.get_current_scope().iter_trace_propagation_headers(
                 span=span
             ):
                 logger.debug(
@@ -203,12 +203,12 @@ def _install_subprocess():
 
         env = None
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.SUBPROCESS,
             name=description,
             origin="auto.subprocess.stdlib.subprocess",
         ) as span:
-            for k, v in sentry_sdk.get_current_scope().iter_trace_propagation_headers(
+            for k, v in debugg_ai_sdk.get_current_scope().iter_trace_propagation_headers(
                 span=span
             ):
                 if env is None:
@@ -236,7 +236,7 @@ def _install_subprocess():
     @ensure_integration_enabled(StdlibIntegration, old_popen_wait)
     def sentry_patched_popen_wait(self, *a, **kw):
         # type: (subprocess.Popen[Any], *Any, **Any) -> Any
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.SUBPROCESS_WAIT,
             origin="auto.subprocess.stdlib.subprocess",
         ) as span:
@@ -250,7 +250,7 @@ def _install_subprocess():
     @ensure_integration_enabled(StdlibIntegration, old_popen_communicate)
     def sentry_patched_popen_communicate(self, *a, **kw):
         # type: (subprocess.Popen[Any], *Any, **Any) -> Any
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.SUBPROCESS_COMMUNICATE,
             origin="auto.subprocess.stdlib.subprocess",
         ) as span:

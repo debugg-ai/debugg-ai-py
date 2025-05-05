@@ -8,8 +8,8 @@ from importlib import import_module
 from typing import TYPE_CHECKING, List, Dict, cast, overload
 import warnings
 
-from sentry_sdk._compat import PY37, check_uwsgi_thread_support
-from sentry_sdk.utils import (
+from debugg_ai_sdk._compat import PY37, check_uwsgi_thread_support
+from debugg_ai_sdk.utils import (
     AnnotatedValue,
     ContextVar,
     capture_internal_exceptions,
@@ -23,10 +23,10 @@ from sentry_sdk.utils import (
     is_gevent,
     logger,
 )
-from sentry_sdk.serializer import serialize
-from sentry_sdk.tracing import trace
-from sentry_sdk.transport import BaseHttpTransport, make_transport
-from sentry_sdk.consts import (
+from debugg_ai_sdk.serializer import serialize
+from debugg_ai_sdk.tracing import trace
+from debugg_ai_sdk.transport import BaseHttpTransport, make_transport
+from debugg_ai_sdk.consts import (
     SPANDATA,
     DEFAULT_MAX_VALUE_LENGTH,
     DEFAULT_OPTIONS,
@@ -34,19 +34,19 @@ from sentry_sdk.consts import (
     VERSION,
     ClientConstructor,
 )
-from sentry_sdk.integrations import _DEFAULT_INTEGRATIONS, setup_integrations
-from sentry_sdk.integrations.dedupe import DedupeIntegration
-from sentry_sdk.sessions import SessionFlusher
-from sentry_sdk.envelope import Envelope
-from sentry_sdk.profiler.continuous_profiler import setup_continuous_profiler
-from sentry_sdk.profiler.transaction_profiler import (
+from debugg_ai_sdk.integrations import _DEFAULT_INTEGRATIONS, setup_integrations
+from debugg_ai_sdk.integrations.dedupe import DedupeIntegration
+from debugg_ai_sdk.sessions import SessionFlusher
+from debugg_ai_sdk.envelope import Envelope
+from debugg_ai_sdk.profiler.continuous_profiler import setup_continuous_profiler
+from debugg_ai_sdk.profiler.transaction_profiler import (
     has_profiling_enabled,
     Profile,
     setup_profiler,
 )
-from sentry_sdk.scrubber import EventScrubber
-from sentry_sdk.monitor import Monitor
-from sentry_sdk.spotlight import setup_spotlight
+from debugg_ai_sdk.scrubber import EventScrubber
+from debugg_ai_sdk.monitor import Monitor
+from debugg_ai_sdk.spotlight import setup_spotlight
 
 if TYPE_CHECKING:
     from typing import Any
@@ -57,14 +57,14 @@ if TYPE_CHECKING:
     from typing import Union
     from typing import TypeVar
 
-    from sentry_sdk._types import Event, Hint, SDKInfo, Log
-    from sentry_sdk.integrations import Integration
-    from sentry_sdk.metrics import MetricsAggregator
-    from sentry_sdk.scope import Scope
-    from sentry_sdk.session import Session
-    from sentry_sdk.spotlight import SpotlightClient
-    from sentry_sdk.transport import Transport
-    from sentry_sdk._log_batcher import LogBatcher
+    from debugg_ai_sdk._types import Event, Hint, SDKInfo, Log
+    from debugg_ai_sdk.integrations import Integration
+    from debugg_ai_sdk.metrics import MetricsAggregator
+    from debugg_ai_sdk.scope import Scope
+    from debugg_ai_sdk.session import Session
+    from debugg_ai_sdk.spotlight import SpotlightClient
+    from debugg_ai_sdk.transport import Transport
+    from debugg_ai_sdk._log_batcher import LogBatcher
 
     I = TypeVar("I", bound=Integration)  # noqa: E741
 
@@ -363,7 +363,7 @@ class _Client(BaseClient):
                 # with gevent.
                 metrics_supported = not is_gevent() or PY37
                 if metrics_supported:
-                    from sentry_sdk.metrics import MetricsAggregator
+                    from debugg_ai_sdk.metrics import MetricsAggregator
 
                     self.metrics_aggregator = MetricsAggregator(
                         capture_func=_capture_envelope,
@@ -378,7 +378,7 @@ class _Client(BaseClient):
 
             self.log_batcher = None
             if experiments.get("enable_logs", False):
-                from sentry_sdk._log_batcher import LogBatcher
+                from debugg_ai_sdk._log_batcher import LogBatcher
 
                 self.log_batcher = LogBatcher(capture_func=_capture_envelope)
 

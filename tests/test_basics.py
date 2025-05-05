@@ -7,12 +7,12 @@ import time
 from collections import Counter
 
 import pytest
-from sentry_sdk.client import Client
-from sentry_sdk.utils import datetime_from_isoformat
+from debugg_ai_sdk.client import Client
+from debugg_ai_sdk.utils import datetime_from_isoformat
 
-import sentry_sdk
-import sentry_sdk.scope
-from sentry_sdk import (
+import debugg_ai_sdk
+import debugg_ai_sdk.scope
+from debugg_ai_sdk import (
     get_client,
     push_scope,
     capture_event,
@@ -25,18 +25,18 @@ from sentry_sdk import (
     new_scope,
     Hub,
 )
-from sentry_sdk.integrations import (
+from debugg_ai_sdk.integrations import (
     _AUTO_ENABLING_INTEGRATIONS,
     _DEFAULT_INTEGRATIONS,
     DidNotEnable,
     Integration,
     setup_integrations,
 )
-from sentry_sdk.integrations.logging import LoggingIntegration
-from sentry_sdk.integrations.stdlib import StdlibIntegration
-from sentry_sdk.scope import add_global_event_processor
-from sentry_sdk.utils import get_sdk_name, reraise
-from sentry_sdk.tracing_utils import has_tracing_enabled
+from debugg_ai_sdk.integrations.logging import LoggingIntegration
+from debugg_ai_sdk.integrations.stdlib import StdlibIntegration
+from debugg_ai_sdk.scope import add_global_event_processor
+from debugg_ai_sdk.utils import get_sdk_name, reraise
+from debugg_ai_sdk.tracing_utils import has_tracing_enabled
 
 
 class NoOpIntegration(Integration):
@@ -65,7 +65,7 @@ def test_processors(sentry_init, capture_events):
         event["exception"]["values"][0]["value"] += " whatever"
         return event
 
-    sentry_sdk.get_isolation_scope().add_error_processor(error_processor, ValueError)
+    debugg_ai_sdk.get_isolation_scope().add_error_processor(error_processor, ValueError)
 
     try:
         raise ValueError("aha!")
@@ -224,7 +224,7 @@ def test_option_before_breadcrumb(sentry_init, capture_events, monkeypatch):
     events = capture_events()
 
     monkeypatch.setattr(
-        sentry_sdk.get_client().transport, "record_lost_event", record_lost_event
+        debugg_ai_sdk.get_client().transport, "record_lost_event", record_lost_event
     )
 
     def do_this():
@@ -273,7 +273,7 @@ def test_option_enable_tracing(
     updated_traces_sample_rate,
 ):
     sentry_init(enable_tracing=enable_tracing, traces_sample_rate=traces_sample_rate)
-    options = sentry_sdk.get_client().options
+    options = debugg_ai_sdk.get_client().options
     assert has_tracing_enabled(options) is tracing_enabled
     assert options["traces_sample_rate"] == updated_traces_sample_rate
 
@@ -390,7 +390,7 @@ def test_breadcrumbs(sentry_init, capture_events):
             category="auth", message="Authenticated user %s" % i, level="info"
         )
 
-    sentry_sdk.get_isolation_scope().clear()
+    debugg_ai_sdk.get_isolation_scope().clear()
 
     capture_exception(ValueError())
     (event,) = events
@@ -473,7 +473,7 @@ def test_attachments(sentry_init, capture_envelopes):
 
     this_file = os.path.abspath(__file__.rstrip("c"))
 
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
     scope.add_attachment(bytes=b"Hello World!", filename="message.txt")
     scope.add_attachment(path=this_file)
 
@@ -507,7 +507,7 @@ def test_attachments_graceful_failure(
     sentry_init()
     envelopes = capture_envelopes()
 
-    sentry_sdk.get_isolation_scope().add_attachment(path="non_existent")
+    debugg_ai_sdk.get_isolation_scope().add_attachment(path="non_existent")
     capture_exception(ValueError())
 
     (envelope,) = envelopes
@@ -748,11 +748,11 @@ def test_event_processor_drop_records_client_report(
     record_lost_event_calls = capture_record_lost_event_calls()
 
     # Ensure full idempotency by restoring the original global event processors list object, not just a copy.
-    old_processors = sentry_sdk.scope.global_event_processors
+    old_processors = debugg_ai_sdk.scope.global_event_processors
 
     try:
-        sentry_sdk.scope.global_event_processors = (
-            sentry_sdk.scope.global_event_processors.copy()
+        debugg_ai_sdk.scope.global_event_processors = (
+            debugg_ai_sdk.scope.global_event_processors.copy()
         )
 
         @add_global_event_processor
@@ -776,7 +776,7 @@ def test_event_processor_drop_records_client_report(
         )
 
     finally:
-        sentry_sdk.scope.global_event_processors = old_processors
+        debugg_ai_sdk.scope.global_event_processors = old_processors
 
 
 @pytest.mark.parametrize(
@@ -947,7 +947,7 @@ def test_staticmethod_class_tracing(sentry_init, capture_events):
 
     events = capture_events()
 
-    with sentry_sdk.start_transaction(name="test"):
+    with debugg_ai_sdk.start_transaction(name="test"):
         assert TracingTestClass.static(1) == 1
 
     (event,) = events
@@ -971,7 +971,7 @@ def test_staticmethod_instance_tracing(sentry_init, capture_events):
 
     events = capture_events()
 
-    with sentry_sdk.start_transaction(name="test"):
+    with debugg_ai_sdk.start_transaction(name="test"):
         assert TracingTestClass().static(1) == 1
 
     (event,) = events
@@ -995,7 +995,7 @@ def test_classmethod_class_tracing(sentry_init, capture_events):
 
     events = capture_events()
 
-    with sentry_sdk.start_transaction(name="test"):
+    with debugg_ai_sdk.start_transaction(name="test"):
         assert TracingTestClass.class_(1) == (TracingTestClass, 1)
 
     (event,) = events
@@ -1019,7 +1019,7 @@ def test_classmethod_instance_tracing(sentry_init, capture_events):
 
     events = capture_events()
 
-    with sentry_sdk.start_transaction(name="test"):
+    with debugg_ai_sdk.start_transaction(name="test"):
         assert TracingTestClass().class_(1) == (TracingTestClass, 1)
 
     (event,) = events
@@ -1060,12 +1060,12 @@ def test_last_event_id_scope(sentry_init):
 
 
 def test_hub_constructor_deprecation_warning():
-    with pytest.warns(sentry_sdk.hub.SentryHubDeprecationWarning):
+    with pytest.warns(debugg_ai_sdk.hub.SentryHubDeprecationWarning):
         Hub()
 
 
 def test_hub_current_deprecation_warning():
-    with pytest.warns(sentry_sdk.hub.SentryHubDeprecationWarning) as warning_records:
+    with pytest.warns(debugg_ai_sdk.hub.SentryHubDeprecationWarning) as warning_records:
         Hub.current
 
     # Make sure we only issue one deprecation warning
@@ -1073,7 +1073,7 @@ def test_hub_current_deprecation_warning():
 
 
 def test_hub_main_deprecation_warnings():
-    with pytest.warns(sentry_sdk.hub.SentryHubDeprecationWarning):
+    with pytest.warns(debugg_ai_sdk.hub.SentryHubDeprecationWarning):
         Hub.main
 
 
@@ -1143,7 +1143,7 @@ def test_stacktrace_big_recursion(sentry_init, capture_events):
         recurse()
     except RecursionError as e:
         capture_start_time = time.perf_counter_ns()
-        sentry_sdk.capture_exception(e)
+        debugg_ai_sdk.capture_exception(e)
         capture_end_time = time.perf_counter_ns()
     finally:
         sys.setrecursionlimit(old_recursion_limit)

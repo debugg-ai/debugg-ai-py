@@ -2,13 +2,13 @@ import functools
 import hashlib
 from inspect import isawaitable
 
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.integrations.logging import ignore_logger
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.integrations.logging import ignore_logger
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import TransactionSource
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     from graphql import GraphQLError, GraphQLResolveInfo
     from strawberry.http import GraphQLHTTPResponse
     from strawberry.types import ExecutionContext
-    from sentry_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk._types import Event, EventProcessor
 
 
 ignore_logger("strawberry.execution")
@@ -89,7 +89,7 @@ def _patch_schema_init():
     @functools.wraps(old_schema_init)
     def _sentry_patched_schema_init(self, *args, **kwargs):
         # type: (Schema, Any, Any) -> None
-        integration = sentry_sdk.get_client().get_integration(StrawberryIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(StrawberryIntegration)
         if integration is None:
             return old_schema_init(self, *args, **kwargs)
 
@@ -172,7 +172,7 @@ class SentryAsyncExtension(SchemaExtension):
         if self._operation_name:
             description += " {}".format(self._operation_name)
 
-        sentry_sdk.add_breadcrumb(
+        debugg_ai_sdk.add_breadcrumb(
             category="graphql.operation",
             data={
                 "operation_name": self._operation_name,
@@ -180,11 +180,11 @@ class SentryAsyncExtension(SchemaExtension):
             },
         )
 
-        scope = sentry_sdk.get_isolation_scope()
+        scope = debugg_ai_sdk.get_isolation_scope()
         event_processor = _make_request_event_processor(self.execution_context)
         scope.add_event_processor(event_processor)
 
-        span = sentry_sdk.get_current_span()
+        span = debugg_ai_sdk.get_current_span()
         if span:
             self.graphql_span = span.start_child(
                 op=op,
@@ -192,7 +192,7 @@ class SentryAsyncExtension(SchemaExtension):
                 origin=StrawberryIntegration.origin,
             )
         else:
-            self.graphql_span = sentry_sdk.start_span(
+            self.graphql_span = debugg_ai_sdk.start_span(
                 op=op,
                 name=description,
                 origin=StrawberryIntegration.origin,
@@ -312,7 +312,7 @@ def _patch_views():
         if not errors:
             return
 
-        scope = sentry_sdk.get_isolation_scope()
+        scope = debugg_ai_sdk.get_isolation_scope()
         event_processor = _make_response_event_processor(response_data)
         scope.add_event_processor(event_processor)
 
@@ -320,13 +320,13 @@ def _patch_views():
             for error in errors:
                 event, hint = event_from_exception(
                     error,
-                    client_options=sentry_sdk.get_client().options,
+                    client_options=debugg_ai_sdk.get_client().options,
                     mechanism={
                         "type": StrawberryIntegration.identifier,
                         "handled": False,
                     },
                 )
-                sentry_sdk.capture_event(event, hint=hint)
+                debugg_ai_sdk.capture_event(event, hint=hint)
 
     async_base_view.AsyncBaseHTTPView._handle_errors = (  # type: ignore[method-assign]
         _sentry_patched_async_view_handle_errors

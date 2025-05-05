@@ -10,9 +10,9 @@ from grpc.aio import (
 )
 from google.protobuf.message import Message
 
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations.grpc.consts import SPAN_ORIGIN
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations.grpc.consts import SPAN_ORIGIN
 
 
 class ClientInterceptor:
@@ -31,7 +31,7 @@ class ClientInterceptor:
         for (
             key,
             value,
-        ) in sentry_sdk.get_current_scope().iter_trace_propagation_headers():
+        ) in debugg_ai_sdk.get_current_scope().iter_trace_propagation_headers():
             client_call_details.metadata.add(key, value)
         return client_call_details
 
@@ -45,7 +45,7 @@ class SentryUnaryUnaryClientInterceptor(ClientInterceptor, UnaryUnaryClientInter
     ) -> Union[UnaryUnaryCall, Message]:
         method = client_call_details.method
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.GRPC_CLIENT,
             name="unary unary call to %s" % method.decode(),
             origin=SPAN_ORIGIN,
@@ -75,7 +75,7 @@ class SentryUnaryStreamClientInterceptor(
     ) -> Union[AsyncIterable[Any], UnaryStreamCall]:
         method = client_call_details.method
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.GRPC_CLIENT,
             name="unary stream call to %s" % method.decode(),
             origin=SPAN_ORIGIN,

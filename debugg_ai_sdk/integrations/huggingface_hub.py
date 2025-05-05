@@ -1,16 +1,16 @@
 from functools import wraps
 
-from sentry_sdk import consts
-from sentry_sdk.ai.monitoring import record_token_usage
-from sentry_sdk.ai.utils import set_data_normalized
-from sentry_sdk.consts import SPANDATA
+from debugg_ai_sdk import consts
+from debugg_ai_sdk.ai.monitoring import record_token_usage
+from debugg_ai_sdk.ai.utils import set_data_normalized
+from debugg_ai_sdk.consts import SPANDATA
 
 from typing import Any, Iterable, Callable
 
-import sentry_sdk
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.integrations import DidNotEnable, Integration
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.integrations import DidNotEnable, Integration
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     event_from_exception,
 )
@@ -45,10 +45,10 @@ def _capture_exception(exc):
     # type: (Any) -> None
     event, hint = event_from_exception(
         exc,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": "huggingface_hub", "handled": False},
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _wrap_text_generation(f):
@@ -56,7 +56,7 @@ def _wrap_text_generation(f):
     @wraps(f)
     def new_text_generation(*args, **kwargs):
         # type: (*Any, **Any) -> Any
-        integration = sentry_sdk.get_client().get_integration(HuggingfaceHubIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(HuggingfaceHubIntegration)
         if integration is None:
             return f(*args, **kwargs)
 
@@ -73,7 +73,7 @@ def _wrap_text_generation(f):
         model = kwargs.get("model")
         streaming = kwargs.get("stream")
 
-        span = sentry_sdk.start_span(
+        span = debugg_ai_sdk.start_span(
             op=consts.OP.HUGGINGFACE_HUB_CHAT_COMPLETIONS_CREATE,
             name="Text Generation",
             origin=HuggingfaceHubIntegration.origin,

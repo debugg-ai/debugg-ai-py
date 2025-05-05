@@ -1,6 +1,6 @@
 import copy
-import sentry_sdk
-from sentry_sdk._lru_cache import LRUCache
+import debugg_ai_sdk
+from debugg_ai_sdk._lru_cache import LRUCache
 from threading import Lock
 
 from typing import TYPE_CHECKING, Any
@@ -64,9 +64,9 @@ def add_feature_flag(flag, result):
     Records a flag and its value to be sent on subsequent error events.
     We recommend you do this on flag evaluations. Flags are buffered per Sentry scope.
     """
-    flags = sentry_sdk.get_isolation_scope().flags
+    flags = debugg_ai_sdk.get_isolation_scope().flags
     flags.set(flag, result)
 
-    span = sentry_sdk.get_current_span()
+    span = debugg_ai_sdk.get_current_span()
     if span:
         span.set_flag(f"flag.evaluation.{flag}", result)

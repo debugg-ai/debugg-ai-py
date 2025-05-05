@@ -1,10 +1,10 @@
 from functools import partial
 
-import sentry_sdk
-from sentry_sdk.consts import OP, SPANDATA
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.tracing import Span
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP, SPANDATA
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.tracing import Span
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     parse_url,
@@ -59,7 +59,7 @@ class Boto3Integration(Integration):
 def _sentry_request_created(service_id, request, operation_name, **kwargs):
     # type: (str, AWSRequest, str, **Any) -> None
     description = "aws.%s.%s" % (service_id, operation_name)
-    span = sentry_sdk.start_span(
+    span = debugg_ai_sdk.start_span(
         op=OP.HTTP_CLIENT,
         name=description,
         origin=Boto3Integration.origin,

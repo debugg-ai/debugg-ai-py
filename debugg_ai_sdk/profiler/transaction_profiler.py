@@ -37,13 +37,13 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import deque
 
-import sentry_sdk
-from sentry_sdk._lru_cache import LRUCache
-from sentry_sdk.profiler.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk._lru_cache import LRUCache
+from debugg_ai_sdk.profiler.utils import (
     DEFAULT_SAMPLING_FREQUENCY,
     extract_stack,
 )
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     capture_internal_exception,
     get_current_thread_meta,
     is_gevent,
@@ -66,7 +66,7 @@ if TYPE_CHECKING:
     from typing import Type
     from typing_extensions import TypedDict
 
-    from sentry_sdk.profiler.utils import (
+    from debugg_ai_sdk.profiler.utils import (
         ProcessedStack,
         ProcessedFrame,
         ProcessedThreadMetadata,
@@ -75,7 +75,7 @@ if TYPE_CHECKING:
         ThreadId,
         ExtractedSample,
     )
-    from sentry_sdk._types import Event, SamplingContext, ProfilerMode
+    from debugg_ai_sdk._types import Event, SamplingContext, ProfilerMode
 
     ProcessedSample = TypedDict(
         "ProcessedSample",
@@ -210,7 +210,7 @@ class Profile:
         self,
         sampled,  # type: Optional[bool]
         start_ns,  # type: int
-        hub=None,  # type: Optional[sentry_sdk.Hub]
+        hub=None,  # type: Optional[debugg_ai_sdk.Hub]
         scheduler=None,  # type: Optional[Scheduler]
     ):
         # type: (...) -> None
@@ -242,7 +242,7 @@ class Profile:
         self.unique_samples = 0
 
         # Backwards compatibility with the old hub property
-        self._hub = None  # type: Optional[sentry_sdk.Hub]
+        self._hub = None  # type: Optional[debugg_ai_sdk.Hub]
         if hub is not None:
             self._hub = hub
             warnings.warn(
@@ -289,7 +289,7 @@ class Profile:
             self.sampled = False
             return
 
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
         if not client.is_active():
             self.sampled = False
             return
@@ -357,7 +357,7 @@ class Profile:
 
     def __enter__(self):
         # type: () -> Profile
-        scope = sentry_sdk.get_isolation_scope()
+        scope = debugg_ai_sdk.get_isolation_scope()
         old_profile = scope.profile
         scope.profile = self
 
@@ -493,7 +493,7 @@ class Profile:
 
     def valid(self):
         # type: () -> bool
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
         if not client.is_active():
             return False
 
@@ -519,7 +519,7 @@ class Profile:
 
     @property
     def hub(self):
-        # type: () -> Optional[sentry_sdk.Hub]
+        # type: () -> Optional[debugg_ai_sdk.Hub]
         warnings.warn(
             "The `hub` attribute is deprecated. Please do not access it.",
             DeprecationWarning,
@@ -529,7 +529,7 @@ class Profile:
 
     @hub.setter
     def hub(self, value):
-        # type: (Optional[sentry_sdk.Hub]) -> None
+        # type: (Optional[debugg_ai_sdk.Hub]) -> None
         warnings.warn(
             "The `hub` attribute is deprecated. Please do not set it.",
             DeprecationWarning,

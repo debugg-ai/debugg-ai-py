@@ -1,10 +1,10 @@
-from sentry_sdk.profiler.continuous_profiler import (
+from debugg_ai_sdk.profiler.continuous_profiler import (
     start_profile_session,
     start_profiler,
     stop_profile_session,
     stop_profiler,
 )
-from sentry_sdk.profiler.transaction_profiler import (
+from debugg_ai_sdk.profiler.transaction_profiler import (
     MAX_PROFILE_DURATION_NS,
     PROFILE_MINIMUM_SAMPLES,
     Profile,
@@ -15,7 +15,7 @@ from sentry_sdk.profiler.transaction_profiler import (
     setup_profiler,
     teardown_profiler,
 )
-from sentry_sdk.profiler.utils import (
+from debugg_ai_sdk.profiler.utils import (
     DEFAULT_SAMPLING_FREQUENCY,
     MAX_STACK_DEPTH,
     get_frame_name,

@@ -3,14 +3,14 @@ import os
 import pytest
 from unittest import mock
 
-import sentry_sdk
-from sentry_sdk import (
+import debugg_ai_sdk
+from debugg_ai_sdk import (
     capture_exception,
     isolation_scope,
     new_scope,
 )
-from sentry_sdk.client import Client, NonRecordingClient
-from sentry_sdk.scope import (
+from debugg_ai_sdk.client import Client, NonRecordingClient
+from debugg_ai_sdk.scope import (
     Scope,
     ScopeType,
     use_isolation_scope,
@@ -791,22 +791,22 @@ def test_nested_scopes_with_tags(sentry_init, capture_envelopes):
     sentry_init(traces_sample_rate=1.0)
     envelopes = capture_envelopes()
 
-    with sentry_sdk.isolation_scope() as scope1:
+    with debugg_ai_sdk.isolation_scope() as scope1:
         scope1.set_tag("isolation_scope1", 1)
 
-        with sentry_sdk.new_scope() as scope2:
+        with debugg_ai_sdk.new_scope() as scope2:
             scope2.set_tag("current_scope2", 1)
 
-            with sentry_sdk.start_transaction(name="trx") as trx:
+            with debugg_ai_sdk.start_transaction(name="trx") as trx:
                 trx.set_tag("trx", 1)
 
-                with sentry_sdk.start_span(op="span1") as span1:
+                with debugg_ai_sdk.start_span(op="span1") as span1:
                     span1.set_tag("a", 1)
 
                     with new_scope() as scope3:
                         scope3.set_tag("current_scope3", 1)
 
-                        with sentry_sdk.start_span(op="span2") as span2:
+                        with debugg_ai_sdk.start_span(op="span2") as span2:
                             span2.set_tag("b", 1)
 
     (envelope,) = envelopes
@@ -878,7 +878,7 @@ def test_last_event_id(sentry_init):
 
     assert Scope.last_event_id() is None
 
-    sentry_sdk.capture_exception(Exception("test"))
+    debugg_ai_sdk.capture_exception(Exception("test"))
 
     assert Scope.last_event_id() is not None
 
@@ -888,7 +888,7 @@ def test_last_event_id_transaction(sentry_init):
 
     assert Scope.last_event_id() is None
 
-    with sentry_sdk.start_transaction(name="test"):
+    with debugg_ai_sdk.start_transaction(name="test"):
         pass
 
     assert Scope.last_event_id() is None, "Transaction should not set last_event_id"
@@ -898,7 +898,7 @@ def test_last_event_id_cleared(sentry_init):
     sentry_init(enable_tracing=True)
 
     # Make sure last_event_id is set
-    sentry_sdk.capture_exception(Exception("test"))
+    debugg_ai_sdk.capture_exception(Exception("test"))
     assert Scope.last_event_id() is not None
 
     # Clearing the isolation scope should clear the last_event_id

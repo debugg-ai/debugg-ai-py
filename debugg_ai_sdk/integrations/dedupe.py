@@ -1,14 +1,14 @@
-import sentry_sdk
-from sentry_sdk.utils import ContextVar
-from sentry_sdk.integrations import Integration
-from sentry_sdk.scope import add_global_event_processor
+import debugg_ai_sdk
+from debugg_ai_sdk.utils import ContextVar
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.scope import add_global_event_processor
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Optional
 
-    from sentry_sdk._types import Event, Hint
+    from debugg_ai_sdk._types import Event, Hint
 
 
 class DedupeIntegration(Integration):
@@ -27,7 +27,7 @@ class DedupeIntegration(Integration):
             if hint is None:
                 return event
 
-            integration = sentry_sdk.get_client().get_integration(DedupeIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(DedupeIntegration)
             if integration is None:
                 return event
 
@@ -44,7 +44,7 @@ class DedupeIntegration(Integration):
     @staticmethod
     def reset_last_seen():
         # type: () -> None
-        integration = sentry_sdk.get_client().get_integration(DedupeIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(DedupeIntegration)
         if integration is None:
             return
 

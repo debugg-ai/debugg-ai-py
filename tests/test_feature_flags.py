@@ -5,9 +5,9 @@ import threading
 
 import pytest
 
-import sentry_sdk
-from sentry_sdk.feature_flags import add_feature_flag, FlagBuffer
-from sentry_sdk import start_span, start_transaction
+import debugg_ai_sdk
+from debugg_ai_sdk.feature_flags import add_feature_flag, FlagBuffer
+from debugg_ai_sdk import start_span, start_transaction
 from tests.conftest import ApproxDict
 
 
@@ -19,7 +19,7 @@ def test_featureflags_integration(sentry_init, capture_events, uninstall_integra
     add_feature_flag("other", False)
 
     events = capture_events()
-    sentry_sdk.capture_exception(Exception("something wrong!"))
+    debugg_ai_sdk.capture_exception(Exception("something wrong!"))
 
     assert len(events) == 1
     assert events[0]["contexts"]["flags"] == {
@@ -41,11 +41,11 @@ async def test_featureflags_integration_spans_async(sentry_init, capture_events)
     add_feature_flag("hello", False)
 
     try:
-        with sentry_sdk.start_span(name="test-span"):
-            with sentry_sdk.start_span(name="test-span-2"):
+        with debugg_ai_sdk.start_span(name="test-span"):
+            with debugg_ai_sdk.start_span(name="test-span-2"):
                 raise ValueError("something wrong!")
     except ValueError as e:
-        sentry_sdk.capture_exception(e)
+        debugg_ai_sdk.capture_exception(e)
 
     found = False
     for event in events:
@@ -69,11 +69,11 @@ def test_featureflags_integration_spans_sync(sentry_init, capture_events):
     add_feature_flag("hello", False)
 
     try:
-        with sentry_sdk.start_span(name="test-span"):
-            with sentry_sdk.start_span(name="test-span-2"):
+        with debugg_ai_sdk.start_span(name="test-span"):
+            with debugg_ai_sdk.start_span(name="test-span-2"):
                 raise ValueError("something wrong!")
     except ValueError as e:
-        sentry_sdk.capture_exception(e)
+        debugg_ai_sdk.capture_exception(e)
 
     found = False
     for event in events:
@@ -100,19 +100,19 @@ def test_featureflags_integration_threaded(
     def task(flag_key):
         # Creates a new isolation scope for the thread.
         # This means the evaluations in each task are captured separately.
-        with sentry_sdk.isolation_scope():
+        with debugg_ai_sdk.isolation_scope():
             add_feature_flag(flag_key, False)
             # use a tag to identify to identify events later on
-            sentry_sdk.set_tag("task_id", flag_key)
-            sentry_sdk.capture_exception(Exception("something wrong!"))
+            debugg_ai_sdk.set_tag("task_id", flag_key)
+            debugg_ai_sdk.capture_exception(Exception("something wrong!"))
 
     # Run tasks in separate threads
     with cf.ThreadPoolExecutor(max_workers=2) as pool:
         pool.map(task, ["world", "other"])
 
     # Capture error in original scope
-    sentry_sdk.set_tag("task_id", "0")
-    sentry_sdk.capture_exception(Exception("something wrong!"))
+    debugg_ai_sdk.set_tag("task_id", "0")
+    debugg_ai_sdk.capture_exception(Exception("something wrong!"))
 
     assert len(events) == 3
     events.sort(key=lambda e: e["tags"]["task_id"])
@@ -151,11 +151,11 @@ def test_featureflags_integration_asyncio(
     async def task(flag_key):
         # Creates a new isolation scope for the thread.
         # This means the evaluations in each task are captured separately.
-        with sentry_sdk.isolation_scope():
+        with debugg_ai_sdk.isolation_scope():
             add_feature_flag(flag_key, False)
             # use a tag to identify to identify events later on
-            sentry_sdk.set_tag("task_id", flag_key)
-            sentry_sdk.capture_exception(Exception("something wrong!"))
+            debugg_ai_sdk.set_tag("task_id", flag_key)
+            debugg_ai_sdk.capture_exception(Exception("something wrong!"))
 
     async def runner():
         return asyncio.gather(task("world"), task("other"))
@@ -163,8 +163,8 @@ def test_featureflags_integration_asyncio(
     asyncio.run(runner())
 
     # Capture error in original scope
-    sentry_sdk.set_tag("task_id", "0")
-    sentry_sdk.capture_exception(Exception("something wrong!"))
+    debugg_ai_sdk.set_tag("task_id", "0")
+    debugg_ai_sdk.capture_exception(Exception("something wrong!"))
 
     assert len(events) == 3
     events.sort(key=lambda e: e["tags"]["task_id"])

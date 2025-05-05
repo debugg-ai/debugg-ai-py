@@ -3,8 +3,8 @@ from unittest import mock
 import boto3
 import pytest
 
-import sentry_sdk
-from sentry_sdk.integrations.boto3 import Boto3Integration
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations.boto3 import Boto3Integration
 from tests.conftest import ApproxDict
 from tests.integrations.boto3 import read_fixture
 from tests.integrations.boto3.aws_mock import MockResponse
@@ -21,7 +21,7 @@ def test_basic(sentry_init, capture_events):
     events = capture_events()
 
     s3 = session.resource("s3")
-    with sentry_sdk.start_transaction() as transaction, MockResponse(
+    with debugg_ai_sdk.start_transaction() as transaction, MockResponse(
         s3.meta.client, 200, {}, read_fixture("s3_list.xml")
     ):
         bucket = s3.Bucket("bucket")
@@ -44,7 +44,7 @@ def test_streaming(sentry_init, capture_events):
     events = capture_events()
 
     s3 = session.resource("s3")
-    with sentry_sdk.start_transaction() as transaction, MockResponse(
+    with debugg_ai_sdk.start_transaction() as transaction, MockResponse(
         s3.meta.client, 200, {}, b"hello"
     ):
         obj = s3.Bucket("bucket").Object("foo.pdf")
@@ -82,7 +82,7 @@ def test_streaming_close(sentry_init, capture_events):
     events = capture_events()
 
     s3 = session.resource("s3")
-    with sentry_sdk.start_transaction() as transaction, MockResponse(
+    with debugg_ai_sdk.start_transaction() as transaction, MockResponse(
         s3.meta.client, 200, {}, b"hello"
     ):
         obj = s3.Bucket("bucket").Object("foo.pdf")
@@ -111,7 +111,7 @@ def test_omit_url_data_if_parsing_fails(sentry_init, capture_events):
         "sentry_sdk.integrations.boto3.parse_url",
         side_effect=ValueError,
     ):
-        with sentry_sdk.start_transaction() as transaction, MockResponse(
+        with debugg_ai_sdk.start_transaction() as transaction, MockResponse(
             s3.meta.client, 200, {}, read_fixture("s3_list.xml")
         ):
             bucket = s3.Bucket("bucket")
@@ -139,7 +139,7 @@ def test_span_origin(sentry_init, capture_events):
     events = capture_events()
 
     s3 = session.resource("s3")
-    with sentry_sdk.start_transaction(), MockResponse(
+    with debugg_ai_sdk.start_transaction(), MockResponse(
         s3.meta.client, 200, {}, read_fixture("s3_list.xml")
     ):
         bucket = s3.Bucket("bucket")

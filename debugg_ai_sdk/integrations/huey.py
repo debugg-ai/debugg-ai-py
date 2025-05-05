@@ -1,17 +1,17 @@
 import sys
 from datetime import datetime
 
-import sentry_sdk
-from sentry_sdk.api import continue_trace, get_baggage, get_traceparent
-from sentry_sdk.consts import OP, SPANSTATUS
-from sentry_sdk.integrations import DidNotEnable, Integration
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import (
+import debugg_ai_sdk
+from debugg_ai_sdk.api import continue_trace, get_baggage, get_traceparent
+from debugg_ai_sdk.consts import OP, SPANSTATUS
+from debugg_ai_sdk.integrations import DidNotEnable, Integration
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import (
     BAGGAGE_HEADER_NAME,
     SENTRY_TRACE_HEADER_NAME,
     TransactionSource,
 )
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -24,8 +24,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Union, TypeVar
 
-    from sentry_sdk._types import EventProcessor, Event, Hint
-    from sentry_sdk.utils import ExcInfo
+    from debugg_ai_sdk._types import EventProcessor, Event, Hint
+    from debugg_ai_sdk.utils import ExcInfo
 
     F = TypeVar("F", bound=Callable[..., Any])
 
@@ -57,7 +57,7 @@ def patch_enqueue():
     @ensure_integration_enabled(HueyIntegration, old_enqueue)
     def _sentry_enqueue(self, task):
         # type: (Huey, Task) -> Optional[Union[Result, ResultGroup]]
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.QUEUE_SUBMIT_HUEY,
             name=task.name,
             origin=HueyIntegration.origin,
@@ -107,7 +107,7 @@ def _make_event_processor(task):
 
 def _capture_exception(exc_info):
     # type: (ExcInfo) -> None
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
 
     if exc_info[0] in HUEY_CONTROL_FLOW_EXCEPTIONS:
         scope.transaction.set_status(SPANSTATUS.ABORTED)
@@ -116,7 +116,7 @@ def _capture_exception(exc_info):
     scope.transaction.set_status(SPANSTATUS.INTERNAL_ERROR)
     event, hint = event_from_exception(
         exc_info,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": HueyIntegration.identifier, "handled": False},
     )
     scope.capture_event(event, hint=hint)
@@ -147,7 +147,7 @@ def patch_execute():
     @ensure_integration_enabled(HueyIntegration, old_execute)
     def _sentry_execute(self, task, timestamp=None):
         # type: (Huey, Task, Optional[datetime]) -> Any
-        with sentry_sdk.isolation_scope() as scope:
+        with debugg_ai_sdk.isolation_scope() as scope:
             with capture_internal_exceptions():
                 scope._name = "huey"
                 scope.clear_breadcrumbs()
@@ -168,7 +168,7 @@ def patch_execute():
                 task.execute = _wrap_task_execute(task.execute)
                 task._sentry_is_patched = True
 
-            with sentry_sdk.start_transaction(transaction):
+            with debugg_ai_sdk.start_transaction(transaction):
                 return old_execute(self, task, timestamp)
 
     Huey._execute = _sentry_execute

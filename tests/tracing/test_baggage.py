@@ -1,4 +1,4 @@
-from sentry_sdk.tracing_utils import Baggage
+from debugg_ai_sdk.tracing_utils import Baggage
 
 
 def test_third_party_baggage():

@@ -4,11 +4,11 @@ import threading
 from datetime import datetime, timezone
 from typing import Optional, List, Callable, TYPE_CHECKING, Any
 
-from sentry_sdk.utils import format_timestamp, safe_repr
-from sentry_sdk.envelope import Envelope, Item, PayloadRef
+from debugg_ai_sdk.utils import format_timestamp, safe_repr
+from debugg_ai_sdk.envelope import Envelope, Item, PayloadRef
 
 if TYPE_CHECKING:
-    from sentry_sdk._types import Log
+    from debugg_ai_sdk._types import Log
 
 
 class LogBatcher:

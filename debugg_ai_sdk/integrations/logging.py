@@ -3,16 +3,16 @@ import sys
 from datetime import datetime, timezone
 from fnmatch import fnmatch
 
-import sentry_sdk
-from sentry_sdk.client import BaseClient
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.client import BaseClient
+from debugg_ai_sdk.utils import (
     safe_repr,
     to_string,
     event_from_exception,
     current_stacktrace,
     capture_internal_exceptions,
 )
-from sentry_sdk.integrations import Integration
+from debugg_ai_sdk.integrations import Integration
 
 from typing import TYPE_CHECKING, Tuple
 
@@ -120,7 +120,7 @@ class LoggingIntegration(Integration):
                 # into a recursion error when the integration is resolved
                 # (this also is slower).
                 if ignored_loggers is not None and record.name not in ignored_loggers:
-                    integration = sentry_sdk.get_client().get_integration(
+                    integration = debugg_ai_sdk.get_client().get_integration(
                         LoggingIntegration
                     )
                     if integration is not None:
@@ -202,7 +202,7 @@ class EventHandler(_BaseHandler):
         if not self._can_record(record):
             return
 
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
         if not client.is_active():
             return
 
@@ -271,7 +271,7 @@ class EventHandler(_BaseHandler):
 
         event["extra"] = self._extra_from_record(record)
 
-        sentry_sdk.capture_event(event, hint=hint)
+        debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 # Legacy name
@@ -296,7 +296,7 @@ class BreadcrumbHandler(_BaseHandler):
         if not self._can_record(record):
             return
 
-        sentry_sdk.add_breadcrumb(
+        debugg_ai_sdk.add_breadcrumb(
             self._breadcrumb_from_record(record), hint={"log_record": record}
         )
 
@@ -341,7 +341,7 @@ class SentryLogsHandler(_BaseHandler):
             if not self._can_record(record):
                 return
 
-            client = sentry_sdk.get_client()
+            client = debugg_ai_sdk.get_client()
             if not client.is_active():
                 return
 
@@ -353,7 +353,7 @@ class SentryLogsHandler(_BaseHandler):
     @staticmethod
     def _capture_log_from_record(client, record):
         # type: (BaseClient, LogRecord) -> None
-        scope = sentry_sdk.get_current_scope()
+        scope = debugg_ai_sdk.get_current_scope()
         otel_severity_number, otel_severity_text = _python_level_to_otel(record.levelno)
         project_root = client.options["project_root"]
         attrs = {

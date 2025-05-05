@@ -1,8 +1,8 @@
 import sys
 from functools import wraps
 
-import sentry_sdk
-from sentry_sdk.utils import event_from_exception, reraise
+import debugg_ai_sdk
+from debugg_ai_sdk.utils import event_from_exception, reraise
 
 from typing import TYPE_CHECKING
 
@@ -42,7 +42,7 @@ def serverless_function(f=None, flush=True):  # noqa
         @wraps(f)
         def inner(*args, **kwargs):
             # type: (*Any, **Any) -> Any
-            with sentry_sdk.isolation_scope() as scope:
+            with debugg_ai_sdk.isolation_scope() as scope:
                 scope.clear_breadcrumbs()
 
                 try:
@@ -51,7 +51,7 @@ def serverless_function(f=None, flush=True):  # noqa
                     _capture_and_reraise()
                 finally:
                     if flush:
-                        sentry_sdk.flush()
+                        debugg_ai_sdk.flush()
 
         return inner  # type: ignore
 
@@ -64,13 +64,13 @@ def serverless_function(f=None, flush=True):  # noqa
 def _capture_and_reraise():
     # type: () -> None
     exc_info = sys.exc_info()
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
     if client.is_active():
         event, hint = event_from_exception(
             exc_info,
             client_options=client.options,
             mechanism={"type": "serverless", "handled": False},
         )
-        sentry_sdk.capture_event(event, hint=hint)
+        debugg_ai_sdk.capture_event(event, hint=hint)
 
     reraise(*exc_info)

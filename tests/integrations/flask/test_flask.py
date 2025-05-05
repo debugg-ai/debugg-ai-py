@@ -20,15 +20,15 @@ try:
 except ImportError:
     UnsupportedMediaType = None
 
-import sentry_sdk
-import sentry_sdk.integrations.flask as flask_sentry
-from sentry_sdk import (
+import debugg_ai_sdk
+import debugg_ai_sdk.integrations.flask as flask_sentry
+from debugg_ai_sdk import (
     set_tag,
     capture_message,
     capture_exception,
 )
-from sentry_sdk.integrations.logging import LoggingIntegration
-from sentry_sdk.serializer import MAX_DATABAG_BREADTH
+from debugg_ai_sdk.integrations.logging import LoggingIntegration
+from debugg_ai_sdk.serializer import MAX_DATABAG_BREADTH
 
 
 login_manager = LoginManager()
@@ -281,7 +281,7 @@ def test_flask_session_tracking(sentry_init, capture_envelopes, app):
 
     @app.route("/")
     def index():
-        sentry_sdk.get_isolation_scope().set_user({"ip_address": "1.2.3.4", "id": "42"})
+        debugg_ai_sdk.get_isolation_scope().set_user({"ip_address": "1.2.3.4", "id": "42"})
         try:
             raise ValueError("stuff")
         except Exception:
@@ -296,7 +296,7 @@ def test_flask_session_tracking(sentry_init, capture_envelopes, app):
         except ZeroDivisionError:
             pass
 
-    sentry_sdk.get_client().flush()
+    debugg_ai_sdk.get_client().flush()
 
     (first_event, error_event, session) = envelopes
     first_event = first_event.get_event()
@@ -669,15 +669,15 @@ def test_does_not_leak_scope(sentry_init, capture_events, app):
     sentry_init(integrations=[flask_sentry.FlaskIntegration()])
     events = capture_events()
 
-    sentry_sdk.get_isolation_scope().set_tag("request_data", False)
+    debugg_ai_sdk.get_isolation_scope().set_tag("request_data", False)
 
     @app.route("/")
     def index():
-        sentry_sdk.get_isolation_scope().set_tag("request_data", True)
+        debugg_ai_sdk.get_isolation_scope().set_tag("request_data", True)
 
         def generate():
             for row in range(1000):
-                assert sentry_sdk.get_isolation_scope()._tags["request_data"]
+                assert debugg_ai_sdk.get_isolation_scope()._tags["request_data"]
 
                 yield str(row) + "\n"
 
@@ -688,7 +688,7 @@ def test_does_not_leak_scope(sentry_init, capture_events, app):
     assert response.data.decode() == "".join(str(row) + "\n" for row in range(1000))
     assert not events
 
-    assert not sentry_sdk.get_isolation_scope()._tags["request_data"]
+    assert not debugg_ai_sdk.get_isolation_scope()._tags["request_data"]
 
 
 def test_scoped_test_client(sentry_init, app):
@@ -836,7 +836,7 @@ def test_template_tracing_meta(sentry_init, app, capture_events, template_string
 
     @app.route("/")
     def index():
-        capture_message(sentry_sdk.get_traceparent() + "\n" + sentry_sdk.get_baggage())
+        capture_message(debugg_ai_sdk.get_traceparent() + "\n" + debugg_ai_sdk.get_baggage())
         return render_template_string(template_string)
 
     with app.test_client() as client:
@@ -913,7 +913,7 @@ def test_response_status_code_ok_in_transaction_context(
     client = app.test_client()
     client.get("/message")
 
-    sentry_sdk.get_client().flush()
+    debugg_ai_sdk.get_client().flush()
 
     (_, transaction_envelope, _) = envelopes
     transaction = transaction_envelope.get_transaction_event()
@@ -940,7 +940,7 @@ def test_response_status_code_not_found_in_transaction_context(
     client = app.test_client()
     client.get("/not-existing-route")
 
-    sentry_sdk.get_client().flush()
+    debugg_ai_sdk.get_client().flush()
 
     (transaction_envelope, _) = envelopes
     transaction = transaction_envelope.get_transaction_event()

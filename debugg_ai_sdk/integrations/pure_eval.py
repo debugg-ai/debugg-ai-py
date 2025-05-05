@@ -1,10 +1,10 @@
 import ast
 
-import sentry_sdk
-from sentry_sdk import serializer
-from sentry_sdk.integrations import Integration, DidNotEnable
-from sentry_sdk.scope import add_global_event_processor
-from sentry_sdk.utils import walk_exception_chain, iter_stacks
+import debugg_ai_sdk
+from debugg_ai_sdk import serializer
+from debugg_ai_sdk.integrations import Integration, DidNotEnable
+from debugg_ai_sdk.scope import add_global_event_processor
+from debugg_ai_sdk.utils import walk_exception_chain, iter_stacks
 
 from typing import TYPE_CHECKING
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from typing import Optional, Dict, Any, Tuple, List
     from types import FrameType
 
-    from sentry_sdk._types import Event, Hint
+    from debugg_ai_sdk._types import Event, Hint
 
 try:
     import executing
@@ -41,7 +41,7 @@ class PureEvalIntegration(Integration):
         @add_global_event_processor
         def add_executing_info(event, hint):
             # type: (Event, Optional[Hint]) -> Optional[Event]
-            if sentry_sdk.get_client().get_integration(PureEvalIntegration) is None:
+            if debugg_ai_sdk.get_client().get_integration(PureEvalIntegration) is None:
                 return event
 
             if hint is None:

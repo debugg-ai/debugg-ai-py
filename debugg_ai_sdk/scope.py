@@ -9,31 +9,31 @@ from datetime import datetime, timezone
 from functools import wraps
 from itertools import chain
 
-from sentry_sdk._types import AnnotatedValue
-from sentry_sdk.attachments import Attachment
-from sentry_sdk.consts import DEFAULT_MAX_BREADCRUMBS, FALSE_VALUES, INSTRUMENTER
-from sentry_sdk.feature_flags import FlagBuffer, DEFAULT_FLAG_CAPACITY
-from sentry_sdk.profiler.continuous_profiler import (
+from debugg_ai_sdk._types import AnnotatedValue
+from debugg_ai_sdk.attachments import Attachment
+from debugg_ai_sdk.consts import DEFAULT_MAX_BREADCRUMBS, FALSE_VALUES, INSTRUMENTER
+from debugg_ai_sdk.feature_flags import FlagBuffer, DEFAULT_FLAG_CAPACITY
+from debugg_ai_sdk.profiler.continuous_profiler import (
     get_profiler_id,
     try_autostart_continuous_profiler,
     try_profile_lifecycle_trace_start,
 )
-from sentry_sdk.profiler.transaction_profiler import Profile
-from sentry_sdk.session import Session
-from sentry_sdk.tracing_utils import (
+from debugg_ai_sdk.profiler.transaction_profiler import Profile
+from debugg_ai_sdk.session import Session
+from debugg_ai_sdk.tracing_utils import (
     Baggage,
     has_tracing_enabled,
     normalize_incoming_data,
     PropagationContext,
 )
-from sentry_sdk.tracing import (
+from debugg_ai_sdk.tracing import (
     BAGGAGE_HEADER_NAME,
     SENTRY_TRACE_HEADER_NAME,
     NoOpSpan,
     Span,
     Transaction,
 )
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     capture_internal_exception,
     capture_internal_exceptions,
     ContextVar,
@@ -65,7 +65,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Unpack
 
-    from sentry_sdk._types import (
+    from debugg_ai_sdk._types import (
         Breadcrumb,
         BreadcrumbHint,
         ErrorProcessor,
@@ -78,9 +78,9 @@ if TYPE_CHECKING:
         Type,
     )
 
-    from sentry_sdk.tracing import TransactionKwargs
+    from debugg_ai_sdk.tracing import TransactionKwargs
 
-    import sentry_sdk
+    import debugg_ai_sdk
 
     P = ParamSpec("P")
     R = TypeVar("R")
@@ -204,7 +204,7 @@ class Scope:
     )
 
     def __init__(self, ty=None, client=None):
-        # type: (Optional[ScopeType], Optional[sentry_sdk.Client]) -> None
+        # type: (Optional[ScopeType], Optional[debugg_ai_sdk.Client]) -> None
         self._type = ty
 
         self._event_processors = []  # type: List[EventProcessor]
@@ -214,7 +214,7 @@ class Scope:
         self._propagation_context = None  # type: Optional[PropagationContext]
         self._n_breadcrumbs_truncated = 0  # type: int
 
-        self.client = NonRecordingClient()  # type: sentry_sdk.client.BaseClient
+        self.client = NonRecordingClient()  # type: debugg_ai_sdk.client.BaseClient
 
         if client is not None:
             self.set_client(client)
@@ -384,7 +384,7 @@ class Scope:
 
     @classmethod
     def get_client(cls):
-        # type: () -> sentry_sdk.client.BaseClient
+        # type: () -> debugg_ai_sdk.client.BaseClient
         """
         .. versionadded:: 2.0.0
 
@@ -421,7 +421,7 @@ class Scope:
         return NonRecordingClient()
 
     def set_client(self, client=None):
-        # type: (Optional[sentry_sdk.client.BaseClient]) -> None
+        # type: (Optional[debugg_ai_sdk.client.BaseClient]) -> None
         """
         .. versionadded:: 2.0.0
 
@@ -1801,7 +1801,7 @@ def should_send_default_pii():
 
 
 # Circular imports
-from sentry_sdk.client import NonRecordingClient
+from debugg_ai_sdk.client import NonRecordingClient
 
 if TYPE_CHECKING:
-    import sentry_sdk.client
+    import debugg_ai_sdk.client

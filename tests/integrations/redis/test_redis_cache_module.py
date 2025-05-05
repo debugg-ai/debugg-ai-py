@@ -5,10 +5,10 @@ import pytest
 import fakeredis
 from fakeredis import FakeStrictRedis
 
-from sentry_sdk.integrations.redis import RedisIntegration
-from sentry_sdk.integrations.redis.utils import _get_safe_key, _key_as_string
-from sentry_sdk.utils import parse_version
-import sentry_sdk
+from debugg_ai_sdk.integrations.redis import RedisIntegration
+from debugg_ai_sdk.integrations.redis.utils import _get_safe_key, _key_as_string
+from debugg_ai_sdk.utils import parse_version
+import debugg_ai_sdk
 
 
 FAKEREDIS_VERSION = parse_version(fakeredis.__version__)
@@ -24,7 +24,7 @@ def test_no_cache_basic(sentry_init, capture_events):
     events = capture_events()
 
     connection = FakeStrictRedis()
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         connection.get("mycachekey")
 
     (event,) = events
@@ -45,7 +45,7 @@ def test_cache_basic(sentry_init, capture_events):
     events = capture_events()
 
     connection = FakeStrictRedis()
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         connection.hget("mycachekey", "myfield")
         connection.get("mycachekey")
         connection.set("mycachekey1", "bla")
@@ -89,7 +89,7 @@ def test_cache_keys(sentry_init, capture_events):
     events = capture_events()
 
     connection = FakeStrictRedis()
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         connection.get("somethingelse")
         connection.get("blub")
         connection.get("blubkeything")
@@ -127,7 +127,7 @@ def test_cache_data(sentry_init, capture_events):
     events = capture_events()
 
     connection = FakeStrictRedis(host="mycacheserver.io", port=6378)
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         connection.get("mycachekey")
         connection.set("mycachekey", "事实胜于雄辩")
         connection.get("mycachekey")
@@ -210,7 +210,7 @@ def test_cache_prefixes(sentry_init, capture_events):
     events = capture_events()
 
     connection = FakeStrictRedis()
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         connection.mget("yes", "no")
         connection.mget("no", 1, "yes")
         connection.mget("no", "yes.1", "yes.2")

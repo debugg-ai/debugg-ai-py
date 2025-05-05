@@ -4,11 +4,11 @@ from unittest import mock
 
 import pytest
 
-import sentry_sdk
-from sentry_sdk import start_span, start_transaction, capture_exception
-from sentry_sdk.tracing import Transaction
-from sentry_sdk.tracing_utils import Baggage
-from sentry_sdk.utils import logger
+import debugg_ai_sdk
+from debugg_ai_sdk import start_span, start_transaction, capture_exception
+from debugg_ai_sdk.tracing import Transaction
+from debugg_ai_sdk.tracing_utils import Baggage
+from debugg_ai_sdk.utils import logger
 
 
 def test_sampling_decided_only_for_transactions(sentry_init, capture_events):
@@ -58,7 +58,7 @@ def test_get_transaction_and_span_from_scope_regardless_of_sampling_decision(
     with start_transaction(name="/", sampled=sampling_decision):
         with start_span(op="child-span"):
             with start_span(op="child-child-span"):
-                scope = sentry_sdk.get_current_scope()
+                scope = debugg_ai_sdk.get_current_scope()
                 assert scope.span.op == "child-child-span"
                 assert scope.transaction.name == "/"
 

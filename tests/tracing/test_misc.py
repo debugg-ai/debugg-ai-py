@@ -5,12 +5,12 @@ import os
 from unittest import mock
 from unittest.mock import MagicMock
 
-import sentry_sdk
-from sentry_sdk import start_span, start_transaction, set_measurement
-from sentry_sdk.consts import MATCH_ALL
-from sentry_sdk.tracing import Span, Transaction
-from sentry_sdk.tracing_utils import should_propagate_trace
-from sentry_sdk.utils import Dsn
+import debugg_ai_sdk
+from debugg_ai_sdk import start_span, start_transaction, set_measurement
+from debugg_ai_sdk.consts import MATCH_ALL
+from debugg_ai_sdk.tracing import Span, Transaction
+from debugg_ai_sdk.tracing_utils import should_propagate_trace
+from debugg_ai_sdk.utils import Dsn
 from tests.conftest import ApproxDict
 
 
@@ -88,7 +88,7 @@ def test_transaction_data(sentry_init, capture_events):
     events = capture_events()
 
     with start_transaction(name="test-transaction"):
-        span_or_tx = sentry_sdk.get_current_span()
+        span_or_tx = debugg_ai_sdk.get_current_span()
         span_or_tx.set_data("foo", "bar")
         with start_span(op="test-span") as span:
             span.set_data("spanfoo", "spanbar")
@@ -134,7 +134,7 @@ def test_finds_transaction_on_scope(sentry_init):
 
     transaction = start_transaction(name="dogpark")
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
 
     # See note in Scope class re: getters and setters of the `transaction`
     # property. For the moment, assigning to scope.transaction merely sets the
@@ -163,7 +163,7 @@ def test_finds_transaction_when_descendent_span_is_on_scope(
     transaction = start_transaction(name="dogpark")
     child_span = transaction.start_child(op="sniffing")
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
     scope._span = child_span
 
     # this is the same whether it's the transaction itself or one of its
@@ -186,7 +186,7 @@ def test_finds_orphan_span_on_scope(sentry_init):
 
     span = start_span(op="sniffing")
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
     scope._span = span
 
     assert scope._span is not None
@@ -200,7 +200,7 @@ def test_finds_non_orphan_span_on_scope(sentry_init):
     transaction = start_transaction(name="dogpark")
     child_span = transaction.start_child(op="sniffing")
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
     scope._span = child_span
 
     assert scope._span is not None
@@ -225,7 +225,7 @@ def test_circular_references(monkeypatch, sentry_init, request):
     # objects the garbage collector has to clean up once `transaction.finish` is
     # called and the serializer runs.)
     monkeypatch.setattr(
-        sentry_sdk.client,
+        debugg_ai_sdk.client,
         "serialize",
         mock.Mock(
             return_value=None,
@@ -440,7 +440,7 @@ def test_should_propagate_trace_to_sentry(
         traces_sample_rate=1.0,
     )
 
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
     client.transport.parsed_dsn = Dsn(dsn)
 
     assert should_propagate_trace(client, url) == expected_propagation_decision
@@ -449,7 +449,7 @@ def test_should_propagate_trace_to_sentry(
 def test_start_transaction_updates_scope_name_source(sentry_init):
     sentry_init(traces_sample_rate=1.0)
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
 
     with start_transaction(name="foobar", source="route"):
         assert scope._transaction == "foobar"
@@ -483,7 +483,7 @@ def test_transaction_dropeed_sampled_false(sentry_init):
     tx = Transaction(sampled=False)
 
     with mock.patch("sentry_sdk.tracing.logger") as mock_logger:
-        with sentry_sdk.start_transaction(tx):
+        with debugg_ai_sdk.start_transaction(tx):
             pass
 
     mock_logger.debug.assert_any_call("Discarding transaction because sampled = False")

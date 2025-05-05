@@ -27,7 +27,7 @@ class CompressionAlgo(Enum):
 
 
 if TYPE_CHECKING:
-    import sentry_sdk
+    import debugg_ai_sdk
 
     from typing import Optional
     from typing import Callable
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
     from typing_extensions import TypedDict
 
-    from sentry_sdk._types import (
+    from debugg_ai_sdk._types import (
         BreadcrumbProcessor,
         ContinuousProfilerMode,
         Event,
@@ -504,12 +504,12 @@ class ClientConstructor:
         environment=None,  # type: Optional[str]
         server_name=None,  # type: Optional[str]
         shutdown_timeout=2,  # type: float
-        integrations=[],  # type: Sequence[sentry_sdk.integrations.Integration]  # noqa: B006
+        integrations=[],  # type: Sequence[debugg_ai_sdk.integrations.Integration]  # noqa: B006
         in_app_include=[],  # type: List[str]  # noqa: B006
         in_app_exclude=[],  # type: List[str]  # noqa: B006
         default_integrations=True,  # type: bool
         dist=None,  # type: Optional[str]
-        transport=None,  # type: Optional[Union[sentry_sdk.transport.Transport, Type[sentry_sdk.transport.Transport], Callable[[Event], None]]]
+        transport=None,  # type: Optional[Union[debugg_ai_sdk.transport.Transport, Type[debugg_ai_sdk.transport.Transport], Callable[[Event], None]]]
         transport_queue_size=DEFAULT_QUEUE_SIZE,  # type: int
         sample_rate=1.0,  # type: float
         send_default_pii=None,  # type: Optional[bool]
@@ -533,7 +533,7 @@ class ClientConstructor:
         profile_lifecycle="manual",  # type: Literal["manual", "trace"]
         profile_session_sample_rate=None,  # type: Optional[float]
         auto_enabling_integrations=True,  # type: bool
-        disabled_integrations=None,  # type: Optional[Sequence[sentry_sdk.integrations.Integration]]
+        disabled_integrations=None,  # type: Optional[Sequence[debugg_ai_sdk.integrations.Integration]]
         auto_session_tracking=True,  # type: bool
         send_client_reports=True,  # type: bool
         _experiments={},  # type: Experiments  # noqa: B006
@@ -548,7 +548,7 @@ class ClientConstructor:
             MATCH_ALL
         ],  # type: Optional[Sequence[str]]
         functions_to_trace=[],  # type: Sequence[Dict[str, str]]  # noqa: B006
-        event_scrubber=None,  # type: Optional[sentry_sdk.scrubber.EventScrubber]
+        event_scrubber=None,  # type: Optional[debugg_ai_sdk.scrubber.EventScrubber]
         max_value_length=DEFAULT_MAX_VALUE_LENGTH,  # type: int
         enable_backpressure_handling=True,  # type: bool
         error_sampler=None,  # type: Optional[Callable[[Event, Hint], Union[float, bool]]]

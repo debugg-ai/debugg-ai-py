@@ -18,11 +18,11 @@ except ImportError:
 import urllib3
 import certifi
 
-import sentry_sdk
-from sentry_sdk.consts import EndpointType
-from sentry_sdk.utils import Dsn, logger, capture_internal_exceptions
-from sentry_sdk.worker import BackgroundWorker
-from sentry_sdk.envelope import Envelope, Item, PayloadRef
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import EndpointType
+from debugg_ai_sdk.utils import Dsn, logger, capture_internal_exceptions
+from debugg_ai_sdk.worker import BackgroundWorker
+from debugg_ai_sdk.envelope import Envelope, Item, PayloadRef
 
 from typing import TYPE_CHECKING, cast, List, Dict
 
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from urllib3.poolmanager import PoolManager
     from urllib3.poolmanager import ProxyManager
 
-    from sentry_sdk._types import Event, EventDataCategory
+    from debugg_ai_sdk._types import Event, EventDataCategory
 
 KEEP_ALIVE_SOCKET_OPTIONS = []
 for option in [
@@ -200,7 +200,7 @@ class BaseHttpTransport(Transport):
 
     def __init__(self, options):
         # type: (Self, Dict[str, Any]) -> None
-        from sentry_sdk.consts import VERSION
+        from debugg_ai_sdk.consts import VERSION
 
         Transport.__init__(self, options)
         assert self.parsed_dsn is not None
@@ -218,7 +218,7 @@ class BaseHttpTransport(Transport):
         self._pool = self._make_pool()
 
         # Backwards compatibility for deprecated `self.hub_class` attribute
-        self._hub_cls = sentry_sdk.Hub
+        self._hub_cls = debugg_ai_sdk.Hub
 
         experiments = options.get("_experiments", {})
         compression_level = experiments.get(
@@ -599,14 +599,14 @@ class BaseHttpTransport(Transport):
 
     @property
     def hub_cls(self):
-        # type: (Self) -> type[sentry_sdk.Hub]
+        # type: (Self) -> type[debugg_ai_sdk.Hub]
         """DEPRECATED: This attribute is deprecated and will be removed in a future release."""
         HttpTransport._warn_hub_cls()
         return self._hub_cls
 
     @hub_cls.setter
     def hub_cls(self, value):
-        # type: (Self, type[sentry_sdk.Hub]) -> None
+        # type: (Self, type[debugg_ai_sdk.Hub]) -> None
         """DEPRECATED: This attribute is deprecated and will be removed in a future release."""
         HttpTransport._warn_hub_cls()
         self._hub_cls = value

@@ -1,19 +1,19 @@
-from sentry_sdk.consts import SPANDATA
-from sentry_sdk.integrations.redis.consts import (
+from debugg_ai_sdk.consts import SPANDATA
+from debugg_ai_sdk.integrations.redis.consts import (
     _COMMANDS_INCLUDING_SENSITIVE_DATA,
     _MAX_NUM_ARGS,
     _MAX_NUM_COMMANDS,
     _MULTI_KEY_COMMANDS,
     _SINGLE_KEY_COMMANDS,
 )
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.utils import SENSITIVE_DATA_SUBSTITUTE
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.utils import SENSITIVE_DATA_SUBSTITUTE
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Sequence
-    from sentry_sdk.tracing import Span
+    from debugg_ai_sdk.tracing import Span
 
 
 def _get_safe_command(name, args):

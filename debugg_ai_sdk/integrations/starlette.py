@@ -5,26 +5,26 @@ from collections.abc import Set
 from copy import deepcopy
 from json import JSONDecodeError
 
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import (
     DidNotEnable,
     Integration,
     _DEFAULT_FAILED_REQUEST_STATUS_CODES,
 )
-from sentry_sdk.integrations._wsgi_common import (
+from debugg_ai_sdk.integrations._wsgi_common import (
     DEFAULT_HTTP_METHODS_TO_CAPTURE,
     HttpCodeRangeContainer,
     _is_json_content_type,
     request_body_within_bounds,
 )
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import (
+from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import (
     SOURCE_FOR_STYLE,
     TransactionSource,
 )
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     AnnotatedValue,
     capture_internal_exceptions,
     ensure_integration_enabled,
@@ -39,7 +39,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Awaitable, Callable, Container, Dict, Optional, Tuple, Union
 
-    from sentry_sdk._types import Event, HttpStatusCodeRange
+    from debugg_ai_sdk._types import Event, HttpStatusCodeRange
 
 try:
     import starlette  # type: ignore
@@ -146,7 +146,7 @@ def _enable_span_for_middleware(middleware_class):
 
     async def _create_span_call(app, scope, receive, send, **kwargs):
         # type: (Any, Dict[str, Any], Callable[[], Awaitable[Dict[str, Any]]], Callable[[Dict[str, Any]], Awaitable[None]], Any) -> None
-        integration = sentry_sdk.get_client().get_integration(StarletteIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(StarletteIntegration)
         if integration is None or not integration.middleware_spans:
             return await old_call(app, scope, receive, send, **kwargs)
 
@@ -155,12 +155,12 @@ def _enable_span_for_middleware(middleware_class):
         # Update transaction name with middleware name
         name, source = _get_transaction_from_middleware(app, scope, integration)
         if name is not None:
-            sentry_sdk.get_current_scope().set_transaction_name(
+            debugg_ai_sdk.get_current_scope().set_transaction_name(
                 name,
                 source=source,
             )
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.MIDDLEWARE_STARLETTE,
             name=middleware_name,
             origin=StarletteIntegration.origin,
@@ -170,7 +170,7 @@ def _enable_span_for_middleware(middleware_class):
             # Creating spans for the "receive" callback
             async def _sentry_receive(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
-                with sentry_sdk.start_span(
+                with debugg_ai_sdk.start_span(
                     op=OP.MIDDLEWARE_STARLETTE_RECEIVE,
                     name=getattr(receive, "__qualname__", str(receive)),
                     origin=StarletteIntegration.origin,
@@ -185,7 +185,7 @@ def _enable_span_for_middleware(middleware_class):
             # Creating spans for the "send" callback
             async def _sentry_send(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
-                with sentry_sdk.start_span(
+                with debugg_ai_sdk.start_span(
                     op=OP.MIDDLEWARE_STARLETTE_SEND,
                     name=getattr(send, "__qualname__", str(send)),
                     origin=StarletteIntegration.origin,
@@ -216,11 +216,11 @@ def _capture_exception(exception, handled=False):
     # type: (BaseException, **Any) -> None
     event, hint = event_from_exception(
         exception,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": StarletteIntegration.identifier, "handled": handled},
     )
 
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def patch_exception_middleware(middleware_class):
@@ -244,7 +244,7 @@ def patch_exception_middleware(middleware_class):
 
             async def _sentry_patched_exception_handler(self, *args, **kwargs):
                 # type: (Any, Any, Any) -> None
-                integration = sentry_sdk.get_client().get_integration(
+                integration = debugg_ai_sdk.get_client().get_integration(
                     StarletteIntegration
                 )
 
@@ -328,7 +328,7 @@ def _add_user_to_sentry_scope(scope):
     if email:
         user_info.setdefault("email", starlette_user.email)
 
-    sentry_scope = sentry_sdk.get_isolation_scope()
+    sentry_scope = debugg_ai_sdk.get_isolation_scope()
     sentry_scope.user = user_info
 
 
@@ -389,7 +389,7 @@ def patch_asgi_app():
 
     async def _sentry_patched_asgi_app(self, scope, receive, send):
         # type: (Starlette, StarletteScope, Receive, Send) -> None
-        integration = sentry_sdk.get_client().get_integration(StarletteIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(StarletteIntegration)
         if integration is None:
             return await old_app(self, scope, receive, send)
 
@@ -436,7 +436,7 @@ def patch_request_response():
 
             async def _sentry_async_func(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
-                integration = sentry_sdk.get_client().get_integration(
+                integration = debugg_ai_sdk.get_client().get_integration(
                     StarletteIntegration
                 )
                 if integration is None:
@@ -445,12 +445,12 @@ def patch_request_response():
                 request = args[0]
 
                 _set_transaction_name_and_source(
-                    sentry_sdk.get_current_scope(),
+                    debugg_ai_sdk.get_current_scope(),
                     integration.transaction_style,
                     request,
                 )
 
-                sentry_scope = sentry_sdk.get_isolation_scope()
+                sentry_scope = debugg_ai_sdk.get_isolation_scope()
                 extractor = StarletteRequestExtractor(request)
                 info = await extractor.extract_request_info()
 
@@ -486,17 +486,17 @@ def patch_request_response():
             @functools.wraps(old_func)
             def _sentry_sync_func(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
-                integration = sentry_sdk.get_client().get_integration(
+                integration = debugg_ai_sdk.get_client().get_integration(
                     StarletteIntegration
                 )
                 if integration is None:
                     return old_func(*args, **kwargs)
 
-                current_scope = sentry_sdk.get_current_scope()
+                current_scope = debugg_ai_sdk.get_current_scope()
                 if current_scope.transaction is not None:
                     current_scope.transaction.update_active_thread()
 
-                sentry_scope = sentry_sdk.get_isolation_scope()
+                sentry_scope = debugg_ai_sdk.get_isolation_scope()
                 if sentry_scope.profile is not None:
                     sentry_scope.profile.update_active_thread_id()
 
@@ -565,7 +565,7 @@ def patch_templates():
             def add_sentry_trace_meta(request):
                 # type: (Request) -> Dict[str, Any]
                 trace_meta = Markup(
-                    sentry_sdk.get_current_scope().trace_propagation_meta()
+                    debugg_ai_sdk.get_current_scope().trace_propagation_meta()
                 )
                 return {
                     "sentry_trace_meta": trace_meta,
@@ -603,7 +603,7 @@ class StarletteRequestExtractor:
 
     async def extract_request_info(self):
         # type: (StarletteRequestExtractor) -> Optional[Dict[str, Any]]
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
 
         request_info = {}  # type: Dict[str, Any]
 
@@ -706,7 +706,7 @@ def _transaction_name_from_router(scope):
 
 
 def _set_transaction_name_and_source(scope, transaction_style, request):
-    # type: (sentry_sdk.Scope, str, Any) -> None
+    # type: (debugg_ai_sdk.Scope, str, Any) -> None
     name = None
     source = SOURCE_FOR_STYLE[transaction_style]
 

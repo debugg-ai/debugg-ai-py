@@ -4,9 +4,9 @@ from django.template import TemplateSyntaxError
 from django.utils.safestring import mark_safe
 from django import VERSION as DJANGO_VERSION
 
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.utils import ensure_integration_enabled
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.utils import ensure_integration_enabled
 
 from typing import TYPE_CHECKING
 
@@ -60,7 +60,7 @@ def _get_template_name_description(template_name):
 def patch_templates():
     # type: () -> None
     from django.template.response import SimpleTemplateResponse
-    from sentry_sdk.integrations.django import DjangoIntegration
+    from debugg_ai_sdk.integrations.django import DjangoIntegration
 
     real_rendered_content = SimpleTemplateResponse.rendered_content
 
@@ -68,7 +68,7 @@ def patch_templates():
     @ensure_integration_enabled(DjangoIntegration, real_rendered_content.fget)
     def rendered_content(self):
         # type: (SimpleTemplateResponse) -> str
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.TEMPLATE_RENDER,
             name=_get_template_name_description(self.template_name),
             origin=DjangoIntegration.origin,
@@ -93,10 +93,10 @@ def patch_templates():
         context = context or {}
         if "sentry_trace_meta" not in context:
             context["sentry_trace_meta"] = mark_safe(
-                sentry_sdk.get_current_scope().trace_propagation_meta()
+                debugg_ai_sdk.get_current_scope().trace_propagation_meta()
             )
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.TEMPLATE_RENDER,
             name=_get_template_name_description(template_name),
             origin=DjangoIntegration.origin,

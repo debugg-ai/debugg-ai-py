@@ -2,12 +2,12 @@ import warnings
 
 from typing import TYPE_CHECKING
 
-import sentry_sdk
+import debugg_ai_sdk
 
 if TYPE_CHECKING:
     from typing import Any, ContextManager, Optional
 
-    import sentry_sdk.consts
+    import debugg_ai_sdk.consts
 
 
 class _InitGuard:
@@ -19,7 +19,7 @@ class _InitGuard:
     )
 
     def __init__(self, client):
-        # type: (sentry_sdk.Client) -> None
+        # type: (debugg_ai_sdk.Client) -> None
         self._client = client
 
     def __enter__(self):
@@ -59,8 +59,8 @@ def _init(*args, **kwargs):
 
     This takes the same arguments as the client constructor.
     """
-    client = sentry_sdk.Client(*args, **kwargs)
-    sentry_sdk.get_global_scope().set_client(client)
+    client = debugg_ai_sdk.Client(*args, **kwargs)
+    debugg_ai_sdk.get_global_scope().set_client(client)
     _check_python_deprecations()
     rv = _InitGuard(client)
     return rv
@@ -73,7 +73,7 @@ if TYPE_CHECKING:
     # Use `ClientConstructor` to define the argument types of `init` and
     # `ContextManager[Any]` to tell static analyzers about the return type.
 
-    class init(sentry_sdk.consts.ClientConstructor, _InitGuard):  # noqa: N801
+    class init(debugg_ai_sdk.consts.ClientConstructor, _InitGuard):  # noqa: N801
         pass
 
 else:

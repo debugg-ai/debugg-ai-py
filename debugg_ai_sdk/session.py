@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sentry_sdk.utils import format_timestamp
+from debugg_ai_sdk.utils import format_timestamp
 
 from typing import TYPE_CHECKING
 
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from typing import Any
     from typing import Dict
 
-    from sentry_sdk._types import SessionStatus
+    from debugg_ai_sdk._types import SessionStatus
 
 
 def _minute_trunc(ts):

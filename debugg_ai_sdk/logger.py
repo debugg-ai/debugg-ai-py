@@ -3,8 +3,8 @@ import functools
 import time
 from typing import Any
 
-from sentry_sdk import get_client, get_current_scope
-from sentry_sdk.utils import safe_repr
+from debugg_ai_sdk import get_client, get_current_scope
+from debugg_ai_sdk.utils import safe_repr
 
 
 def _capture_log(severity_text, severity_number, template, **kwargs):

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from typing import Any, Tuple
-    from sentry_sdk._types import MonitorConfigScheduleUnit
+    from debugg_ai_sdk._types import MonitorConfigScheduleUnit
 
 
 def _now_seconds_since_epoch():

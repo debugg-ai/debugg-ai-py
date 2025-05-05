@@ -1,7 +1,7 @@
 import sys
 
-from sentry_sdk import capture_message
-from sentry_sdk.integrations.argv import ArgvIntegration
+from debugg_ai_sdk import capture_message
+from debugg_ai_sdk.integrations.argv import ArgvIntegration
 
 
 def test_basic(sentry_init, capture_events, monkeypatch):

@@ -10,13 +10,13 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.testclient import TestClient
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
-import sentry_sdk
-from sentry_sdk import capture_message
-from sentry_sdk.feature_flags import add_feature_flag
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.starlette import StarletteIntegration
-from sentry_sdk.utils import parse_version
+import debugg_ai_sdk
+from debugg_ai_sdk import capture_message
+from debugg_ai_sdk.feature_flags import add_feature_flag
+from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.integrations.fastapi import FastApiIntegration
+from debugg_ai_sdk.integrations.starlette import StarletteIntegration
+from debugg_ai_sdk.utils import parse_version
 
 
 FASTAPI_VERSION = parse_version(fastapi.__version__)
@@ -733,8 +733,8 @@ async def test_feature_flags(sentry_init, capture_events):
     async def _error():
         add_feature_flag("hello", False)
 
-        with sentry_sdk.start_span(name="test-span"):
-            with sentry_sdk.start_span(name="test-span-2"):
+        with debugg_ai_sdk.start_span(name="test-span"):
+            with debugg_ai_sdk.start_span(name="test-span-2"):
                 raise ValueError("something is wrong!")
 
     try:

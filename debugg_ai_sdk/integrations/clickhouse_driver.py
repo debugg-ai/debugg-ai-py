@@ -1,9 +1,9 @@
-import sentry_sdk
-from sentry_sdk.consts import OP, SPANDATA
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.tracing import Span
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.utils import capture_internal_exceptions, ensure_integration_enabled
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP, SPANDATA
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.tracing import Span
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.utils import capture_internal_exceptions, ensure_integration_enabled
 
 from typing import TYPE_CHECKING, TypeVar
 
@@ -80,7 +80,7 @@ def _wrap_start(f: Callable[P, T]) -> Callable[P, T]:
         query_id = args[2] if len(args) > 2 else kwargs.get("query_id")
         params = args[3] if len(args) > 3 else kwargs.get("params")
 
-        span = sentry_sdk.start_span(
+        span = debugg_ai_sdk.start_span(
             op=OP.DB,
             name=query,
             origin=ClickhouseDriverIntegration.origin,

@@ -3,9 +3,9 @@ import time
 from chalice import Chalice, BadRequestError
 from chalice.local import LambdaContext, LocalGateway
 
-from sentry_sdk import capture_message
-from sentry_sdk.integrations.chalice import CHALICE_VERSION, ChaliceIntegration
-from sentry_sdk.utils import parse_version
+from debugg_ai_sdk import capture_message
+from debugg_ai_sdk.integrations.chalice import CHALICE_VERSION, ChaliceIntegration
+from debugg_ai_sdk.utils import parse_version
 
 from pytest_chalice.handlers import RequestHandler
 

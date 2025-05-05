@@ -1,10 +1,10 @@
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import DidNotEnable, Integration
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import SOURCE_FOR_STYLE, TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import DidNotEnable, Integration
+from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE, TransactionSource
+from debugg_ai_sdk.utils import (
     ensure_integration_enabled,
     event_from_exception,
     transaction_from_function,
@@ -38,7 +38,7 @@ if TYPE_CHECKING:
         WebSocketReceiveMessage,
     )
     from starlite import MiddlewareProtocol
-    from sentry_sdk._types import Event
+    from debugg_ai_sdk._types import Event
 
 
 _DEFAULT_TRANSACTION_NAME = "generic Starlite request"
@@ -132,11 +132,11 @@ def enable_span_for_middleware(middleware):
 
     async def _create_span_call(self, scope, receive, send):
         # type: (MiddlewareProtocol, StarliteScope, Receive, Send) -> None
-        if sentry_sdk.get_client().get_integration(StarliteIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(StarliteIntegration) is None:
             return await old_call(self, scope, receive, send)
 
         middleware_name = self.__class__.__name__
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.MIDDLEWARE_STARLITE,
             name=middleware_name,
             origin=StarliteIntegration.origin,
@@ -146,9 +146,9 @@ def enable_span_for_middleware(middleware):
             # Creating spans for the "receive" callback
             async def _sentry_receive(*args, **kwargs):
                 # type: (*Any, **Any) -> Union[HTTPReceiveMessage, WebSocketReceiveMessage]
-                if sentry_sdk.get_client().get_integration(StarliteIntegration) is None:
+                if debugg_ai_sdk.get_client().get_integration(StarliteIntegration) is None:
                     return await receive(*args, **kwargs)
-                with sentry_sdk.start_span(
+                with debugg_ai_sdk.start_span(
                     op=OP.MIDDLEWARE_STARLITE_RECEIVE,
                     name=getattr(receive, "__qualname__", str(receive)),
                     origin=StarliteIntegration.origin,
@@ -163,9 +163,9 @@ def enable_span_for_middleware(middleware):
             # Creating spans for the "send" callback
             async def _sentry_send(message):
                 # type: (Message) -> None
-                if sentry_sdk.get_client().get_integration(StarliteIntegration) is None:
+                if debugg_ai_sdk.get_client().get_integration(StarliteIntegration) is None:
                     return await send(message)
-                with sentry_sdk.start_span(
+                with debugg_ai_sdk.start_span(
                     op=OP.MIDDLEWARE_STARLITE_SEND,
                     name=getattr(send, "__qualname__", str(send)),
                     origin=StarliteIntegration.origin,
@@ -196,10 +196,10 @@ def patch_http_route_handle():
 
     async def handle_wrapper(self, scope, receive, send):
         # type: (HTTPRoute, HTTPScope, Receive, Send) -> None
-        if sentry_sdk.get_client().get_integration(StarliteIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(StarliteIntegration) is None:
             return await old_handle(self, scope, receive, send)
 
-        sentry_scope = sentry_sdk.get_isolation_scope()
+        sentry_scope = debugg_ai_sdk.get_isolation_scope()
         request = scope["app"].request_class(
             scope=scope, receive=receive, send=send
         )  # type: Request[Any, Any]
@@ -280,13 +280,13 @@ def exception_handler(exc, scope, _):
     if should_send_default_pii():
         user_info = retrieve_user_from_scope(scope)
     if user_info and isinstance(user_info, dict):
-        sentry_scope = sentry_sdk.get_isolation_scope()
+        sentry_scope = debugg_ai_sdk.get_isolation_scope()
         sentry_scope.set_user(user_info)
 
     event, hint = event_from_exception(
         exc,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": StarliteIntegration.identifier, "handled": False},
     )
 
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)

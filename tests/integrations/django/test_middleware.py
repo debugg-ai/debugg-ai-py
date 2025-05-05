@@ -2,7 +2,7 @@ from typing import Optional
 
 import pytest
 
-from sentry_sdk.integrations.django.middleware import _wrap_middleware
+from debugg_ai_sdk.integrations.django.middleware import _wrap_middleware
 
 
 def _sync_capable_middleware_factory(sync_capable):

@@ -12,8 +12,8 @@ from unittest import mock
 
 import pytest
 
-import sentry_sdk
-import sentry_sdk.client
+import debugg_ai_sdk
+import debugg_ai_sdk.client
 
 
 def test_dsc_head_of_trace(sentry_init, capture_envelopes):
@@ -30,7 +30,7 @@ def test_dsc_head_of_trace(sentry_init, capture_envelopes):
     envelopes = capture_envelopes()
 
     # We start a new transaction
-    with sentry_sdk.start_transaction(name="foo"):
+    with debugg_ai_sdk.start_transaction(name="foo"):
         pass
 
     assert len(envelopes) == 1
@@ -98,8 +98,8 @@ def test_dsc_continuation_of_trace(sentry_init, capture_envelopes):
     }
 
     # We continue the incoming trace and start a new transaction
-    transaction = sentry_sdk.continue_trace(incoming_http_headers)
-    with sentry_sdk.start_transaction(transaction, name="foo"):
+    transaction = debugg_ai_sdk.continue_trace(incoming_http_headers)
+    with debugg_ai_sdk.start_transaction(transaction, name="foo"):
         pass
 
     assert len(envelopes) == 1
@@ -176,8 +176,8 @@ def test_dsc_continuation_of_trace_sample_rate_changed_in_traces_sampler(
 
     # We continue the incoming trace and start a new transaction
     with mock.patch("sentry_sdk.tracing_utils.Random.uniform", return_value=0.125):
-        transaction = sentry_sdk.continue_trace(incoming_http_headers)
-        with sentry_sdk.start_transaction(transaction, name="foo"):
+        transaction = debugg_ai_sdk.continue_trace(incoming_http_headers)
+        with debugg_ai_sdk.start_transaction(transaction, name="foo"):
             pass
 
     assert len(envelopes) == 1
@@ -229,7 +229,7 @@ def test_dsc_issue(sentry_init, capture_envelopes):
     try:
         1 / 0
     except ZeroDivisionError as exp:
-        sentry_sdk.capture_exception(exp)
+        debugg_ai_sdk.capture_exception(exp)
 
     assert len(envelopes) == 1
 
@@ -273,11 +273,11 @@ def test_dsc_issue_with_tracing(sentry_init, capture_envelopes):
     envelopes = capture_envelopes()
 
     # We start a new transaction and an error occurs
-    with sentry_sdk.start_transaction(name="foo"):
+    with debugg_ai_sdk.start_transaction(name="foo"):
         try:
             1 / 0
         except ZeroDivisionError as exp:
-            sentry_sdk.capture_exception(exp)
+            debugg_ai_sdk.capture_exception(exp)
 
     assert len(envelopes) == 2
 
@@ -359,13 +359,13 @@ def test_dsc_issue_twp(sentry_init, capture_envelopes, traces_sample_rate):
 
     # We continue the trace (meaning: saving the incoming trace information on the scope)
     # but in this test, we do not start a transaction.
-    sentry_sdk.continue_trace(incoming_http_headers)
+    debugg_ai_sdk.continue_trace(incoming_http_headers)
 
     # No transaction is started, just an error is captured
     try:
         1 / 0
     except ZeroDivisionError as exp:
-        sentry_sdk.capture_exception(exp)
+        debugg_ai_sdk.capture_exception(exp)
 
     assert len(envelopes) == 1
 

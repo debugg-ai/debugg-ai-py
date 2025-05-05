@@ -1,6 +1,6 @@
 import pytest
 
-from sentry_sdk.integrations.serverless import serverless_function
+from debugg_ai_sdk.integrations.serverless import serverless_function
 
 
 def test_basic(sentry_init, capture_exceptions, monkeypatch):

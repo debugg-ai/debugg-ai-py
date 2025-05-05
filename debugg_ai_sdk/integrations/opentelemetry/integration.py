@@ -4,10 +4,10 @@ are experimental and not suitable for production use. They may be changed or
 removed at any time without prior notice.
 """
 
-from sentry_sdk.integrations import DidNotEnable, Integration
-from sentry_sdk.integrations.opentelemetry.propagator import SentryPropagator
-from sentry_sdk.integrations.opentelemetry.span_processor import SentrySpanProcessor
-from sentry_sdk.utils import logger
+from debugg_ai_sdk.integrations import DidNotEnable, Integration
+from debugg_ai_sdk.integrations.opentelemetry.propagator import SentryPropagator
+from debugg_ai_sdk.integrations.opentelemetry.span_processor import SentrySpanProcessor
+from debugg_ai_sdk.utils import logger
 
 try:
     from opentelemetry import trace

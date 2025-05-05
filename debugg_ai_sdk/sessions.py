@@ -4,10 +4,10 @@ import warnings
 from threading import Thread, Lock
 from contextlib import contextmanager
 
-import sentry_sdk
-from sentry_sdk.envelope import Envelope
-from sentry_sdk.session import Session
-from sentry_sdk.utils import format_timestamp
+import debugg_ai_sdk
+from debugg_ai_sdk.envelope import Envelope
+from debugg_ai_sdk.session import Session
+from debugg_ai_sdk.utils import format_timestamp
 
 from typing import TYPE_CHECKING
 
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 def is_auto_session_tracking_enabled(hub=None):
-    # type: (Optional[sentry_sdk.Hub]) -> Union[Any, bool, None]
+    # type: (Optional[debugg_ai_sdk.Hub]) -> Union[Any, bool, None]
     """DEPRECATED: Utility function to find out if session tracking is enabled."""
 
     # Internal callers should use private _is_auto_session_tracking_enabled, instead.
@@ -34,7 +34,7 @@ def is_auto_session_tracking_enabled(hub=None):
     )
 
     if hub is None:
-        hub = sentry_sdk.Hub.current
+        hub = debugg_ai_sdk.Hub.current
 
     should_track = hub.scope._force_auto_session_tracking
 
@@ -47,7 +47,7 @@ def is_auto_session_tracking_enabled(hub=None):
 
 @contextmanager
 def auto_session_tracking(hub=None, session_mode="application"):
-    # type: (Optional[sentry_sdk.Hub], str) -> Generator[None, None, None]
+    # type: (Optional[debugg_ai_sdk.Hub], str) -> Generator[None, None, None]
     """DEPRECATED: Use track_session instead
     Starts and stops a session automatically around a block.
     """
@@ -59,7 +59,7 @@ def auto_session_tracking(hub=None, session_mode="application"):
     )
 
     if hub is None:
-        hub = sentry_sdk.Hub.current
+        hub = debugg_ai_sdk.Hub.current
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", DeprecationWarning)
         should_track = is_auto_session_tracking_enabled(hub)
@@ -73,7 +73,7 @@ def auto_session_tracking(hub=None, session_mode="application"):
 
 
 def is_auto_session_tracking_enabled_scope(scope):
-    # type: (sentry_sdk.Scope) -> bool
+    # type: (debugg_ai_sdk.Scope) -> bool
     """
     DEPRECATED: Utility function to find out if session tracking is enabled.
     """
@@ -90,14 +90,14 @@ def is_auto_session_tracking_enabled_scope(scope):
 
 
 def _is_auto_session_tracking_enabled(scope):
-    # type: (sentry_sdk.Scope) -> bool
+    # type: (debugg_ai_sdk.Scope) -> bool
     """
     Utility function to find out if session tracking is enabled.
     """
 
     should_track = scope._force_auto_session_tracking
     if should_track is None:
-        client_options = sentry_sdk.get_client().options
+        client_options = debugg_ai_sdk.get_client().options
         should_track = client_options.get("auto_session_tracking", False)
 
     return should_track
@@ -105,7 +105,7 @@ def _is_auto_session_tracking_enabled(scope):
 
 @contextmanager
 def auto_session_tracking_scope(scope, session_mode="application"):
-    # type: (sentry_sdk.Scope, str) -> Generator[None, None, None]
+    # type: (debugg_ai_sdk.Scope, str) -> Generator[None, None, None]
     """DEPRECATED: This function is a deprecated alias for track_session.
     Starts and stops a session automatically around a block.
     """
@@ -122,7 +122,7 @@ def auto_session_tracking_scope(scope, session_mode="application"):
 
 @contextmanager
 def track_session(scope, session_mode="application"):
-    # type: (sentry_sdk.Scope, str) -> Generator[None, None, None]
+    # type: (debugg_ai_sdk.Scope, str) -> Generator[None, None, None]
     """
     Start a new session in the provided scope, assuming session tracking is enabled.
     This is a no-op context manager if session tracking is not enabled.

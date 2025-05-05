@@ -15,22 +15,22 @@ from opentelemetry.trace.span import (
     INVALID_SPAN_ID,
     INVALID_TRACE_ID,
 )
-from sentry_sdk import get_client, start_transaction
-from sentry_sdk.consts import INSTRUMENTER, SPANSTATUS
-from sentry_sdk.integrations.opentelemetry.consts import (
+from debugg_ai_sdk import get_client, start_transaction
+from debugg_ai_sdk.consts import INSTRUMENTER, SPANSTATUS
+from debugg_ai_sdk.integrations.opentelemetry.consts import (
     SENTRY_BAGGAGE_KEY,
     SENTRY_TRACE_KEY,
 )
-from sentry_sdk.scope import add_global_event_processor
-from sentry_sdk.tracing import Transaction, Span as SentrySpan
-from sentry_sdk.utils import Dsn
+from debugg_ai_sdk.scope import add_global_event_processor
+from debugg_ai_sdk.tracing import Transaction, Span as SentrySpan
+from debugg_ai_sdk.utils import Dsn
 
 from urllib3.util import parse_url as urlparse
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Union
     from opentelemetry import context as context_api
-    from sentry_sdk._types import Event, Hint
+    from debugg_ai_sdk._types import Event, Hint
 
 OPEN_TELEMETRY_CONTEXT = "otel"
 SPAN_MAX_TIME_OPEN_MINUTES = 10

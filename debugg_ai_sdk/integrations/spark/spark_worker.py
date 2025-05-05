@@ -1,8 +1,8 @@
 import sys
 
-import sentry_sdk
-from sentry_sdk.integrations import Integration
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     exc_info_from_error,
     single_exception_from_error_tuple,
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from typing import Any
     from typing import Optional
 
-    from sentry_sdk._types import ExcInfo, Event, Hint
+    from debugg_ai_sdk._types import ExcInfo, Event, Hint
 
 
 class SparkWorkerIntegration(Integration):
@@ -32,7 +32,7 @@ class SparkWorkerIntegration(Integration):
 
 def _capture_exception(exc_info):
     # type: (ExcInfo) -> None
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
 
     mechanism = {"type": "spark", "handled": False}
 
@@ -57,20 +57,20 @@ def _capture_exception(exc_info):
 
         _tag_task_context()
 
-        sentry_sdk.capture_event(event, hint=hint)
+        debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _tag_task_context():
     # type: () -> None
     from pyspark.taskcontext import TaskContext
 
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
 
     @scope.add_event_processor
     def process_event(event, hint):
         # type: (Event, Hint) -> Optional[Event]
         with capture_internal_exceptions():
-            integration = sentry_sdk.get_client().get_integration(
+            integration = debugg_ai_sdk.get_client().get_integration(
                 SparkWorkerIntegration
             )
             task_context = TaskContext.get()
@@ -110,7 +110,7 @@ def _sentry_worker_main(*args, **kwargs):
     try:
         original_worker.main(*args, **kwargs)
     except SystemExit:
-        if sentry_sdk.get_client().get_integration(SparkWorkerIntegration) is not None:
+        if debugg_ai_sdk.get_client().get_integration(SparkWorkerIntegration) is not None:
             exc_info = sys.exc_info()
             with capture_internal_exceptions():
                 _capture_exception(exc_info)

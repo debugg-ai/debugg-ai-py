@@ -14,8 +14,8 @@ from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.messages import BaseMessage, AIMessageChunk
 from langchain_core.outputs import ChatGenerationChunk
 
-from sentry_sdk import start_transaction
-from sentry_sdk.integrations.langchain import LangchainIntegration
+from debugg_ai_sdk import start_transaction
+from debugg_ai_sdk.integrations.langchain import LangchainIntegration
 from langchain.agents import tool, AgentExecutor, create_openai_tools_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 

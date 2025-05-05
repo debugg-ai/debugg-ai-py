@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from threading import Lock
 
-from sentry_sdk.utils import logger
+from debugg_ai_sdk.utils import logger
 
 from typing import TYPE_CHECKING
 

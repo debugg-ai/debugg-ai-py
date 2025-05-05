@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any
 
-from sentry_sdk.tracing import Span
-from sentry_sdk.utils import logger
+from debugg_ai_sdk.tracing import Span
+from debugg_ai_sdk.utils import logger
 
 
 def _normalize_data(data):

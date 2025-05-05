@@ -1,11 +1,11 @@
-import sentry_sdk
-from sentry_sdk.crons import capture_checkin, MonitorStatus
-from sentry_sdk.integrations import DidNotEnable
-from sentry_sdk.integrations.celery.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.crons import capture_checkin, MonitorStatus
+from debugg_ai_sdk.integrations import DidNotEnable
+from debugg_ai_sdk.integrations.celery.utils import (
     _get_humanized_interval,
     _now_seconds_since_epoch,
 )
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     logger,
     match_regex_list,
 )
@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import Any, Optional, TypeVar, Union
-    from sentry_sdk._types import (
+    from debugg_ai_sdk._types import (
         MonitorConfig,
         MonitorConfigScheduleType,
         MonitorConfigScheduleUnit,
@@ -114,7 +114,7 @@ def _get_monitor_config(celery_schedule, app, monitor_name):
 
 
 def _apply_crons_data_to_schedule_entry(scheduler, schedule_entry, integration):
-    # type: (Any, Any, sentry_sdk.integrations.celery.CeleryIntegration) -> None
+    # type: (Any, Any, debugg_ai_sdk.integrations.celery.CeleryIntegration) -> None
     """
     Add Sentry Crons information to the schedule_entry headers.
     """
@@ -176,16 +176,16 @@ def _wrap_beat_scheduler(original_function):
     if already_patched:
         return original_function
 
-    from sentry_sdk.integrations.celery import CeleryIntegration
+    from debugg_ai_sdk.integrations.celery import CeleryIntegration
 
     def sentry_patched_scheduler(*args, **kwargs):
         # type: (*Any, **Any) -> None
-        integration = sentry_sdk.get_client().get_integration(CeleryIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(CeleryIntegration)
         if integration is None:
             return original_function(*args, **kwargs)
 
         # Tasks started by Celery Beat start a new Trace
-        scope = sentry_sdk.get_isolation_scope()
+        scope = debugg_ai_sdk.get_isolation_scope()
         scope.set_new_propagation_context()
         scope._name = "celery-beat"
 

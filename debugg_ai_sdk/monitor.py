@@ -2,8 +2,8 @@ import os
 import time
 from threading import Thread, Lock
 
-import sentry_sdk
-from sentry_sdk.utils import logger
+import debugg_ai_sdk
+from debugg_ai_sdk.utils import logger
 
 from typing import TYPE_CHECKING
 
@@ -24,8 +24,8 @@ class Monitor:
     name = "sentry.monitor"
 
     def __init__(self, transport, interval=10):
-        # type: (sentry_sdk.transport.Transport, float) -> None
-        self.transport = transport  # type: sentry_sdk.transport.Transport
+        # type: (debugg_ai_sdk.transport.Transport, float) -> None
+        self.transport = transport  # type: debugg_ai_sdk.transport.Transport
         self.interval = interval  # type: float
 
         self._healthy = True

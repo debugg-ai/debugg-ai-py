@@ -4,9 +4,9 @@ import pytest
 
 import ray
 
-import sentry_sdk
-from sentry_sdk.envelope import Envelope
-from sentry_sdk.integrations.ray import RayIntegration
+import debugg_ai_sdk
+from debugg_ai_sdk.envelope import Envelope
+from debugg_ai_sdk.integrations.ray import RayIntegration
 from tests.conftest import TestTransport
 
 
@@ -32,7 +32,7 @@ def setup_sentry_with_logging_transport():
 
 
 def setup_sentry(transport=None):
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         integrations=[RayIntegration()],
         transport=RayTestTransport() if transport is None else transport,
         traces_sample_rate=1.0,
@@ -72,15 +72,15 @@ def test_tracing_in_ray_tasks():
     # Setup ray task
     @ray.remote
     def example_task():
-        with sentry_sdk.start_span(op="task", name="example task step"):
+        with debugg_ai_sdk.start_span(op="task", name="example task step"):
             ...
 
-        return sentry_sdk.get_client().transport.envelopes
+        return debugg_ai_sdk.get_client().transport.envelopes
 
-    with sentry_sdk.start_transaction(op="task", name="ray test transaction"):
+    with debugg_ai_sdk.start_transaction(op="task", name="ray test transaction"):
         worker_envelopes = ray.get(example_task.remote())
 
-    client_envelope = sentry_sdk.get_client().transport.envelopes[0]
+    client_envelope = debugg_ai_sdk.get_client().transport.envelopes[0]
     client_transaction = client_envelope.get_transaction_event()
     assert client_transaction["transaction"] == "ray test transaction"
     assert client_transaction["transaction_info"] == {"source": "custom"}
@@ -132,7 +132,7 @@ def test_errors_in_ray_tasks():
     def example_task():
         1 / 0
 
-    with sentry_sdk.start_transaction(op="task", name="ray test transaction"):
+    with debugg_ai_sdk.start_transaction(op="task", name="ray test transaction"):
         with pytest.raises(ZeroDivisionError):
             future = example_task.remote()
             ray.get(future)
@@ -167,16 +167,16 @@ def test_tracing_in_ray_actors():
             self.n = 0
 
         def increment(self):
-            with sentry_sdk.start_span(op="task", name="example actor execution"):
+            with debugg_ai_sdk.start_span(op="task", name="example actor execution"):
                 self.n += 1
 
-            return sentry_sdk.get_client().transport.envelopes
+            return debugg_ai_sdk.get_client().transport.envelopes
 
-    with sentry_sdk.start_transaction(op="task", name="ray test transaction"):
+    with debugg_ai_sdk.start_transaction(op="task", name="ray test transaction"):
         counter = Counter.remote()
         worker_envelopes = ray.get(counter.increment.remote())
 
-    client_envelope = sentry_sdk.get_client().transport.envelopes[0]
+    client_envelope = debugg_ai_sdk.get_client().transport.envelopes[0]
     client_transaction = client_envelope.get_transaction_event()
 
     # Spans for submitting the actor task are not created (actors are not supported yet)
@@ -204,12 +204,12 @@ def test_errors_in_ray_actors():
             self.n = 0
 
         def increment(self):
-            with sentry_sdk.start_span(op="task", name="example actor execution"):
+            with debugg_ai_sdk.start_span(op="task", name="example actor execution"):
                 1 / 0
 
-            return sentry_sdk.get_client().transport.envelopes
+            return debugg_ai_sdk.get_client().transport.envelopes
 
-    with sentry_sdk.start_transaction(op="task", name="ray test transaction"):
+    with debugg_ai_sdk.start_transaction(op="task", name="ray test transaction"):
         with pytest.raises(ZeroDivisionError):
             counter = Counter.remote()
             future = counter.increment.remote()

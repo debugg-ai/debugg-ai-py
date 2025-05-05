@@ -13,11 +13,11 @@ from flask import Flask
 from strawberry.fastapi import GraphQLRouter
 from strawberry.flask.views import GraphQLView
 
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.flask import FlaskIntegration
-from sentry_sdk.integrations.starlette import StarletteIntegration
-from sentry_sdk.integrations.strawberry import (
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations.fastapi import FastApiIntegration
+from debugg_ai_sdk.integrations.flask import FlaskIntegration
+from debugg_ai_sdk.integrations.starlette import StarletteIntegration
+from debugg_ai_sdk.integrations.strawberry import (
     StrawberryIntegration,
     SentryAsyncExtension,
     SentrySyncExtension,

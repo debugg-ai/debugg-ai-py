@@ -2,9 +2,9 @@ from contextlib import contextmanager
 import json
 from copy import deepcopy
 
-import sentry_sdk
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.utils import AnnotatedValue, logger
+import debugg_ai_sdk
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.utils import AnnotatedValue, logger
 
 try:
     from django.http.request import RawPostDataException
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from typing import MutableMapping
     from typing import Optional
     from typing import Union
-    from sentry_sdk._types import Event, HttpStatusCodeRange
+    from debugg_ai_sdk._types import Event, HttpStatusCodeRange
 
 
 SENSITIVE_ENV_KEYS = (
@@ -60,7 +60,7 @@ def nullcontext():
 
 
 def request_body_within_bounds(client, content_length):
-    # type: (Optional[sentry_sdk.client.BaseClient], int) -> bool
+    # type: (Optional[debugg_ai_sdk.client.BaseClient], int) -> bool
     if client is None:
         return False
 
@@ -88,7 +88,7 @@ class RequestExtractor:
 
     def extract_into_event(self, event):
         # type: (Event) -> None
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
         if not client.is_active():
             return
 

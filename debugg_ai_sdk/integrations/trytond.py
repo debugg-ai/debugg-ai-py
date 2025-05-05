@@ -1,7 +1,7 @@
-import sentry_sdk
-from sentry_sdk.integrations import Integration
-from sentry_sdk.integrations.wsgi import SentryWsgiMiddleware
-from sentry_sdk.utils import ensure_integration_enabled, event_from_exception
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.utils import ensure_integration_enabled, event_from_exception
 
 from trytond.exceptions import TrytonException  # type: ignore
 from trytond.wsgi import app  # type: ignore
@@ -29,13 +29,13 @@ class TrytondWSGIIntegration(Integration):
             if isinstance(e, TrytonException):
                 return
             else:
-                client = sentry_sdk.get_client()
+                client = debugg_ai_sdk.get_client()
                 event, hint = event_from_exception(
                     e,
                     client_options=client.options,
                     mechanism={"type": "trytond", "handled": False},
                 )
-                sentry_sdk.capture_event(event, hint=hint)
+                debugg_ai_sdk.capture_event(event, hint=hint)
 
         # Expected error handlers signature was changed
         # when the error_handler decorator was introduced

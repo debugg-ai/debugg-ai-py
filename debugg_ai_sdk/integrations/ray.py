@@ -1,11 +1,11 @@
 import inspect
 import sys
 
-import sentry_sdk
-from sentry_sdk.consts import OP, SPANSTATUS
-from sentry_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
-from sentry_sdk.tracing import TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP, SPANSTATUS
+from debugg_ai_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
+from debugg_ai_sdk.tracing import TransactionSource
+from debugg_ai_sdk.utils import (
     event_from_exception,
     logger,
     package_version,
@@ -24,12 +24,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from collections.abc import Callable
     from typing import Any, Optional
-    from sentry_sdk.utils import ExcInfo
+    from debugg_ai_sdk.utils import ExcInfo
 
 
 def _check_sentry_initialized():
     # type: () -> None
-    if sentry_sdk.get_client().is_active():
+    if debugg_ai_sdk.get_client().is_active():
         return
 
     logger.debug(
@@ -58,7 +58,7 @@ def _patch_ray_remote():
             """
             _check_sentry_initialized()
 
-            transaction = sentry_sdk.continue_trace(
+            transaction = debugg_ai_sdk.continue_trace(
                 _tracing or {},
                 op=OP.QUEUE_TASK_RAY,
                 name=qualname_from_function(f),
@@ -66,7 +66,7 @@ def _patch_ray_remote():
                 source=TransactionSource.TASK,
             )
 
-            with sentry_sdk.start_transaction(transaction) as transaction:
+            with debugg_ai_sdk.start_transaction(transaction) as transaction:
                 try:
                     result = f(*f_args, **f_kwargs)
                     transaction.set_status(SPANSTATUS.OK)
@@ -86,14 +86,14 @@ def _patch_ray_remote():
             """
             Ray Client
             """
-            with sentry_sdk.start_span(
+            with debugg_ai_sdk.start_span(
                 op=OP.QUEUE_SUBMIT_RAY,
                 name=qualname_from_function(f),
                 origin=RayIntegration.origin,
             ) as span:
                 tracing = {
                     k: v
-                    for k, v in sentry_sdk.get_current_scope().iter_trace_propagation_headers()
+                    for k, v in debugg_ai_sdk.get_current_scope().iter_trace_propagation_headers()
                 }
                 try:
                     result = old_remote_method(*args, **kwargs, _tracing=tracing)
@@ -115,7 +115,7 @@ def _patch_ray_remote():
 
 def _capture_exception(exc_info, **kwargs):
     # type: (ExcInfo, **Any) -> None
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
 
     event, hint = event_from_exception(
         exc_info,
@@ -125,7 +125,7 @@ def _capture_exception(exc_info, **kwargs):
             "type": RayIntegration.identifier,
         },
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 class RayIntegration(Integration):

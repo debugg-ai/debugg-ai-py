@@ -4,8 +4,8 @@ import httpx
 import pytest
 from cohere import Client, ChatMessage
 
-from sentry_sdk import start_transaction
-from sentry_sdk.integrations.cohere import CohereIntegration
+from debugg_ai_sdk import start_transaction
+from debugg_ai_sdk.integrations.cohere import CohereIntegration
 
 from unittest import mock  # python 3.3 and above
 from httpx import Client as HTTPXClient

@@ -2,7 +2,7 @@ import sys
 
 import pytest
 
-from sentry_sdk.integrations.sys_exit import SysExitIntegration
+from debugg_ai_sdk.integrations.sys_exit import SysExitIntegration
 
 
 @pytest.mark.parametrize(

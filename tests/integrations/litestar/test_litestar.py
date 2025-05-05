@@ -4,8 +4,8 @@ import functools
 from litestar.exceptions import HTTPException
 import pytest
 
-from sentry_sdk import capture_message
-from sentry_sdk.integrations.litestar import LitestarIntegration
+from debugg_ai_sdk import capture_message
+from debugg_ai_sdk.integrations.litestar import LitestarIntegration
 
 from typing import Any
 

@@ -1,9 +1,9 @@
 import json
 import urllib3
 
-from sentry_sdk.integrations import Integration
-from sentry_sdk.api import set_context
-from sentry_sdk.utils import logger
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.api import set_context
+from debugg_ai_sdk.utils import logger
 
 from typing import TYPE_CHECKING
 

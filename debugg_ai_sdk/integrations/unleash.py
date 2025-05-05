@@ -1,8 +1,8 @@
 from functools import wraps
 from typing import Any
 
-from sentry_sdk.feature_flags import add_feature_flag
-from sentry_sdk.integrations import Integration, DidNotEnable
+from debugg_ai_sdk.feature_flags import add_feature_flag
+from debugg_ai_sdk.integrations import Integration, DidNotEnable
 
 try:
     from UnleashClient import UnleashClient

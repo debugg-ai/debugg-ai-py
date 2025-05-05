@@ -24,15 +24,15 @@ except ImportError:
     # Python 3.10 and below
     BaseExceptionGroup = None  # type: ignore
 
-import sentry_sdk
-from sentry_sdk._compat import PY37
-from sentry_sdk.consts import (
+import debugg_ai_sdk
+from debugg_ai_sdk._compat import PY37
+from debugg_ai_sdk.consts import (
     DEFAULT_ADD_FULL_STACK,
     DEFAULT_MAX_STACK_FRAMES,
     DEFAULT_MAX_VALUE_LENGTH,
     EndpointType,
 )
-from sentry_sdk._types import Annotated, AnnotatedValue, SENSITIVE_DATA_SUBSTITUTE
+from debugg_ai_sdk._types import Annotated, AnnotatedValue, SENSITIVE_DATA_SUBSTITUTE
 
 from typing import TYPE_CHECKING
 
@@ -59,7 +59,7 @@ if TYPE_CHECKING:
 
     from gevent.hub import Hub
 
-    from sentry_sdk._types import Event, ExcInfo
+    from debugg_ai_sdk._types import Event, ExcInfo
 
     P = ParamSpec("P")
     R = TypeVar("R")
@@ -228,7 +228,7 @@ def capture_internal_exception(exc_info):
 
     These exceptions do not end up in Sentry and are just logged instead.
     """
-    if sentry_sdk.get_client().is_active():
+    if debugg_ai_sdk.get_client().is_active():
         logger.error("Internal error in sentry_sdk", exc_info=exc_info)
 
 
@@ -605,7 +605,7 @@ def serialize_frame(
         )
 
     if include_local_variables:
-        from sentry_sdk.serializer import serialize
+        from debugg_ai_sdk.serializer import serialize
 
         rv["vars"] = serialize(
             dict(frame.f_locals), is_vars=True, custom_repr=custom_repr
@@ -1674,7 +1674,7 @@ def match_regex_list(item, regex_list=None, substring_matching=False):
 
 
 def is_sentry_url(client, url):
-    # type: (sentry_sdk.client.BaseClient, str) -> bool
+    # type: (debugg_ai_sdk.client.BaseClient, str) -> bool
     """
     Determines whether the given URL matches the Sentry DSN.
     """
@@ -1756,7 +1756,7 @@ if TYPE_CHECKING:
 
     @overload
     def ensure_integration_enabled(
-        integration,  # type: type[sentry_sdk.integrations.Integration]
+        integration,  # type: type[debugg_ai_sdk.integrations.Integration]
         original_function,  # type: Callable[P, R]
     ):
         # type: (...) -> Callable[[Callable[P, R]], Callable[P, R]]
@@ -1764,14 +1764,14 @@ if TYPE_CHECKING:
 
     @overload
     def ensure_integration_enabled(
-        integration,  # type: type[sentry_sdk.integrations.Integration]
+        integration,  # type: type[debugg_ai_sdk.integrations.Integration]
     ):
         # type: (...) -> Callable[[Callable[P, None]], Callable[P, None]]
         ...
 
 
 def ensure_integration_enabled(
-    integration,  # type: type[sentry_sdk.integrations.Integration]
+    integration,  # type: type[debugg_ai_sdk.integrations.Integration]
     original_function=_no_op,  # type: Union[Callable[P, R], Callable[P, None]]
 ):
     # type: (...) -> Callable[[Callable[P, R]], Callable[P, R]]
@@ -1805,7 +1805,7 @@ def ensure_integration_enabled(
         # type: (Callable[P, R]) -> Callable[P, R]
         def runner(*args: "P.args", **kwargs: "P.kwargs"):
             # type: (...) -> R
-            if sentry_sdk.get_client().get_integration(integration) is None:
+            if debugg_ai_sdk.get_client().get_integration(integration) is None:
                 return original_function(*args, **kwargs)
 
             return sentry_patched_function(*args, **kwargs)

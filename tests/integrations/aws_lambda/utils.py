@@ -159,7 +159,7 @@ class LocalLambdaStack(Stack):
             )
             if not os.path.exists(sdk_path):
                 # Find the Sentry SDK in the current environment
-                import sentry_sdk as sdk_module
+                import debugg_ai_sdk as sdk_module
 
                 sdk_source = os.path.dirname(sdk_module.__file__)
                 shutil.copytree(sdk_source, sdk_path)

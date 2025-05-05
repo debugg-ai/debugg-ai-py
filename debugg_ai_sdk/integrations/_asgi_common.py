@@ -1,7 +1,7 @@
 import urllib
 
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.integrations._wsgi_common import _filter_headers
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.integrations._wsgi_common import _filter_headers
 
 from typing import TYPE_CHECKING
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from typing import Union
     from typing_extensions import Literal
 
-    from sentry_sdk.utils import AnnotatedValue
+    from debugg_ai_sdk.utils import AnnotatedValue
 
 
 def _get_headers(asgi_scope):

@@ -1,7 +1,7 @@
 import enum
 
-from sentry_sdk.integrations import Integration, DidNotEnable
-from sentry_sdk.integrations.logging import (
+from debugg_ai_sdk.integrations import Integration, DidNotEnable
+from debugg_ai_sdk.integrations.logging import (
     BreadcrumbHandler,
     EventHandler,
     _BaseHandler,

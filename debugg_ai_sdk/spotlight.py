@@ -18,12 +18,12 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import Self
 
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     logger as sentry_logger,
     env_to_bool,
     capture_internal_exceptions,
 )
-from sentry_sdk.envelope import Envelope
+from debugg_ai_sdk.envelope import Envelope
 
 
 logger = logging.getLogger("spotlight")
@@ -97,9 +97,9 @@ try:
             # type: (Self, Callable[..., HttpResponse]) -> None
             super().__init__(get_response)
 
-            import sentry_sdk.api
+            import debugg_ai_sdk.api
 
-            self.sentry_sdk = sentry_sdk.api
+            self.sentry_sdk = debugg_ai_sdk.api
 
             spotlight_client = self.sentry_sdk.get_client().spotlight
             if spotlight_client is None:

@@ -9,14 +9,14 @@ import warnings
 from collections import deque
 from datetime import datetime, timezone
 
-from sentry_sdk.consts import VERSION
-from sentry_sdk.envelope import Envelope
-from sentry_sdk._lru_cache import LRUCache
-from sentry_sdk.profiler.utils import (
+from debugg_ai_sdk.consts import VERSION
+from debugg_ai_sdk.envelope import Envelope
+from debugg_ai_sdk._lru_cache import LRUCache
+from debugg_ai_sdk.profiler.utils import (
     DEFAULT_SAMPLING_FREQUENCY,
     extract_stack,
 )
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     capture_internal_exception,
     is_gevent,
     logger,
@@ -37,8 +37,8 @@ if TYPE_CHECKING:
     from typing import Type
     from typing import Union
     from typing_extensions import TypedDict
-    from sentry_sdk._types import ContinuousProfilerMode, SDKInfo
-    from sentry_sdk.profiler.utils import (
+    from debugg_ai_sdk._types import ContinuousProfilerMode, SDKInfo
+    from debugg_ai_sdk.profiler.utils import (
         ExtractedSample,
         FrameId,
         StackId,

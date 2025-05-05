@@ -1,10 +1,10 @@
 import functools
 import sys
 
-import sentry_sdk
-from sentry_sdk.utils import capture_internal_exceptions, event_from_exception
-from sentry_sdk.integrations import Integration
-from sentry_sdk._types import TYPE_CHECKING
+import debugg_ai_sdk
+from debugg_ai_sdk.utils import capture_internal_exceptions, event_from_exception
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk._types import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -42,7 +42,7 @@ class SysExitIntegration(Integration):
         def sentry_patched_exit(__status=0):
             # type: (Union[str, int, None]) -> NoReturn
             # @ensure_integration_enabled ensures that this is non-None
-            integration = sentry_sdk.get_client().get_integration(SysExitIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(SysExitIntegration)
             if integration is None:
                 old_exit(__status)
 
@@ -64,7 +64,7 @@ def _capture_exception(exc):
     # type: (SystemExit) -> None
     event, hint = event_from_exception(
         exc,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": SysExitIntegration.identifier, "handled": False},
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)

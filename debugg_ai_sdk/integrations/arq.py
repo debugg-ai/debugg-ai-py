@@ -1,12 +1,12 @@
 import sys
 
-import sentry_sdk
-from sentry_sdk.consts import OP, SPANSTATUS
-from sentry_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
-from sentry_sdk.integrations.logging import ignore_logger
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import Transaction, TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP, SPANSTATUS
+from debugg_ai_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
+from debugg_ai_sdk.integrations.logging import ignore_logger
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import Transaction, TransactionSource
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Dict, Optional, Union
 
-    from sentry_sdk._types import EventProcessor, Event, ExcInfo, Hint
+    from debugg_ai_sdk._types import EventProcessor, Event, ExcInfo, Hint
 
     from arq.cron import CronJob
     from arq.jobs import Job
@@ -71,11 +71,11 @@ def patch_enqueue_job():
 
     async def _sentry_enqueue_job(self, function, *args, **kwargs):
         # type: (ArqRedis, str, *Any, **Any) -> Optional[Job]
-        integration = sentry_sdk.get_client().get_integration(ArqIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(ArqIntegration)
         if integration is None:
             return await old_enqueue_job(self, function, *args, **kwargs)
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.QUEUE_SUBMIT_ARQ, name=function, origin=ArqIntegration.origin
         ):
             return await old_enqueue_job(self, function, *args, **kwargs)
@@ -90,11 +90,11 @@ def patch_run_job():
 
     async def _sentry_run_job(self, job_id, score):
         # type: (Worker, str, int) -> None
-        integration = sentry_sdk.get_client().get_integration(ArqIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(ArqIntegration)
         if integration is None:
             return await old_run_job(self, job_id, score)
 
-        with sentry_sdk.isolation_scope() as scope:
+        with debugg_ai_sdk.isolation_scope() as scope:
             scope._name = "arq"
             scope.clear_breadcrumbs()
 
@@ -106,7 +106,7 @@ def patch_run_job():
                 origin=ArqIntegration.origin,
             )
 
-            with sentry_sdk.start_transaction(transaction):
+            with debugg_ai_sdk.start_transaction(transaction):
                 return await old_run_job(self, job_id, score)
 
     Worker.run_job = _sentry_run_job
@@ -114,7 +114,7 @@ def patch_run_job():
 
 def _capture_exception(exc_info):
     # type: (ExcInfo) -> None
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
 
     if scope.transaction is not None:
         if exc_info[0] in ARQ_CONTROL_FLOW_EXCEPTIONS:
@@ -125,10 +125,10 @@ def _capture_exception(exc_info):
 
     event, hint = event_from_exception(
         exc_info,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": ArqIntegration.identifier, "handled": False},
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _make_event_processor(ctx, *args, **kwargs):
@@ -137,7 +137,7 @@ def _make_event_processor(ctx, *args, **kwargs):
         # type: (Event, Hint) -> Optional[Event]
 
         with capture_internal_exceptions():
-            scope = sentry_sdk.get_current_scope()
+            scope = debugg_ai_sdk.get_current_scope()
             if scope.transaction is not None:
                 scope.transaction.name = ctx["job_name"]
                 event["transaction"] = ctx["job_name"]
@@ -167,11 +167,11 @@ def _wrap_coroutine(name, coroutine):
 
     async def _sentry_coroutine(ctx, *args, **kwargs):
         # type: (Dict[Any, Any], *Any, **Any) -> Any
-        integration = sentry_sdk.get_client().get_integration(ArqIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(ArqIntegration)
         if integration is None:
             return await coroutine(ctx, *args, **kwargs)
 
-        sentry_sdk.get_isolation_scope().add_event_processor(
+        debugg_ai_sdk.get_isolation_scope().add_event_processor(
             _make_event_processor({**ctx, "job_name": name}, *args, **kwargs)
         )
 

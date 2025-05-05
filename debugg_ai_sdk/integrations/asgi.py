@@ -9,25 +9,25 @@ import inspect
 from copy import deepcopy
 from functools import partial
 
-import sentry_sdk
-from sentry_sdk.api import continue_trace
-from sentry_sdk.consts import OP
+import debugg_ai_sdk
+from debugg_ai_sdk.api import continue_trace
+from debugg_ai_sdk.consts import OP
 
-from sentry_sdk.integrations._asgi_common import (
+from debugg_ai_sdk.integrations._asgi_common import (
     _get_headers,
     _get_request_data,
     _get_url,
 )
-from sentry_sdk.integrations._wsgi_common import (
+from debugg_ai_sdk.integrations._wsgi_common import (
     DEFAULT_HTTP_METHODS_TO_CAPTURE,
     nullcontext,
 )
-from sentry_sdk.sessions import track_session
-from sentry_sdk.tracing import (
+from debugg_ai_sdk.sessions import track_session
+from debugg_ai_sdk.tracing import (
     SOURCE_FOR_STYLE,
     TransactionSource,
 )
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     ContextVar,
     event_from_exception,
     HAS_REAL_CONTEXTVARS,
@@ -36,7 +36,7 @@ from sentry_sdk.utils import (
     transaction_from_function,
     _get_installed_modules,
 )
-from sentry_sdk.tracing import Transaction
+from debugg_ai_sdk.tracing import Transaction
 
 from typing import TYPE_CHECKING
 
@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import Tuple
 
-    from sentry_sdk._types import Event, Hint
+    from debugg_ai_sdk._types import Event, Hint
 
 
 _asgi_middleware_applied = ContextVar("sentry_asgi_middleware_applied")
@@ -62,10 +62,10 @@ def _capture_exception(exc, mechanism_type="asgi"):
 
     event, hint = event_from_exception(
         exc,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": mechanism_type, "handled": False},
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _looks_like_asgi3(app):
@@ -174,7 +174,7 @@ class SentryAsgiMiddleware:
 
         _asgi_middleware_applied.set(True)
         try:
-            with sentry_sdk.isolation_scope() as sentry_scope:
+            with debugg_ai_sdk.isolation_scope() as sentry_scope:
                 with track_session(sentry_scope, session_mode="request"):
                     sentry_scope.clear_breadcrumbs()
                     sentry_scope._name = "asgi"
@@ -225,7 +225,7 @@ class SentryAsgiMiddleware:
                         )
 
                     with (
-                        sentry_sdk.start_transaction(
+                        debugg_ai_sdk.start_transaction(
                             transaction,
                             custom_sampling_context={"asgi_scope": scope},
                         )

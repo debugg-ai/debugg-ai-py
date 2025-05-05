@@ -2,16 +2,16 @@
 Code used for the Queries module in Sentry
 """
 
-from sentry_sdk.consts import OP, SPANDATA
-from sentry_sdk.integrations.redis.utils import _get_safe_command
-from sentry_sdk.utils import capture_internal_exceptions
+from debugg_ai_sdk.consts import OP, SPANDATA
+from debugg_ai_sdk.integrations.redis.utils import _get_safe_command
+from debugg_ai_sdk.utils import capture_internal_exceptions
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from redis import Redis
-    from sentry_sdk.integrations.redis import RedisIntegration
-    from sentry_sdk.tracing import Span
+    from debugg_ai_sdk.integrations.redis import RedisIntegration
+    from debugg_ai_sdk.tracing import Span
     from typing import Any
 
 

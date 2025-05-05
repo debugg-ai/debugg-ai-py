@@ -4,11 +4,11 @@ Instrumentation for Redis
 https://github.com/redis/redis-py
 """
 
-from sentry_sdk.integrations.redis._sync_common import (
+from debugg_ai_sdk.integrations.redis._sync_common import (
     patch_redis_client,
     patch_redis_pipeline,
 )
-from sentry_sdk.integrations.redis.modules.queries import _set_db_data
+from debugg_ai_sdk.integrations.redis.modules.queries import _set_db_data
 
 from typing import TYPE_CHECKING
 
@@ -51,7 +51,7 @@ def _patch_redis(StrictRedis, client):  # noqa: N803
     except ImportError:
         pass
     else:
-        from sentry_sdk.integrations.redis._async_common import (
+        from debugg_ai_sdk.integrations.redis._async_common import (
             patch_redis_async_client,
             patch_redis_async_pipeline,
         )

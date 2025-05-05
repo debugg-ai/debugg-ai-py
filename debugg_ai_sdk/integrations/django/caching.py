@@ -1,14 +1,14 @@
 import functools
 from typing import TYPE_CHECKING
-from sentry_sdk.integrations.redis.utils import _get_safe_key, _key_as_string
+from debugg_ai_sdk.integrations.redis.utils import _get_safe_key, _key_as_string
 from urllib3.util import parse_url as urlparse
 
 from django import VERSION as DJANGO_VERSION
 from django.core.cache import CacheHandler
 
-import sentry_sdk
-from sentry_sdk.consts import OP, SPANDATA
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP, SPANDATA
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
 )
@@ -35,7 +35,7 @@ def _get_span_description(method_name, args, kwargs):
 
 def _patch_cache_method(cache, method_name, address, port):
     # type: (CacheHandler, str, Optional[str], Optional[int]) -> None
-    from sentry_sdk.integrations.django import DjangoIntegration
+    from debugg_ai_sdk.integrations.django import DjangoIntegration
 
     original_method = getattr(cache, method_name)
 
@@ -50,7 +50,7 @@ def _patch_cache_method(cache, method_name, address, port):
         op = OP.CACHE_PUT if is_set_operation else OP.CACHE_GET
         description = _get_span_description(method_name, args, kwargs)
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=op,
             name=description,
             origin=DjangoIntegration.origin,
@@ -135,9 +135,9 @@ def _get_address_port(settings):
 
 def should_enable_cache_spans():
     # type: () -> bool
-    from sentry_sdk.integrations.django import DjangoIntegration
+    from debugg_ai_sdk.integrations.django import DjangoIntegration
 
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
     integration = client.get_integration(DjangoIntegration)
     from django.conf import settings
 

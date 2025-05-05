@@ -1,12 +1,12 @@
 import logging
 import os
-import sentry_sdk
+import debugg_ai_sdk
 
-from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
-from sentry_sdk.integrations.logging import LoggingIntegration
+from debugg_ai_sdk.integrations.aws_lambda import AwsLambdaIntegration
+from debugg_ai_sdk.integrations.logging import LoggingIntegration
 
 def lambda_handler(event, context):
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         dsn=os.environ.get("SENTRY_DSN"),
         attach_stacktrace=True,
         integrations=[

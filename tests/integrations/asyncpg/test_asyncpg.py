@@ -27,10 +27,10 @@ import pytest
 import pytest_asyncio
 from asyncpg import connect, Connection
 
-from sentry_sdk import capture_message, start_transaction
-from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
-from sentry_sdk.consts import SPANDATA
-from sentry_sdk.tracing_utils import record_sql_queries
+from debugg_ai_sdk import capture_message, start_transaction
+from debugg_ai_sdk.integrations.asyncpg import AsyncPGIntegration
+from debugg_ai_sdk.consts import SPANDATA
+from debugg_ai_sdk.tracing_utils import record_sql_queries
 from tests.conftest import ApproxDict
 
 

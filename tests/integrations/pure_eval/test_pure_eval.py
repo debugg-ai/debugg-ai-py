@@ -2,8 +2,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from sentry_sdk import capture_exception, serializer
-from sentry_sdk.integrations.pure_eval import PureEvalIntegration
+from debugg_ai_sdk import capture_exception, serializer
+from debugg_ai_sdk.integrations.pure_eval import PureEvalIntegration
 
 
 @pytest.mark.parametrize("integrations", [[], [PureEvalIntegration()]])

@@ -1,7 +1,7 @@
 import socket
 
-from sentry_sdk import start_transaction
-from sentry_sdk.integrations.socket import SocketIntegration
+from debugg_ai_sdk import start_transaction
+from debugg_ai_sdk.integrations.socket import SocketIntegration
 from tests.conftest import ApproxDict
 
 

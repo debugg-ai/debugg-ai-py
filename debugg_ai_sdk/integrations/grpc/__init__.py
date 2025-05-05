@@ -5,7 +5,7 @@ from grpc import Channel, Server, intercept_channel
 from grpc.aio import Channel as AsyncChannel
 from grpc.aio import Server as AsyncServer
 
-from sentry_sdk.integrations import Integration
+from debugg_ai_sdk.integrations import Integration
 
 from .client import ClientInterceptor
 from .server import ServerInterceptor

@@ -11,9 +11,9 @@ from random import Random
 from urllib.parse import quote, unquote
 import uuid
 
-import sentry_sdk
-from sentry_sdk.consts import OP, SPANDATA
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP, SPANDATA
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     filename_for_module,
     Dsn,
@@ -120,10 +120,10 @@ def record_sql_queries(
     record_cursor_repr=False,  # type: bool
     span_origin="manual",  # type: str
 ):
-    # type: (...) -> Generator[sentry_sdk.tracing.Span, None, None]
+    # type: (...) -> Generator[debugg_ai_sdk.tracing.Span, None, None]
 
     # TODO: Bring back capturing of params by default
-    if sentry_sdk.get_client().options["_experiments"].get("record_sql_params", False):
+    if debugg_ai_sdk.get_client().options["_experiments"].get("record_sql_params", False):
         if not params_list or params_list == [None]:
             params_list = None
 
@@ -146,9 +146,9 @@ def record_sql_queries(
         data["db.cursor"] = cursor
 
     with capture_internal_exceptions():
-        sentry_sdk.add_breadcrumb(message=query, category="query", data=data)
+        debugg_ai_sdk.add_breadcrumb(message=query, category="query", data=data)
 
-    with sentry_sdk.start_span(
+    with debugg_ai_sdk.start_span(
         op=OP.DB,
         name=query,
         origin=span_origin,
@@ -159,7 +159,7 @@ def record_sql_queries(
 
 
 def maybe_create_breadcrumbs_from_span(scope, span):
-    # type: (sentry_sdk.Scope, sentry_sdk.tracing.Span) -> None
+    # type: (debugg_ai_sdk.Scope, debugg_ai_sdk.tracing.Span) -> None
     if span.op == OP.DB_REDIS:
         scope.add_breadcrumb(
             message=span.description, type="redis", category="redis", data=span._tags
@@ -219,11 +219,11 @@ def _should_be_included(
 
 
 def add_query_source(span):
-    # type: (sentry_sdk.tracing.Span) -> None
+    # type: (debugg_ai_sdk.tracing.Span) -> None
     """
     Adds OTel compatible source code information to the span
     """
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
     if not client.is_active():
         return
 
@@ -602,13 +602,13 @@ class Baggage:
 
     @classmethod
     def from_options(cls, scope):
-        # type: (sentry_sdk.scope.Scope) -> Optional[Baggage]
+        # type: (debugg_ai_sdk.scope.Scope) -> Optional[Baggage]
 
         sentry_items = {}  # type: Dict[str, str]
         third_party_items = ""
         mutable = False
 
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
 
         if not client.is_active() or scope._propagation_context is None:
             return Baggage(sentry_items)
@@ -635,12 +635,12 @@ class Baggage:
 
     @classmethod
     def populate_from_transaction(cls, transaction):
-        # type: (sentry_sdk.tracing.Transaction) -> Baggage
+        # type: (debugg_ai_sdk.tracing.Transaction) -> Baggage
         """
         Populate fresh baggage entry with sentry_items and make it immutable
         if this is the head SDK which originates traces.
         """
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
         sentry_items = {}  # type: Dict[str, str]
 
         if not client.is_active():
@@ -742,7 +742,7 @@ class Baggage:
 
 
 def should_propagate_trace(client, url):
-    # type: (sentry_sdk.client.BaseClient, str) -> bool
+    # type: (debugg_ai_sdk.client.BaseClient, str) -> bool
     """
     Returns True if url matches trace_propagation_targets configured in the given client. Otherwise, returns False.
     """
@@ -837,11 +837,11 @@ def start_child_span_decorator(func):
 
 
 def get_current_span(scope=None):
-    # type: (Optional[sentry_sdk.Scope]) -> Optional[Span]
+    # type: (Optional[debugg_ai_sdk.Scope]) -> Optional[Span]
     """
     Returns the currently active span if there is one running, otherwise `None`
     """
-    scope = scope or sentry_sdk.get_current_scope()
+    scope = scope or debugg_ai_sdk.get_current_scope()
     current_span = scope.span
     return current_span
 
@@ -897,11 +897,11 @@ def _sample_rand_range(parent_sampled, sample_rate):
 
 
 # Circular imports
-from sentry_sdk.tracing import (
+from debugg_ai_sdk.tracing import (
     BAGGAGE_HEADER_NAME,
     LOW_QUALITY_TRANSACTION_SOURCES,
     SENTRY_TRACE_HEADER_NAME,
 )
 
 if TYPE_CHECKING:
-    from sentry_sdk.tracing import Span
+    from debugg_ai_sdk.tracing import Span

@@ -1,9 +1,9 @@
-import sentry_sdk
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     event_from_exception,
 )
-from sentry_sdk.integrations import Integration, DidNotEnable
+from debugg_ai_sdk.integrations import Integration, DidNotEnable
 
 from typing import TYPE_CHECKING
 
@@ -39,7 +39,7 @@ def _make_excepthook(old_excepthook):
     # type: (Excepthook) -> Excepthook
     def sentry_sdk_excepthook(type_, value, traceback):
         # type: (Type[BaseException], BaseException, Optional[TracebackType]) -> None
-        integration = sentry_sdk.get_client().get_integration(TyperIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(TyperIntegration)
 
         # Note: If we replace this with ensure_integration_enabled then
         # we break the exceptiongroup backport;
@@ -50,10 +50,10 @@ def _make_excepthook(old_excepthook):
         with capture_internal_exceptions():
             event, hint = event_from_exception(
                 (type_, value, traceback),
-                client_options=sentry_sdk.get_client().options,
+                client_options=debugg_ai_sdk.get_client().options,
                 mechanism={"type": "typer", "handled": False},
             )
-            sentry_sdk.capture_event(event, hint=hint)
+            debugg_ai_sdk.capture_event(event, hint=hint)
 
         return old_excepthook(type_, value, traceback)
 

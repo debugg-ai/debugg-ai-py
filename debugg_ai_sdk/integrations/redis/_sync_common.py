@@ -1,17 +1,17 @@
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations.redis.consts import SPAN_ORIGIN
-from sentry_sdk.integrations.redis.modules.caches import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations.redis.consts import SPAN_ORIGIN
+from debugg_ai_sdk.integrations.redis.modules.caches import (
     _compile_cache_span_properties,
     _set_cache_data,
 )
-from sentry_sdk.integrations.redis.modules.queries import _compile_db_span_properties
-from sentry_sdk.integrations.redis.utils import (
+from debugg_ai_sdk.integrations.redis.modules.queries import _compile_db_span_properties
+from debugg_ai_sdk.integrations.redis.utils import (
     _set_client_data,
     _set_pipeline_data,
 )
-from sentry_sdk.tracing import Span
-from sentry_sdk.utils import capture_internal_exceptions
+from debugg_ai_sdk.tracing import Span
+from debugg_ai_sdk.utils import capture_internal_exceptions
 
 from typing import TYPE_CHECKING
 
@@ -29,14 +29,14 @@ def patch_redis_pipeline(
     # type: (Any, bool, Any, Callable[[Span, Any], None]) -> None
     old_execute = pipeline_cls.execute
 
-    from sentry_sdk.integrations.redis import RedisIntegration
+    from debugg_ai_sdk.integrations.redis import RedisIntegration
 
     def sentry_patched_execute(self, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Any
-        if sentry_sdk.get_client().get_integration(RedisIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(RedisIntegration) is None:
             return old_execute(self, *args, **kwargs)
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.DB_REDIS,
             name="redis.pipeline.execute",
             origin=SPAN_ORIGIN,
@@ -64,11 +64,11 @@ def patch_redis_client(cls, is_cluster, set_db_data_fn):
     """
     old_execute_command = cls.execute_command
 
-    from sentry_sdk.integrations.redis import RedisIntegration
+    from debugg_ai_sdk.integrations.redis import RedisIntegration
 
     def sentry_patched_execute_command(self, name, *args, **kwargs):
         # type: (Any, str, *Any, **Any) -> Any
-        integration = sentry_sdk.get_client().get_integration(RedisIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(RedisIntegration)
         if integration is None:
             return old_execute_command(self, name, *args, **kwargs)
 
@@ -81,7 +81,7 @@ def patch_redis_client(cls, is_cluster, set_db_data_fn):
 
         cache_span = None
         if cache_properties["is_cache_key"] and cache_properties["op"] is not None:
-            cache_span = sentry_sdk.start_span(
+            cache_span = debugg_ai_sdk.start_span(
                 op=cache_properties["op"],
                 name=cache_properties["description"],
                 origin=SPAN_ORIGIN,
@@ -90,7 +90,7 @@ def patch_redis_client(cls, is_cluster, set_db_data_fn):
 
         db_properties = _compile_db_span_properties(integration, name, args)
 
-        db_span = sentry_sdk.start_span(
+        db_span = debugg_ai_sdk.start_span(
             op=db_properties["op"],
             name=db_properties["description"],
             origin=SPAN_ORIGIN,

@@ -2,12 +2,12 @@ from __future__ import annotations
 import contextlib
 from typing import Any, TypeVar, Callable, Awaitable, Iterator
 
-import sentry_sdk
-from sentry_sdk.consts import OP, SPANDATA
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.tracing import Span
-from sentry_sdk.tracing_utils import add_query_source, record_sql_queries
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP, SPANDATA
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.tracing import Span
+from debugg_ai_sdk.tracing_utils import add_query_source, record_sql_queries
+from debugg_ai_sdk.utils import (
     ensure_integration_enabled,
     parse_version,
     capture_internal_exceptions,
@@ -57,7 +57,7 @@ T = TypeVar("T")
 
 def _wrap_execute(f: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
     async def _inner(*args: Any, **kwargs: Any) -> T:
-        if sentry_sdk.get_client().get_integration(AsyncPGIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(AsyncPGIntegration) is None:
             return await f(*args, **kwargs)
 
         # Avoid recording calls to _execute twice.
@@ -97,7 +97,7 @@ def _record(
     *,
     executemany: bool = False,
 ) -> Iterator[Span]:
-    integration = sentry_sdk.get_client().get_integration(AsyncPGIntegration)
+    integration = debugg_ai_sdk.get_client().get_integration(AsyncPGIntegration)
     if integration is not None and not integration._record_params:
         params_list = None
 
@@ -119,7 +119,7 @@ def _wrap_connection_method(
     f: Callable[..., Awaitable[T]], *, executemany: bool = False
 ) -> Callable[..., Awaitable[T]]:
     async def _inner(*args: Any, **kwargs: Any) -> T:
-        if sentry_sdk.get_client().get_integration(AsyncPGIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(AsyncPGIntegration) is None:
             return await f(*args, **kwargs)
         query = args[1]
         params_list = args[2] if len(args) > 2 else None
@@ -155,13 +155,13 @@ def _wrap_cursor_creation(f: Callable[..., T]) -> Callable[..., T]:
 
 def _wrap_connect_addr(f: Callable[..., Awaitable[T]]) -> Callable[..., Awaitable[T]]:
     async def _inner(*args: Any, **kwargs: Any) -> T:
-        if sentry_sdk.get_client().get_integration(AsyncPGIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(AsyncPGIntegration) is None:
             return await f(*args, **kwargs)
 
         user = kwargs["params"].user
         database = kwargs["params"].database
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.DB,
             name="connect",
             origin=AsyncPGIntegration.origin,
@@ -178,7 +178,7 @@ def _wrap_connect_addr(f: Callable[..., Awaitable[T]]) -> Callable[..., Awaitabl
             span.set_data(SPANDATA.DB_USER, user)
 
             with capture_internal_exceptions():
-                sentry_sdk.add_breadcrumb(
+                debugg_ai_sdk.add_breadcrumb(
                     message="connect", category="query", data=span._data
                 )
             res = await f(*args, **kwargs)

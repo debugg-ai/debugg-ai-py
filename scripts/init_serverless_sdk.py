@@ -10,8 +10,8 @@ import os
 import sys
 import re
 
-import sentry_sdk
-from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations.aws_lambda import AwsLambdaIntegration
 
 from typing import TYPE_CHECKING
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 # Configure Sentry SDK
-sentry_sdk.init(
+debugg_ai_sdk.init(
     dsn=os.environ["SENTRY_DSN"],
     integrations=[AwsLambdaIntegration(timeout_warning=True)],
     traces_sample_rate=float(os.environ["SENTRY_TRACES_SAMPLE_RATE"]),

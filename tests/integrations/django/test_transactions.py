@@ -20,7 +20,7 @@ if django.VERSION < (1, 9):
 else:
     included_url_conf = ((re_path(r"^foo/bar/(?P<param>[\w]+)", lambda x: ""),), "")
 
-from sentry_sdk.integrations.django.transactions import RavenResolver
+from debugg_ai_sdk.integrations.django.transactions import RavenResolver
 
 
 example_url_conf = (

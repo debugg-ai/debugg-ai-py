@@ -4,15 +4,15 @@ import logging
 
 from io import BytesIO
 from bottle import Bottle, debug as set_debug, abort, redirect, HTTPResponse
-from sentry_sdk import capture_message
-from sentry_sdk.integrations.bottle import BottleIntegration
-from sentry_sdk.serializer import MAX_DATABAG_BREADTH
+from debugg_ai_sdk import capture_message
+from debugg_ai_sdk.integrations.bottle import BottleIntegration
+from debugg_ai_sdk.serializer import MAX_DATABAG_BREADTH
 
-from sentry_sdk.integrations.logging import LoggingIntegration
+from debugg_ai_sdk.integrations.logging import LoggingIntegration
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 
-import sentry_sdk.integrations.bottle as bottle_sentry
+import debugg_ai_sdk.integrations.bottle as bottle_sentry
 
 
 @pytest.fixture(scope="function")

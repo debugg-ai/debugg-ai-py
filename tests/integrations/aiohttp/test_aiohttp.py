@@ -22,8 +22,8 @@ from aiohttp.web_exceptions import (
     HTTPUnavailableForLegalReasons,
 )
 
-from sentry_sdk import capture_message, start_transaction
-from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+from debugg_ai_sdk import capture_message, start_transaction
+from debugg_ai_sdk.integrations.aiohttp import AioHttpIntegration
 from tests.conftest import ApproxDict
 
 
@@ -80,7 +80,7 @@ async def test_basic(sentry_init, aiohttp_client, capture_events):
 
 @pytest.mark.asyncio
 async def test_post_body_not_read(sentry_init, aiohttp_client, capture_events):
-    from sentry_sdk.integrations.aiohttp import BODY_NOT_READ_MESSAGE
+    from debugg_ai_sdk.integrations.aiohttp import BODY_NOT_READ_MESSAGE
 
     sentry_init(integrations=[AioHttpIntegration()])
 

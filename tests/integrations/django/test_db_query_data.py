@@ -14,10 +14,10 @@ except ImportError:
 
 from werkzeug.test import Client
 
-from sentry_sdk import start_transaction
-from sentry_sdk.consts import SPANDATA
-from sentry_sdk.integrations.django import DjangoIntegration
-from sentry_sdk.tracing_utils import record_sql_queries
+from debugg_ai_sdk import start_transaction
+from debugg_ai_sdk.consts import SPANDATA
+from debugg_ai_sdk.integrations.django import DjangoIntegration
+from debugg_ai_sdk.tracing_utils import record_sql_queries
 
 from tests.conftest import unpack_werkzeug_response
 from tests.integrations.django.utils import pytest_mark_django_db_decorator

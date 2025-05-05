@@ -2,11 +2,11 @@ import asyncio
 from copy import deepcopy
 from functools import wraps
 
-import sentry_sdk
-from sentry_sdk.integrations import DidNotEnable
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import SOURCE_FOR_STYLE, TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import DidNotEnable
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE, TransactionSource
+from debugg_ai_sdk.utils import (
     transaction_from_function,
     logger,
 )
@@ -15,10 +15,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict
-    from sentry_sdk._types import Event
+    from debugg_ai_sdk._types import Event
 
 try:
-    from sentry_sdk.integrations.starlette import (
+    from debugg_ai_sdk.integrations.starlette import (
         StarletteIntegration,
         StarletteRequestExtractor,
     )
@@ -44,7 +44,7 @@ class FastApiIntegration(StarletteIntegration):
 
 
 def _set_transaction_name_and_source(scope, transaction_style, request):
-    # type: (sentry_sdk.Scope, str, Any) -> None
+    # type: (debugg_ai_sdk.Scope, str, Any) -> None
     name = ""
 
     if transaction_style == "endpoint":
@@ -88,11 +88,11 @@ def patch_get_request_handler():
             @wraps(old_call)
             def _sentry_call(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
-                current_scope = sentry_sdk.get_current_scope()
+                current_scope = debugg_ai_sdk.get_current_scope()
                 if current_scope.transaction is not None:
                     current_scope.transaction.update_active_thread()
 
-                sentry_scope = sentry_sdk.get_isolation_scope()
+                sentry_scope = debugg_ai_sdk.get_isolation_scope()
                 if sentry_scope.profile is not None:
                     sentry_scope.profile.update_active_thread_id()
 
@@ -104,16 +104,16 @@ def patch_get_request_handler():
 
         async def _sentry_app(*args, **kwargs):
             # type: (*Any, **Any) -> Any
-            integration = sentry_sdk.get_client().get_integration(FastApiIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(FastApiIntegration)
             if integration is None:
                 return await old_app(*args, **kwargs)
 
             request = args[0]
 
             _set_transaction_name_and_source(
-                sentry_sdk.get_current_scope(), integration.transaction_style, request
+                debugg_ai_sdk.get_current_scope(), integration.transaction_style, request
             )
-            sentry_scope = sentry_sdk.get_isolation_scope()
+            sentry_scope = debugg_ai_sdk.get_isolation_scope()
             extractor = StarletteRequestExtractor(request)
             info = await extractor.extract_request_info()
 

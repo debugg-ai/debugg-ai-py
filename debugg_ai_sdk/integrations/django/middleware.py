@@ -6,9 +6,9 @@ from functools import wraps
 
 from django import VERSION as DJANGO_VERSION
 
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.utils import (
     ContextVar,
     transaction_from_function,
     capture_internal_exceptions,
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import TypeVar
 
-    from sentry_sdk.tracing import Span
+    from debugg_ai_sdk.tracing import Span
 
     F = TypeVar("F", bound=Callable[..., Any])
 
@@ -70,11 +70,11 @@ def patch_django_middlewares():
 
 def _wrap_middleware(middleware, middleware_name):
     # type: (Any, str) -> Any
-    from sentry_sdk.integrations.django import DjangoIntegration
+    from debugg_ai_sdk.integrations.django import DjangoIntegration
 
     def _check_middleware_span(old_method):
         # type: (Callable[..., Any]) -> Optional[Span]
-        integration = sentry_sdk.get_client().get_integration(DjangoIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
         if integration is None or not integration.middleware_spans:
             return None
 
@@ -85,7 +85,7 @@ def _wrap_middleware(middleware, middleware_name):
         if function_basename:
             description = "{}.{}".format(description, function_basename)
 
-        middleware_span = sentry_sdk.start_span(
+        middleware_span = debugg_ai_sdk.start_span(
             op=OP.MIDDLEWARE_DJANGO,
             name=description,
             origin=DjangoIntegration.origin,

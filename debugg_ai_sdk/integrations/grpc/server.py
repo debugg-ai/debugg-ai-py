@@ -1,8 +1,8 @@
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import DidNotEnable
-from sentry_sdk.integrations.grpc.consts import SPAN_ORIGIN
-from sentry_sdk.tracing import Transaction, TransactionSource
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import DidNotEnable
+from debugg_ai_sdk.integrations.grpc.consts import SPAN_ORIGIN
+from debugg_ai_sdk.tracing import Transaction, TransactionSource
 
 from typing import TYPE_CHECKING
 
@@ -32,7 +32,7 @@ class ServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
         def behavior(request, context):
             # type: (Message, ServicerContext) -> Message
-            with sentry_sdk.isolation_scope():
+            with debugg_ai_sdk.isolation_scope():
                 name = self._find_method_name(context)
 
                 if name:
@@ -46,7 +46,7 @@ class ServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                         origin=SPAN_ORIGIN,
                     )
 
-                    with sentry_sdk.start_transaction(transaction=transaction):
+                    with debugg_ai_sdk.start_transaction(transaction=transaction):
                         try:
                             return handler.unary_unary(request, context)
                         except BaseException as e:

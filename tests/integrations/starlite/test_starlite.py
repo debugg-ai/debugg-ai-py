@@ -3,8 +3,8 @@ import functools
 
 import pytest
 
-from sentry_sdk import capture_message
-from sentry_sdk.integrations.starlite import StarliteIntegration
+from debugg_ai_sdk import capture_message
+from debugg_ai_sdk.integrations.starlite import StarliteIntegration
 
 from typing import Any, Dict
 

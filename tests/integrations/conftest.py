@@ -1,13 +1,13 @@
 import pytest
-import sentry_sdk
+import debugg_ai_sdk
 
 
 @pytest.fixture
 def capture_exceptions(monkeypatch):
     def inner():
         errors = set()
-        old_capture_event_hub = sentry_sdk.Hub.capture_event
-        old_capture_event_scope = sentry_sdk.Scope.capture_event
+        old_capture_event_hub = debugg_ai_sdk.Hub.capture_event
+        old_capture_event_scope = debugg_ai_sdk.Scope.capture_event
 
         def capture_event_hub(self, event, hint=None, scope=None):
             """
@@ -26,8 +26,8 @@ def capture_exceptions(monkeypatch):
                     errors.add(error)
             return old_capture_event_scope(self, event, hint=hint, scope=scope)
 
-        monkeypatch.setattr(sentry_sdk.Hub, "capture_event", capture_event_hub)
-        monkeypatch.setattr(sentry_sdk.Scope, "capture_event", capture_event_scope)
+        monkeypatch.setattr(debugg_ai_sdk.Hub, "capture_event", capture_event_hub)
+        monkeypatch.setattr(debugg_ai_sdk.Scope, "capture_event", capture_event_scope)
 
         return errors
 

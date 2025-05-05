@@ -2,28 +2,28 @@ import sys
 import weakref
 from functools import wraps
 
-import sentry_sdk
-from sentry_sdk.api import continue_trace
-from sentry_sdk.consts import OP, SPANSTATUS, SPANDATA
-from sentry_sdk.integrations import (
+import debugg_ai_sdk
+from debugg_ai_sdk.api import continue_trace
+from debugg_ai_sdk.consts import OP, SPANSTATUS, SPANDATA
+from debugg_ai_sdk.integrations import (
     _DEFAULT_FAILED_REQUEST_STATUS_CODES,
     _check_minimum_version,
     Integration,
     DidNotEnable,
 )
-from sentry_sdk.integrations.logging import ignore_logger
-from sentry_sdk.sessions import track_session
-from sentry_sdk.integrations._wsgi_common import (
+from debugg_ai_sdk.integrations.logging import ignore_logger
+from debugg_ai_sdk.sessions import track_session
+from debugg_ai_sdk.integrations._wsgi_common import (
     _filter_headers,
     request_body_within_bounds,
 )
-from sentry_sdk.tracing import (
+from debugg_ai_sdk.tracing import (
     BAGGAGE_HEADER_NAME,
     SOURCE_FOR_STYLE,
     TransactionSource,
 )
-from sentry_sdk.tracing_utils import should_propagate_trace
-from sentry_sdk.utils import (
+from debugg_ai_sdk.tracing_utils import should_propagate_trace
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -61,8 +61,8 @@ if TYPE_CHECKING:
     from typing import Tuple
     from typing import Union
 
-    from sentry_sdk.utils import ExcInfo
-    from sentry_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk.utils import ExcInfo
+    from debugg_ai_sdk._types import Event, EventProcessor
 
 
 TRANSACTION_STYLE_VALUES = ("handler_name", "method_and_path_pattern")
@@ -108,13 +108,13 @@ class AioHttpIntegration(Integration):
 
         async def sentry_app_handle(self, request, *args, **kwargs):
             # type: (Any, Request, *Any, **Any) -> Any
-            integration = sentry_sdk.get_client().get_integration(AioHttpIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(AioHttpIntegration)
             if integration is None:
                 return await old_handle(self, request, *args, **kwargs)
 
             weak_request = weakref.ref(request)
 
-            with sentry_sdk.isolation_scope() as scope:
+            with debugg_ai_sdk.isolation_scope() as scope:
                 with track_session(scope, session_mode="request"):
                     # Scope data will not leak between requests because aiohttp
                     # create a task to wrap each request.
@@ -132,7 +132,7 @@ class AioHttpIntegration(Integration):
                         source=TransactionSource.ROUTE,
                         origin=AioHttpIntegration.origin,
                     )
-                    with sentry_sdk.start_transaction(
+                    with debugg_ai_sdk.start_transaction(
                         transaction,
                         custom_sampling_context={"aiohttp_request": request},
                     ):
@@ -178,7 +178,7 @@ class AioHttpIntegration(Integration):
             # type: (UrlDispatcher, Request) -> UrlMappingMatchInfo
             rv = await old_urldispatcher_resolve(self, request)
 
-            integration = sentry_sdk.get_client().get_integration(AioHttpIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(AioHttpIntegration)
             if integration is None:
                 return rv
 
@@ -195,7 +195,7 @@ class AioHttpIntegration(Integration):
                 pass
 
             if name is not None:
-                sentry_sdk.get_current_scope().set_transaction_name(
+                debugg_ai_sdk.get_current_scope().set_transaction_name(
                     name,
                     source=SOURCE_FOR_STYLE[integration.transaction_style],
                 )
@@ -224,7 +224,7 @@ def create_trace_config():
 
     async def on_request_start(session, trace_config_ctx, params):
         # type: (ClientSession, SimpleNamespace, TraceRequestStartParams) -> None
-        if sentry_sdk.get_client().get_integration(AioHttpIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(AioHttpIntegration) is None:
             return
 
         method = params.method.upper()
@@ -233,7 +233,7 @@ def create_trace_config():
         with capture_internal_exceptions():
             parsed_url = parse_url(str(params.url), sanitize=False)
 
-        span = sentry_sdk.start_span(
+        span = debugg_ai_sdk.start_span(
             op=OP.HTTP_CLIENT,
             name="%s %s"
             % (method, parsed_url.url if parsed_url else SENSITIVE_DATA_SUBSTITUTE),
@@ -245,13 +245,13 @@ def create_trace_config():
             span.set_data(SPANDATA.HTTP_QUERY, parsed_url.query)
             span.set_data(SPANDATA.HTTP_FRAGMENT, parsed_url.fragment)
 
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
 
         if should_propagate_trace(client, str(params.url)):
             for (
                 key,
                 value,
-            ) in sentry_sdk.get_current_scope().iter_trace_propagation_headers(
+            ) in debugg_ai_sdk.get_current_scope().iter_trace_propagation_headers(
                 span=span
             ):
                 logger.debug(
@@ -327,10 +327,10 @@ def _capture_exception():
     exc_info = sys.exc_info()
     event, hint = event_from_exception(
         exc_info,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": "aiohttp", "handled": False},
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
     return exc_info
 
 
@@ -343,7 +343,7 @@ def get_aiohttp_request_data(request):
 
     if bytes_body is not None:
         # we have body to show
-        if not request_body_within_bounds(sentry_sdk.get_client(), len(bytes_body)):
+        if not request_body_within_bounds(debugg_ai_sdk.get_client(), len(bytes_body)):
             return AnnotatedValue.removed_because_over_size_limit()
 
         encoding = request.charset or "utf-8"

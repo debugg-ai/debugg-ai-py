@@ -1,7 +1,7 @@
 from unittest import mock
 
-import sentry_sdk
-from sentry_sdk.sessions import auto_session_tracking, track_session
+import debugg_ai_sdk
+from debugg_ai_sdk.sessions import auto_session_tracking, track_session
 
 
 def sorted_aggregates(item):
@@ -14,17 +14,17 @@ def test_basic(sentry_init, capture_envelopes):
     sentry_init(release="fun-release", environment="not-fun-env")
     envelopes = capture_envelopes()
 
-    sentry_sdk.get_isolation_scope().start_session()
+    debugg_ai_sdk.get_isolation_scope().start_session()
 
     try:
-        scope = sentry_sdk.get_current_scope()
+        scope = debugg_ai_sdk.get_current_scope()
         scope.set_user({"id": "42"})
         raise Exception("all is wrong")
     except Exception:
-        sentry_sdk.capture_exception()
+        debugg_ai_sdk.capture_exception()
 
-    sentry_sdk.get_isolation_scope().end_session()
-    sentry_sdk.flush()
+    debugg_ai_sdk.get_isolation_scope().end_session()
+    debugg_ai_sdk.flush()
 
     assert len(envelopes) == 2
     assert envelopes[0].get_event() is not None
@@ -50,21 +50,21 @@ def test_aggregates(sentry_init, capture_envelopes):
     )
     envelopes = capture_envelopes()
 
-    with sentry_sdk.isolation_scope() as scope:
+    with debugg_ai_sdk.isolation_scope() as scope:
         with track_session(scope, session_mode="request"):
             try:
                 scope.set_user({"id": "42"})
                 raise Exception("all is wrong")
             except Exception:
-                sentry_sdk.capture_exception()
+                debugg_ai_sdk.capture_exception()
 
-    with sentry_sdk.isolation_scope() as scope:
+    with debugg_ai_sdk.isolation_scope() as scope:
         with track_session(scope, session_mode="request"):
             pass
 
-    sentry_sdk.get_isolation_scope().start_session(session_mode="request")
-    sentry_sdk.get_isolation_scope().end_session()
-    sentry_sdk.flush()
+    debugg_ai_sdk.get_isolation_scope().start_session(session_mode="request")
+    debugg_ai_sdk.get_isolation_scope().end_session()
+    debugg_ai_sdk.flush()
 
     assert len(envelopes) == 2
     assert envelopes[0].get_event() is not None
@@ -93,19 +93,19 @@ def test_aggregates_deprecated(
     envelopes = capture_envelopes()
 
     with auto_session_tracking(session_mode="request"):
-        with sentry_sdk.new_scope() as scope:
+        with debugg_ai_sdk.new_scope() as scope:
             try:
                 scope.set_user({"id": "42"})
                 raise Exception("all is wrong")
             except Exception:
-                sentry_sdk.capture_exception()
+                debugg_ai_sdk.capture_exception()
 
     with auto_session_tracking(session_mode="request"):
         pass
 
-    sentry_sdk.get_isolation_scope().start_session(session_mode="request")
-    sentry_sdk.get_isolation_scope().end_session()
-    sentry_sdk.flush()
+    debugg_ai_sdk.get_isolation_scope().start_session(session_mode="request")
+    debugg_ai_sdk.get_isolation_scope().end_session()
+    debugg_ai_sdk.flush()
 
     assert len(envelopes) == 2
     assert envelopes[0].get_event() is not None
@@ -132,20 +132,20 @@ def test_aggregates_explicitly_disabled_session_tracking_request_mode(
     )
     envelopes = capture_envelopes()
 
-    with sentry_sdk.isolation_scope() as scope:
+    with debugg_ai_sdk.isolation_scope() as scope:
         with track_session(scope, session_mode="request"):
             try:
                 raise Exception("all is wrong")
             except Exception:
-                sentry_sdk.capture_exception()
+                debugg_ai_sdk.capture_exception()
 
-    with sentry_sdk.isolation_scope() as scope:
+    with debugg_ai_sdk.isolation_scope() as scope:
         with track_session(scope, session_mode="request"):
             pass
 
-    sentry_sdk.get_isolation_scope().start_session(session_mode="request")
-    sentry_sdk.get_isolation_scope().end_session()
-    sentry_sdk.flush()
+    debugg_ai_sdk.get_isolation_scope().start_session(session_mode="request")
+    debugg_ai_sdk.get_isolation_scope().end_session()
+    debugg_ai_sdk.flush()
 
     sess = envelopes[1]
     assert len(sess.items) == 1
@@ -166,18 +166,18 @@ def test_aggregates_explicitly_disabled_session_tracking_request_mode_deprecated
     envelopes = capture_envelopes()
 
     with auto_session_tracking(session_mode="request"):
-        with sentry_sdk.new_scope():
+        with debugg_ai_sdk.new_scope():
             try:
                 raise Exception("all is wrong")
             except Exception:
-                sentry_sdk.capture_exception()
+                debugg_ai_sdk.capture_exception()
 
     with auto_session_tracking(session_mode="request"):
         pass
 
-    sentry_sdk.get_isolation_scope().start_session(session_mode="request")
-    sentry_sdk.get_isolation_scope().end_session()
-    sentry_sdk.flush()
+    debugg_ai_sdk.get_isolation_scope().start_session(session_mode="request")
+    debugg_ai_sdk.get_isolation_scope().end_session()
+    debugg_ai_sdk.flush()
 
     sess = envelopes[1]
     assert len(sess.items) == 1
@@ -200,20 +200,20 @@ def test_no_thread_on_shutdown_no_errors(sentry_init):
         "threading.Thread.start",
         side_effect=RuntimeError("can't create new thread at interpreter shutdown"),
     ):
-        with sentry_sdk.isolation_scope() as scope:
+        with debugg_ai_sdk.isolation_scope() as scope:
             with track_session(scope, session_mode="request"):
                 try:
                     raise Exception("all is wrong")
                 except Exception:
-                    sentry_sdk.capture_exception()
+                    debugg_ai_sdk.capture_exception()
 
-        with sentry_sdk.isolation_scope() as scope:
+        with debugg_ai_sdk.isolation_scope() as scope:
             with track_session(scope, session_mode="request"):
                 pass
 
-        sentry_sdk.get_isolation_scope().start_session(session_mode="request")
-        sentry_sdk.get_isolation_scope().end_session()
-        sentry_sdk.flush()
+        debugg_ai_sdk.get_isolation_scope().start_session(session_mode="request")
+        debugg_ai_sdk.get_isolation_scope().end_session()
+        debugg_ai_sdk.flush()
 
     # If we reach this point without error, the test is successful.
 
@@ -232,17 +232,17 @@ def test_no_thread_on_shutdown_no_errors_deprecated(
         side_effect=RuntimeError("can't create new thread at interpreter shutdown"),
     ):
         with auto_session_tracking(session_mode="request"):
-            with sentry_sdk.new_scope():
+            with debugg_ai_sdk.new_scope():
                 try:
                     raise Exception("all is wrong")
                 except Exception:
-                    sentry_sdk.capture_exception()
+                    debugg_ai_sdk.capture_exception()
 
         with auto_session_tracking(session_mode="request"):
             pass
 
-        sentry_sdk.get_isolation_scope().start_session(session_mode="request")
-        sentry_sdk.get_isolation_scope().end_session()
-        sentry_sdk.flush()
+        debugg_ai_sdk.get_isolation_scope().start_session(session_mode="request")
+        debugg_ai_sdk.get_isolation_scope().end_session()
+        debugg_ai_sdk.flush()
 
     # If we reach this point without error, the test is successful.

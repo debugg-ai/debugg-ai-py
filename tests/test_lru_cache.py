@@ -1,6 +1,6 @@
 import pytest
 
-from sentry_sdk._lru_cache import LRUCache
+from debugg_ai_sdk._lru_cache import LRUCache
 
 
 @pytest.mark.parametrize("max_size", [-10, -1, 0])

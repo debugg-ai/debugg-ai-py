@@ -1,15 +1,15 @@
 import re
 
-import sentry_sdk
-from sentry_sdk.integrations import Integration
-from sentry_sdk.scope import add_global_event_processor
-from sentry_sdk.utils import capture_internal_exceptions
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.scope import add_global_event_processor
+from debugg_ai_sdk.utils import capture_internal_exceptions
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any
-    from sentry_sdk._types import Event
+    from debugg_ai_sdk._types import Event
 
 
 MODULE_RE = r"[a-zA-Z0-9/._:\\-]+"
@@ -49,7 +49,7 @@ class GnuBacktraceIntegration(Integration):
 
 def _process_gnu_backtrace(event, hint):
     # type: (Event, dict[str, Any]) -> Event
-    if sentry_sdk.get_client().get_integration(GnuBacktraceIntegration) is None:
+    if debugg_ai_sdk.get_client().get_integration(GnuBacktraceIntegration) is None:
         return event
 
     exc_info = hint.get("exc_info", None)

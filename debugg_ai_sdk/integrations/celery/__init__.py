@@ -2,21 +2,21 @@ import sys
 from collections.abc import Mapping
 from functools import wraps
 
-import sentry_sdk
-from sentry_sdk import isolation_scope
-from sentry_sdk.api import continue_trace
-from sentry_sdk.consts import OP, SPANSTATUS, SPANDATA
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.integrations.celery.beat import (
+import debugg_ai_sdk
+from debugg_ai_sdk import isolation_scope
+from debugg_ai_sdk.api import continue_trace
+from debugg_ai_sdk.consts import OP, SPANSTATUS, SPANDATA
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.integrations.celery.beat import (
     _patch_beat_apply_entry,
     _patch_redbeat_maybe_due,
     _setup_celery_beat_signals,
 )
-from sentry_sdk.integrations.celery.utils import _now_seconds_since_epoch
-from sentry_sdk.integrations.logging import ignore_logger
-from sentry_sdk.tracing import BAGGAGE_HEADER_NAME, TransactionSource
-from sentry_sdk.tracing_utils import Baggage
-from sentry_sdk.utils import (
+from debugg_ai_sdk.integrations.celery.utils import _now_seconds_since_epoch
+from debugg_ai_sdk.integrations.logging import ignore_logger
+from debugg_ai_sdk.tracing import BAGGAGE_HEADER_NAME, TransactionSource
+from debugg_ai_sdk.tracing_utils import Baggage
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -33,8 +33,8 @@ if TYPE_CHECKING:
     from typing import TypeVar
     from typing import Union
 
-    from sentry_sdk._types import EventProcessor, Event, Hint, ExcInfo
-    from sentry_sdk.tracing import Span
+    from debugg_ai_sdk._types import EventProcessor, Event, Hint, ExcInfo
+    from debugg_ai_sdk.tracing import Span
 
     F = TypeVar("F", bound=Callable[..., Any])
 
@@ -101,14 +101,14 @@ class CeleryIntegration(Integration):
 def _set_status(status):
     # type: (str) -> None
     with capture_internal_exceptions():
-        scope = sentry_sdk.get_current_scope()
+        scope = debugg_ai_sdk.get_current_scope()
         if scope.span is not None:
             scope.span.set_status(status)
 
 
 def _capture_exception(task, exc_info):
     # type: (Any, ExcInfo) -> None
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
     if client.get_integration(CeleryIntegration) is None:
         return
 
@@ -128,7 +128,7 @@ def _capture_exception(task, exc_info):
         mechanism={"type": "celery", "handled": False},
     )
 
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _make_event_processor(task, uuid, args, kwargs, request=None):
@@ -171,7 +171,7 @@ def _update_celery_task_headers(original_headers, span, monitor_beat_tasks):
         # if span is None (when the task was started by Celery Beat)
         # this will return the trace headers from the scope.
         headers = dict(
-            sentry_sdk.get_isolation_scope().iter_trace_propagation_headers(span=span)
+            debugg_ai_sdk.get_isolation_scope().iter_trace_propagation_headers(span=span)
         )
 
         if monitor_beat_tasks:
@@ -251,7 +251,7 @@ def _wrap_task_run(f):
         # type: (*Any, **Any) -> Any
         # Note: kwargs can contain headers=None, so no setdefault!
         # Unsure which backend though.
-        integration = sentry_sdk.get_client().get_integration(CeleryIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(CeleryIntegration)
         if integration is None:
             return f(*args, **kwargs)
 
@@ -270,10 +270,10 @@ def _wrap_task_run(f):
         else:
             task_name = "<unknown Celery task>"
 
-        task_started_from_beat = sentry_sdk.get_isolation_scope()._name == "celery-beat"
+        task_started_from_beat = debugg_ai_sdk.get_isolation_scope()._name == "celery-beat"
 
         span_mgr = (
-            sentry_sdk.start_span(
+            debugg_ai_sdk.start_span(
                 op=OP.QUEUE_SUBMIT_CELERY,
                 name=task_name,
                 origin=CeleryIntegration.origin,
@@ -328,7 +328,7 @@ def _wrap_tracer(task, f):
             if transaction is None:
                 return f(*args, **kwargs)
 
-            with sentry_sdk.start_transaction(
+            with debugg_ai_sdk.start_transaction(
                 transaction,
                 custom_sampling_context={
                     "celery_job": {
@@ -373,7 +373,7 @@ def _wrap_task_call(task, f):
     def _inner(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         try:
-            with sentry_sdk.start_span(
+            with debugg_ai_sdk.start_span(
                 op=OP.QUEUE_PROCESS,
                 name=task.name,
                 origin=CeleryIntegration.origin,
@@ -471,10 +471,10 @@ def _patch_worker_exit():
         finally:
             with capture_internal_exceptions():
                 if (
-                    sentry_sdk.get_client().get_integration(CeleryIntegration)
+                    debugg_ai_sdk.get_client().get_integration(CeleryIntegration)
                     is not None
                 ):
-                    sentry_sdk.flush()
+                    debugg_ai_sdk.flush()
 
     Worker.workloop = sentry_workloop
 
@@ -502,7 +502,7 @@ def _patch_producer_publish():
         routing_key = kwargs.get("routing_key")
         exchange = kwargs.get("exchange")
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.QUEUE_PUBLISH,
             name=task_name,
             origin=CeleryIntegration.origin,

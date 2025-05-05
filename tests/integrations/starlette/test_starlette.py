@@ -11,13 +11,13 @@ from unittest import mock
 
 import pytest
 
-from sentry_sdk import capture_message, get_baggage, get_traceparent
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
-from sentry_sdk.integrations.starlette import (
+from debugg_ai_sdk import capture_message, get_baggage, get_traceparent
+from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.integrations.starlette import (
     StarletteIntegration,
     StarletteRequestExtractor,
 )
-from sentry_sdk.utils import parse_version
+from debugg_ai_sdk.utils import parse_version
 
 import starlette
 from starlette.authentication import (

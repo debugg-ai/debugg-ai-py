@@ -5,13 +5,13 @@ import time
 from typing import List, Any, Mapping, Union
 import pytest
 
-import sentry_sdk
-import sentry_sdk.logger
-from sentry_sdk import get_client
-from sentry_sdk.envelope import Envelope
-from sentry_sdk.integrations.logging import LoggingIntegration
-from sentry_sdk.types import Log
-from sentry_sdk.consts import SPANDATA, VERSION
+import debugg_ai_sdk
+import debugg_ai_sdk.logger
+from debugg_ai_sdk import get_client
+from debugg_ai_sdk.envelope import Envelope
+from debugg_ai_sdk.integrations.logging import LoggingIntegration
+from debugg_ai_sdk.types import Log
+from debugg_ai_sdk.consts import SPANDATA, VERSION
 
 minimum_python_37 = pytest.mark.skipif(
     sys.version_info < (3, 7), reason="Asyncio tests need Python >= 3.7"
@@ -68,12 +68,12 @@ def test_logs_disabled_by_default(sentry_init, capture_envelopes):
 
     envelopes = capture_envelopes()
 
-    sentry_sdk.logger.trace("This is a 'trace' log.")
-    sentry_sdk.logger.debug("This is a 'debug' log...")
-    sentry_sdk.logger.info("This is a 'info' log...")
-    sentry_sdk.logger.warning("This is a 'warning' log...")
-    sentry_sdk.logger.error("This is a 'error' log...")
-    sentry_sdk.logger.fatal("This is a 'fatal' log...")
+    debugg_ai_sdk.logger.trace("This is a 'trace' log.")
+    debugg_ai_sdk.logger.debug("This is a 'debug' log...")
+    debugg_ai_sdk.logger.info("This is a 'info' log...")
+    debugg_ai_sdk.logger.warning("This is a 'warning' log...")
+    debugg_ai_sdk.logger.error("This is a 'error' log...")
+    debugg_ai_sdk.logger.fatal("This is a 'fatal' log...")
     python_logger.warning("sad")
 
     assert len(envelopes) == 0
@@ -84,12 +84,12 @@ def test_logs_basics(sentry_init, capture_envelopes):
     sentry_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
-    sentry_sdk.logger.trace("This is a 'trace' log...")
-    sentry_sdk.logger.debug("This is a 'debug' log...")
-    sentry_sdk.logger.info("This is a 'info' log...")
-    sentry_sdk.logger.warning("This is a 'warn' log...")
-    sentry_sdk.logger.error("This is a 'error' log...")
-    sentry_sdk.logger.fatal("This is a 'fatal' log...")
+    debugg_ai_sdk.logger.trace("This is a 'trace' log...")
+    debugg_ai_sdk.logger.debug("This is a 'debug' log...")
+    debugg_ai_sdk.logger.info("This is a 'info' log...")
+    debugg_ai_sdk.logger.warning("This is a 'warn' log...")
+    debugg_ai_sdk.logger.error("This is a 'error' log...")
+    debugg_ai_sdk.logger.fatal("This is a 'fatal' log...")
 
     get_client().flush()
     logs = envelopes_to_logs(envelopes)
@@ -141,12 +141,12 @@ def test_logs_before_send_log(sentry_init, capture_envelopes):
     )
     envelopes = capture_envelopes()
 
-    sentry_sdk.logger.trace("This is a 'trace' log...")
-    sentry_sdk.logger.debug("This is a 'debug' log...")
-    sentry_sdk.logger.info("This is a 'info' log...")
-    sentry_sdk.logger.warning("This is a 'warning' log...")
-    sentry_sdk.logger.error("This is a 'error' log...")
-    sentry_sdk.logger.fatal("This is a 'fatal' log...")
+    debugg_ai_sdk.logger.trace("This is a 'trace' log...")
+    debugg_ai_sdk.logger.debug("This is a 'debug' log...")
+    debugg_ai_sdk.logger.info("This is a 'info' log...")
+    debugg_ai_sdk.logger.warning("This is a 'warning' log...")
+    debugg_ai_sdk.logger.error("This is a 'error' log...")
+    debugg_ai_sdk.logger.fatal("This is a 'fatal' log...")
 
     get_client().flush()
     logs = envelopes_to_logs(envelopes)
@@ -174,7 +174,7 @@ def test_logs_attributes(sentry_init, capture_envelopes):
         "attr_string": "string attribute",
     }
 
-    sentry_sdk.logger.warning(
+    debugg_ai_sdk.logger.warning(
         "The recorded value was '{my_var}'", my_var="some value", attributes=attrs
     )
 
@@ -200,13 +200,13 @@ def test_logs_message_params(sentry_init, capture_envelopes):
     sentry_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
-    sentry_sdk.logger.warning("The recorded value was '{int_var}'", int_var=1)
-    sentry_sdk.logger.warning("The recorded value was '{float_var}'", float_var=2.0)
-    sentry_sdk.logger.warning("The recorded value was '{bool_var}'", bool_var=False)
-    sentry_sdk.logger.warning(
+    debugg_ai_sdk.logger.warning("The recorded value was '{int_var}'", int_var=1)
+    debugg_ai_sdk.logger.warning("The recorded value was '{float_var}'", float_var=2.0)
+    debugg_ai_sdk.logger.warning("The recorded value was '{bool_var}'", bool_var=False)
+    debugg_ai_sdk.logger.warning(
         "The recorded value was '{string_var}'", string_var="some string value"
     )
-    sentry_sdk.logger.error(
+    debugg_ai_sdk.logger.error(
         "The recorded error was '{error}'", error=Exception("some error")
     )
 
@@ -243,8 +243,8 @@ def test_logs_tied_to_transactions(sentry_init, capture_envelopes):
     sentry_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
-    with sentry_sdk.start_transaction(name="test-transaction") as trx:
-        sentry_sdk.logger.warning("This is a log tied to a transaction")
+    with debugg_ai_sdk.start_transaction(name="test-transaction") as trx:
+        debugg_ai_sdk.logger.warning("This is a log tied to a transaction")
 
     get_client().flush()
     logs = envelopes_to_logs(envelopes)
@@ -259,9 +259,9 @@ def test_logs_tied_to_spans(sentry_init, capture_envelopes):
     sentry_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
-    with sentry_sdk.start_transaction(name="test-transaction"):
-        with sentry_sdk.start_span(name="test-span") as span:
-            sentry_sdk.logger.warning("This is a log tied to a span")
+    with debugg_ai_sdk.start_transaction(name="test-transaction"):
+        with debugg_ai_sdk.start_span(name="test-span") as span:
+            debugg_ai_sdk.logger.warning("This is a log tied to a span")
 
     get_client().flush()
     logs = envelopes_to_logs(envelopes)

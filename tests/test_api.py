@@ -3,8 +3,8 @@ import pytest
 import re
 from unittest import mock
 
-import sentry_sdk
-from sentry_sdk import (
+import debugg_ai_sdk
+from debugg_ai_sdk import (
     capture_exception,
     continue_trace,
     get_baggage,
@@ -21,7 +21,7 @@ from sentry_sdk import (
     get_isolation_scope,
 )
 
-from sentry_sdk.client import Client, NonRecordingClient
+from debugg_ai_sdk.client import Client, NonRecordingClient
 
 
 @pytest.mark.forked
@@ -203,15 +203,15 @@ def test_push_scope_deprecation():
 
 def test_init_context_manager_deprecation():
     with pytest.warns(DeprecationWarning):
-        with sentry_sdk.init():
+        with debugg_ai_sdk.init():
             ...
 
 
 def test_init_enter_deprecation():
     with pytest.warns(DeprecationWarning):
-        sentry_sdk.init().__enter__()
+        debugg_ai_sdk.init().__enter__()
 
 
 def test_init_exit_deprecation():
     with pytest.warns(DeprecationWarning):
-        sentry_sdk.init().__exit__(None, None, None)
+        debugg_ai_sdk.init().__exit__(None, None, None)

@@ -12,12 +12,12 @@ import inspect
 
 from django.core.handlers.wsgi import WSGIRequest
 
-import sentry_sdk
-from sentry_sdk.consts import OP
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
 
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.utils import (
+from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
 )
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from django.core.handlers.asgi import ASGIRequest
     from django.http.response import HttpResponse
 
-    from sentry_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk._types import Event, EventProcessor
 
     _F = TypeVar("_F", bound=Callable[..., Any])
 
@@ -58,7 +58,7 @@ def _make_asgi_request_event_processor(request):
         # if the request is gone we are fine not logging the data from
         # it.  This might happen if the processor is pushed away to
         # another thread.
-        from sentry_sdk.integrations.django import (
+        from debugg_ai_sdk.integrations.django import (
             DjangoRequestExtractor,
             _set_user_info,
         )
@@ -84,13 +84,13 @@ def _make_asgi_request_event_processor(request):
 def patch_django_asgi_handler_impl(cls):
     # type: (Any) -> None
 
-    from sentry_sdk.integrations.django import DjangoIntegration
+    from debugg_ai_sdk.integrations.django import DjangoIntegration
 
     old_app = cls.__call__
 
     async def sentry_patched_asgi_handler(self, scope, receive, send):
         # type: (Any, Any, Any, Any) -> Any
-        integration = sentry_sdk.get_client().get_integration(DjangoIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
         if integration is None:
             return await old_app(self, scope, receive, send)
 
@@ -113,7 +113,7 @@ def patch_django_asgi_handler_impl(cls):
         def sentry_patched_create_request(self, *args, **kwargs):
             # type: (Any, *Any, **Any) -> Any
             request, error_response = old_create_request(self, *args, **kwargs)
-            scope = sentry_sdk.get_isolation_scope()
+            scope = debugg_ai_sdk.get_isolation_scope()
             scope.add_event_processor(_make_asgi_request_event_processor(request))
 
             return request, error_response
@@ -137,14 +137,14 @@ def patch_channels_asgi_handler_impl(cls):
     # type: (Any) -> None
     import channels  # type: ignore
 
-    from sentry_sdk.integrations.django import DjangoIntegration
+    from debugg_ai_sdk.integrations.django import DjangoIntegration
 
     if channels.__version__ < "3.0.0":
         old_app = cls.__call__
 
         async def sentry_patched_asgi_handler(self, receive, send):
             # type: (Any, Any, Any) -> Any
-            integration = sentry_sdk.get_client().get_integration(DjangoIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
             if integration is None:
                 return await old_app(self, receive, send)
 
@@ -167,20 +167,20 @@ def patch_channels_asgi_handler_impl(cls):
 
 def wrap_async_view(callback):
     # type: (Any) -> Any
-    from sentry_sdk.integrations.django import DjangoIntegration
+    from debugg_ai_sdk.integrations.django import DjangoIntegration
 
     @functools.wraps(callback)
     async def sentry_wrapped_callback(request, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Any
-        current_scope = sentry_sdk.get_current_scope()
+        current_scope = debugg_ai_sdk.get_current_scope()
         if current_scope.transaction is not None:
             current_scope.transaction.update_active_thread()
 
-        sentry_scope = sentry_sdk.get_isolation_scope()
+        sentry_scope = debugg_ai_sdk.get_isolation_scope()
         if sentry_scope.profile is not None:
             sentry_scope.profile.update_active_thread_id()
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.VIEW_RENDER,
             name=request.resolver_match.view_name,
             origin=DjangoIntegration.origin,

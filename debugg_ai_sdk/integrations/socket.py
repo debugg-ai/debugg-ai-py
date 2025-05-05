@@ -1,9 +1,9 @@
 import socket
 
-import sentry_sdk
-from sentry_sdk._types import MYPY
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import Integration
+import debugg_ai_sdk
+from debugg_ai_sdk._types import MYPY
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import Integration
 
 if MYPY:
     from socket import AddressFamily, SocketKind
@@ -53,11 +53,11 @@ def _patch_create_connection():
         source_address=None,
     ):
         # type: (Tuple[Optional[str], int], Optional[float], Optional[Tuple[Union[bytearray, bytes, str], int]])-> socket.socket
-        integration = sentry_sdk.get_client().get_integration(SocketIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(SocketIntegration)
         if integration is None:
             return real_create_connection(address, timeout, source_address)
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.SOCKET_CONNECTION,
             name=_get_span_description(address[0], address[1]),
             origin=SocketIntegration.origin,
@@ -79,11 +79,11 @@ def _patch_getaddrinfo():
 
     def getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
         # type: (Union[bytes, str, None], Union[bytes, str, int, None], int, int, int, int) -> List[Tuple[AddressFamily, SocketKind, int, str, Union[Tuple[str, int], Tuple[str, int, int, int], Tuple[int, bytes]]]]
-        integration = sentry_sdk.get_client().get_integration(SocketIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(SocketIntegration)
         if integration is None:
             return real_getaddrinfo(host, port, family, type, proto, flags)
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.SOCKET_DNS,
             name=_get_span_description(host, port),
             origin=SocketIntegration.origin,

@@ -44,7 +44,7 @@ def check_uwsgi_thread_support():
     except ImportError:
         return True
 
-    from sentry_sdk.consts import FALSE_VALUES
+    from debugg_ai_sdk.consts import FALSE_VALUES
 
     def enabled(option):
         # type: (str) -> bool

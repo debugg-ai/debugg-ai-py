@@ -1,20 +1,20 @@
 import sys
 from functools import partial
 
-import sentry_sdk
-from sentry_sdk._werkzeug import get_host, _get_headers
-from sentry_sdk.api import continue_trace
-from sentry_sdk.consts import OP
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.integrations._wsgi_common import (
+import debugg_ai_sdk
+from debugg_ai_sdk._werkzeug import get_host, _get_headers
+from debugg_ai_sdk.api import continue_trace
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.integrations._wsgi_common import (
     DEFAULT_HTTP_METHODS_TO_CAPTURE,
     _filter_headers,
     nullcontext,
 )
-from sentry_sdk.sessions import track_session
-from sentry_sdk.scope import use_isolation_scope
-from sentry_sdk.tracing import Transaction, TransactionSource
-from sentry_sdk.utils import (
+from debugg_ai_sdk.sessions import track_session
+from debugg_ai_sdk.scope import use_isolation_scope
+from debugg_ai_sdk.tracing import Transaction, TransactionSource
+from debugg_ai_sdk.utils import (
     ContextVar,
     capture_internal_exceptions,
     event_from_exception,
@@ -33,8 +33,8 @@ if TYPE_CHECKING:
     from typing import TypeVar
     from typing import Protocol
 
-    from sentry_sdk.utils import ExcInfo
-    from sentry_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk.utils import ExcInfo
+    from debugg_ai_sdk._types import Event, EventProcessor
 
     WsgiResponseIter = TypeVar("WsgiResponseIter")
     WsgiResponseHeaders = TypeVar("WsgiResponseHeaders")
@@ -97,7 +97,7 @@ class SentryWsgiMiddleware:
 
         _wsgi_middleware_applied.set(True)
         try:
-            with sentry_sdk.isolation_scope() as scope:
+            with debugg_ai_sdk.isolation_scope() as scope:
                 with track_session(scope, session_mode="request"):
                     with capture_internal_exceptions():
                         scope.clear_breadcrumbs()
@@ -120,7 +120,7 @@ class SentryWsgiMiddleware:
                         )
 
                     with (
-                        sentry_sdk.start_transaction(
+                        debugg_ai_sdk.start_transaction(
                             transaction,
                             custom_sampling_context={"wsgi_environ": environ},
                         )
@@ -215,10 +215,10 @@ def _capture_exception():
     if not should_skip_capture:
         event, hint = event_from_exception(
             exc_info,
-            client_options=sentry_sdk.get_client().options,
+            client_options=debugg_ai_sdk.get_client().options,
             mechanism={"type": "wsgi", "handled": False},
         )
-        sentry_sdk.capture_event(event, hint=hint)
+        debugg_ai_sdk.capture_event(event, hint=hint)
 
     return exc_info
 
@@ -237,7 +237,7 @@ class _ScopedResponse:
     __slots__ = ("_response", "_scope")
 
     def __init__(self, scope, response):
-        # type: (sentry_sdk.scope.Scope, Iterator[bytes]) -> None
+        # type: (debugg_ai_sdk.scope.Scope, Iterator[bytes]) -> None
         self._scope = scope
         self._response = response
 

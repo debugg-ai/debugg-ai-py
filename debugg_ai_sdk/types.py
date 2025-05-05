@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     # Re-export types to make them available in the public API
-    from sentry_sdk._types import (
+    from debugg_ai_sdk._types import (
         Breadcrumb,
         BreadcrumbHint,
         Event,

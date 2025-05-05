@@ -4,13 +4,13 @@ import threading
 import weakref
 from importlib import import_module
 
-import sentry_sdk
-from sentry_sdk.consts import OP, SPANDATA
-from sentry_sdk.scope import add_global_event_processor, should_send_default_pii
-from sentry_sdk.serializer import add_global_repr_processor
-from sentry_sdk.tracing import SOURCE_FOR_STYLE, TransactionSource
-from sentry_sdk.tracing_utils import add_query_source, record_sql_queries
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP, SPANDATA
+from debugg_ai_sdk.scope import add_global_event_processor, should_send_default_pii
+from debugg_ai_sdk.serializer import add_global_repr_processor
+from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE, TransactionSource
+from debugg_ai_sdk.tracing_utils import add_query_source, record_sql_queries
+from debugg_ai_sdk.utils import (
     AnnotatedValue,
     HAS_REAL_CONTEXTVARS,
     CONTEXTVARS_ERROR_MESSAGE,
@@ -22,10 +22,10 @@ from sentry_sdk.utils import (
     transaction_from_function,
     walk_exception_chain,
 )
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.integrations.logging import ignore_logger
-from sentry_sdk.integrations.wsgi import SentryWsgiMiddleware
-from sentry_sdk.integrations._wsgi_common import (
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.integrations.logging import ignore_logger
+from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.integrations._wsgi_common import (
     DEFAULT_HTTP_METHODS_TO_CAPTURE,
     RequestExtractor,
 )
@@ -55,17 +55,17 @@ try:
 except ImportError:
     raise DidNotEnable("Django not installed")
 
-from sentry_sdk.integrations.django.transactions import LEGACY_RESOLVER
-from sentry_sdk.integrations.django.templates import (
+from debugg_ai_sdk.integrations.django.transactions import LEGACY_RESOLVER
+from debugg_ai_sdk.integrations.django.templates import (
     get_template_frame_from_exception,
     patch_templates,
 )
-from sentry_sdk.integrations.django.middleware import patch_django_middlewares
-from sentry_sdk.integrations.django.signals_handlers import patch_signals
-from sentry_sdk.integrations.django.views import patch_views
+from debugg_ai_sdk.integrations.django.middleware import patch_django_middlewares
+from debugg_ai_sdk.integrations.django.signals_handlers import patch_signals
+from debugg_ai_sdk.integrations.django.views import patch_views
 
 if DJANGO_VERSION[:2] > (1, 8):
-    from sentry_sdk.integrations.django.caching import patch_caching
+    from debugg_ai_sdk.integrations.django.caching import patch_caching
 else:
     patch_caching = None  # type: ignore
 
@@ -84,9 +84,9 @@ if TYPE_CHECKING:
     from django.http.request import QueryDict
     from django.utils.datastructures import MultiValueDict
 
-    from sentry_sdk.tracing import Span
-    from sentry_sdk.integrations.wsgi import _ScopedResponse
-    from sentry_sdk._types import Event, Hint, EventProcessor, NotImplementedType
+    from debugg_ai_sdk.tracing import Span
+    from debugg_ai_sdk.integrations.wsgi import _ScopedResponse
+    from debugg_ai_sdk._types import Event, Hint, EventProcessor, NotImplementedType
 
 
 if DJANGO_VERSION < (1, 10):
@@ -176,7 +176,7 @@ class DjangoIntegration(Integration):
 
             use_x_forwarded_for = settings.USE_X_FORWARDED_HOST
 
-            integration = sentry_sdk.get_client().get_integration(DjangoIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
 
             middleware = SentryWsgiMiddleware(
                 bound_old_app,
@@ -353,7 +353,7 @@ def _patch_channels():
             + CONTEXTVARS_ERROR_MESSAGE
         )
 
-    from sentry_sdk.integrations.django.asgi import patch_channels_asgi_handler_impl
+    from debugg_ai_sdk.integrations.django.asgi import patch_channels_asgi_handler_impl
 
     patch_channels_asgi_handler_impl(AsgiHandler)
 
@@ -375,13 +375,13 @@ def _patch_django_asgi_handler():
             "We detected that you are using Django 3." + CONTEXTVARS_ERROR_MESSAGE
         )
 
-    from sentry_sdk.integrations.django.asgi import patch_django_asgi_handler_impl
+    from debugg_ai_sdk.integrations.django.asgi import patch_django_asgi_handler_impl
 
     patch_django_asgi_handler_impl(ASGIHandler)
 
 
 def _set_transaction_name_and_source(scope, transaction_style, request):
-    # type: (sentry_sdk.Scope, str, WSGIRequest) -> None
+    # type: (debugg_ai_sdk.Scope, str, WSGIRequest) -> None
     try:
         transaction_name = None
         if transaction_style == "function_name":
@@ -424,13 +424,13 @@ def _set_transaction_name_and_source(scope, transaction_style, request):
 
 def _before_get_response(request):
     # type: (WSGIRequest) -> None
-    integration = sentry_sdk.get_client().get_integration(DjangoIntegration)
+    integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
     if integration is None:
         return
 
     _patch_drf()
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
     # Rely on WSGI middleware to start a trace
     _set_transaction_name_and_source(scope, integration.transaction_style, request)
 
@@ -440,7 +440,7 @@ def _before_get_response(request):
 
 
 def _attempt_resolve_again(request, scope, transaction_style):
-    # type: (WSGIRequest, sentry_sdk.Scope, str) -> None
+    # type: (WSGIRequest, debugg_ai_sdk.Scope, str) -> None
     """
     Some django middlewares overwrite request.urlconf
     so we need to respect that contract,
@@ -454,11 +454,11 @@ def _attempt_resolve_again(request, scope, transaction_style):
 
 def _after_get_response(request):
     # type: (WSGIRequest) -> None
-    integration = sentry_sdk.get_client().get_integration(DjangoIntegration)
+    integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
     if integration is None or integration.transaction_style != "url":
         return
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
     _attempt_resolve_again(request, scope, integration.transaction_style)
 
 
@@ -481,7 +481,7 @@ def _patch_get_response():
     BaseHandler.get_response = sentry_patched_get_response
 
     if hasattr(BaseHandler, "get_response_async"):
-        from sentry_sdk.integrations.django.asgi import patch_get_response_async
+        from debugg_ai_sdk.integrations.django.asgi import patch_get_response_async
 
         patch_get_response_async(BaseHandler, _before_get_response)
 
@@ -516,13 +516,13 @@ def _make_wsgi_request_event_processor(weak_request, integration):
 
 def _got_request_exception(request=None, **kwargs):
     # type: (WSGIRequest, **Any) -> None
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
     integration = client.get_integration(DjangoIntegration)
     if integration is None:
         return
 
     if request is not None and integration.transaction_style == "url":
-        scope = sentry_sdk.get_current_scope()
+        scope = debugg_ai_sdk.get_current_scope()
         _attempt_resolve_again(request, scope, integration.transaction_style)
 
     event, hint = event_from_exception(
@@ -530,7 +530,7 @@ def _got_request_exception(request=None, **kwargs):
         client_options=client.options,
         mechanism={"type": "django", "handled": False},
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 class DjangoRequestExtractor(RequestExtractor):
@@ -679,9 +679,9 @@ def install_sql_hook():
     def connect(self):
         # type: (BaseDatabaseWrapper) -> None
         with capture_internal_exceptions():
-            sentry_sdk.add_breadcrumb(message="connect", category="query")
+            debugg_ai_sdk.add_breadcrumb(message="connect", category="query")
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.DB,
             name="connect",
             origin=DjangoIntegration.origin_db,

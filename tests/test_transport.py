@@ -24,8 +24,8 @@ try:
 except ImportError:
     gevent = None
 
-import sentry_sdk
-from sentry_sdk import (
+import debugg_ai_sdk
+from debugg_ai_sdk import (
     Client,
     add_breadcrumb,
     capture_message,
@@ -33,14 +33,14 @@ from sentry_sdk import (
     get_isolation_scope,
     Hub,
 )
-from sentry_sdk._compat import PY37, PY38
-from sentry_sdk.envelope import Envelope, Item, parse_json
-from sentry_sdk.transport import (
+from debugg_ai_sdk._compat import PY37, PY38
+from debugg_ai_sdk.envelope import Envelope, Item, parse_json
+from debugg_ai_sdk.transport import (
     KEEP_ALIVE_SOCKET_OPTIONS,
     _parse_rate_limits,
     HttpTransport,
 )
-from sentry_sdk.integrations.logging import LoggingIntegration, ignore_logger
+from debugg_ai_sdk.integrations.logging import LoggingIntegration, ignore_logger
 
 CapturedData = namedtuple("CapturedData", ["path", "event", "envelope", "compressed"])
 
@@ -177,8 +177,8 @@ def test_transport_works(
     if use_pickle:
         client = pickle.loads(pickle.dumps(client))
 
-    sentry_sdk.get_global_scope().set_client(client)
-    request.addfinalizer(lambda: sentry_sdk.get_global_scope().set_client(None))
+    debugg_ai_sdk.get_global_scope().set_client(client)
+    request.addfinalizer(lambda: debugg_ai_sdk.get_global_scope().set_client(None))
 
     add_breadcrumb(
         level="info", message="i like bread", timestamp=datetime.now(timezone.utc)
@@ -295,7 +295,7 @@ def test_default_timeout_http2(make_client):
         "sentry_sdk.transport.httpcore.ConnectionPool.request",
         return_value=httpcore.Response(200),
     ) as request_mock:
-        sentry_sdk.get_global_scope().set_client(client)
+        debugg_ai_sdk.get_global_scope().set_client(client)
         capture_message("hi")
         client.flush()
 
@@ -387,7 +387,7 @@ def test_transport_infinite_loop(capturing_server, request, make_client):
     # to an infinite loop
     ignore_logger("werkzeug")
 
-    sentry_sdk.get_global_scope().set_client(client)
+    debugg_ai_sdk.get_global_scope().set_client(client)
     with isolation_scope():
         capture_message("hi")
         client.flush()
@@ -403,7 +403,7 @@ def test_transport_no_thread_on_shutdown_no_errors(capturing_server, make_client
         "threading.Thread.start",
         side_effect=RuntimeError("can't create new thread at interpreter shutdown"),
     ):
-        sentry_sdk.get_global_scope().set_client(client)
+        debugg_ai_sdk.get_global_scope().set_client(client)
         with isolation_scope():
             capture_message("hi")
 

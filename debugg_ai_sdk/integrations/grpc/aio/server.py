@@ -1,9 +1,9 @@
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import DidNotEnable
-from sentry_sdk.integrations.grpc.consts import SPAN_ORIGIN
-from sentry_sdk.tracing import Transaction, TransactionSource
-from sentry_sdk.utils import event_from_exception
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import DidNotEnable
+from debugg_ai_sdk.integrations.grpc.consts import SPAN_ORIGIN
+from debugg_ai_sdk.tracing import Transaction, TransactionSource
+from debugg_ai_sdk.utils import event_from_exception
 
 from typing import TYPE_CHECKING
 
@@ -52,7 +52,7 @@ class ServerInterceptor(grpc.aio.ServerInterceptor):  # type: ignore
                     origin=SPAN_ORIGIN,
                 )
 
-                with sentry_sdk.start_transaction(transaction=transaction):
+                with debugg_ai_sdk.start_transaction(transaction=transaction):
                     try:
                         return await handler.unary_unary(request, context)
                     except AbortError:
@@ -62,7 +62,7 @@ class ServerInterceptor(grpc.aio.ServerInterceptor):  # type: ignore
                             exc,
                             mechanism={"type": "grpc", "handled": False},
                         )
-                        sentry_sdk.capture_event(event, hint=hint)
+                        debugg_ai_sdk.capture_event(event, hint=hint)
                         raise
 
         elif not handler.request_streaming and handler.response_streaming:

@@ -2,10 +2,10 @@ import sys
 import types
 from functools import wraps
 
-import sentry_sdk
-from sentry_sdk.integrations import Integration
-from sentry_sdk.integrations.logging import ignore_logger
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.integrations.logging import ignore_logger
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from typing import TypeVar
     from typing import Callable
 
-    from sentry_sdk._types import ExcInfo
+    from debugg_ai_sdk._types import ExcInfo
 
     T = TypeVar("T")
     F = TypeVar("F", bound=Callable[..., Any])
@@ -141,14 +141,14 @@ def _capture_exception(exc_info):
     """
     Send Beam exception to Sentry.
     """
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
 
     event, hint = event_from_exception(
         exc_info,
         client_options=client.options,
         mechanism={"type": "beam", "handled": False},
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def raise_exception():

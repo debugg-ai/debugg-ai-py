@@ -4,14 +4,14 @@ from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from os import environ
 
-import sentry_sdk
-from sentry_sdk.api import continue_trace
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import Integration
-from sentry_sdk.integrations._wsgi_common import _filter_headers
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.api import continue_trace
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.integrations._wsgi_common import _filter_headers
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import TransactionSource
+from debugg_ai_sdk.utils import (
     AnnotatedValue,
     capture_internal_exceptions,
     event_from_exception,
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from typing import Callable
     from typing import Optional
 
-    from sentry_sdk._types import EventProcessor, Event, Hint
+    from debugg_ai_sdk._types import EventProcessor, Event, Hint
 
     F = TypeVar("F", bound=Callable[..., Any])
 
@@ -42,7 +42,7 @@ def _wrap_func(func):
     @functools.wraps(func)
     def sentry_func(functionhandler, gcp_event, *args, **kwargs):
         # type: (Any, Any, *Any, **Any) -> Any
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
 
         integration = client.get_integration(GcpIntegration)
         if integration is None:
@@ -59,7 +59,7 @@ def _wrap_func(func):
 
         initial_time = datetime.now(timezone.utc)
 
-        with sentry_sdk.isolation_scope() as scope:
+        with debugg_ai_sdk.isolation_scope() as scope:
             with capture_internal_exceptions():
                 scope.clear_breadcrumbs()
                 scope.add_event_processor(
@@ -101,7 +101,7 @@ def _wrap_func(func):
                 },
                 "gcp_event": gcp_event,
             }
-            with sentry_sdk.start_transaction(
+            with debugg_ai_sdk.start_transaction(
                 transaction, custom_sampling_context=sampling_context
             ):
                 try:
@@ -113,7 +113,7 @@ def _wrap_func(func):
                         client_options=client.options,
                         mechanism={"type": "gcp", "handled": False},
                     )
-                    sentry_sdk.capture_event(sentry_event, hint=hint)
+                    debugg_ai_sdk.capture_event(sentry_event, hint=hint)
                     reraise(*exc_info)
                 finally:
                     if timeout_thread:

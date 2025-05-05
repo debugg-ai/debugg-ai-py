@@ -2,9 +2,9 @@ import os
 import sys
 import atexit
 
-import sentry_sdk
-from sentry_sdk.utils import logger
-from sentry_sdk.integrations import Integration
+import debugg_ai_sdk
+from debugg_ai_sdk.utils import logger
+from debugg_ai_sdk.integrations import Integration
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -44,7 +44,7 @@ class AtexitIntegration(Integration):
         @atexit.register
         def _shutdown():
             # type: () -> None
-            client = sentry_sdk.get_client()
+            client = debugg_ai_sdk.get_client()
             integration = client.get_integration(AtexitIntegration)
 
             if integration is None:
@@ -52,6 +52,6 @@ class AtexitIntegration(Integration):
 
             logger.debug("atexit: got shutdown signal")
             logger.debug("atexit: shutting down client")
-            sentry_sdk.get_isolation_scope().end_session()
+            debugg_ai_sdk.get_isolation_scope().end_session()
 
             client.close(callback=integration.callback)

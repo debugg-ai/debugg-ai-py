@@ -1,12 +1,12 @@
 import weakref
 
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.api import continue_trace
-from sentry_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
-from sentry_sdk.integrations.logging import ignore_logger
-from sentry_sdk.tracing import TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.api import continue_trace
+from debugg_ai_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
+from debugg_ai_sdk.integrations.logging import ignore_logger
+from debugg_ai_sdk.tracing import TransactionSource
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -28,8 +28,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Callable
 
-    from sentry_sdk._types import Event, EventProcessor
-    from sentry_sdk.utils import ExcInfo
+    from debugg_ai_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk.utils import ExcInfo
 
     from rq.job import Job
 
@@ -49,7 +49,7 @@ class RqIntegration(Integration):
         @ensure_integration_enabled(RqIntegration, old_perform_job)
         def sentry_patched_perform_job(self, job, *args, **kwargs):
             # type: (Any, Job, *Queue, **Any) -> bool
-            with sentry_sdk.new_scope() as scope:
+            with debugg_ai_sdk.new_scope() as scope:
                 scope.clear_breadcrumbs()
                 scope.add_event_processor(_make_event_processor(weakref.ref(job)))
 
@@ -64,7 +64,7 @@ class RqIntegration(Integration):
                 with capture_internal_exceptions():
                     transaction.name = job.func_name
 
-                with sentry_sdk.start_transaction(
+                with debugg_ai_sdk.start_transaction(
                     transaction,
                     custom_sampling_context={"rq_job": job},
                 ):
@@ -74,7 +74,7 @@ class RqIntegration(Integration):
                 # We're inside of a forked process and RQ is
                 # about to call `os._exit`. Make sure that our
                 # events get sent out.
-                sentry_sdk.get_client().flush()
+                debugg_ai_sdk.get_client().flush()
 
             return rv
 
@@ -102,7 +102,7 @@ class RqIntegration(Integration):
         @ensure_integration_enabled(RqIntegration, old_enqueue_job)
         def sentry_patched_enqueue_job(self, job, **kwargs):
             # type: (Queue, Any, **Any) -> Any
-            scope = sentry_sdk.get_current_scope()
+            scope = debugg_ai_sdk.get_current_scope()
             if scope.span is not None:
                 job.meta["_sentry_trace_headers"] = dict(
                     scope.iter_trace_propagation_headers()
@@ -150,7 +150,7 @@ def _make_event_processor(weak_job):
 
 def _capture_exception(exc_info, **kwargs):
     # type: (ExcInfo, **Any) -> None
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
 
     event, hint = event_from_exception(
         exc_info,
@@ -158,4 +158,4 @@ def _capture_exception(exc_info, **kwargs):
         mechanism={"type": "rq", "handled": False},
     )
 
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)

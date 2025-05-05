@@ -6,13 +6,13 @@ import pytest
 from celery import Celery, VERSION
 from celery.bin import worker
 
-import sentry_sdk
-from sentry_sdk import start_transaction, get_current_span
-from sentry_sdk.integrations.celery import (
+import debugg_ai_sdk
+from debugg_ai_sdk import start_transaction, get_current_span
+from debugg_ai_sdk.integrations.celery import (
     CeleryIntegration,
     _wrap_task_run,
 )
-from sentry_sdk.integrations.celery.beat import _get_headers
+from debugg_ai_sdk.integrations.celery.beat import _get_headers
 from tests.conftest import ApproxDict
 
 
@@ -155,7 +155,7 @@ def test_simple_without_performance(capture_events, init_celery, celery_invocati
         foo = 42  # noqa
         return x / y
 
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
 
     celery_invocation(dummy_task, 1, 2)
     _, expected_context = celery_invocation(dummy_task, 1, 0)
@@ -257,14 +257,14 @@ def test_no_stackoverflows(celery):
 
     @celery.task(name="dummy_task")
     def dummy_task():
-        sentry_sdk.get_isolation_scope().set_tag("foo", "bar")
+        debugg_ai_sdk.get_isolation_scope().set_tag("foo", "bar")
         results.append(42)
 
     for _ in range(10000):
         dummy_task.delay()
 
     assert results == [42] * 10000
-    assert not sentry_sdk.get_isolation_scope()._tags
+    assert not debugg_ai_sdk.get_isolation_scope()._tags
 
 
 def test_simple_no_propagation(capture_events, init_celery):
@@ -801,7 +801,7 @@ def test_send_task_wrapped(
 
     events = capture_events()
 
-    with sentry_sdk.start_transaction(name="custom_transaction"):
+    with debugg_ai_sdk.start_transaction(name="custom_transaction"):
         celery.send_task("very_creative_task_name", args=(1, 2), kwargs={"foo": "bar"})
 
     (call,) = patched_send_task.call_args_list  # We should have exactly one call

@@ -1,7 +1,7 @@
 import sys
 
 import pytest
-from sentry_sdk.types import Event, Hint
+from debugg_ai_sdk.types import Event, Hint
 
 
 @pytest.mark.skipif(

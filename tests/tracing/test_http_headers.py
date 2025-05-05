@@ -2,8 +2,8 @@ from unittest import mock
 
 import pytest
 
-from sentry_sdk.tracing import Transaction
-from sentry_sdk.tracing_utils import extract_sentrytrace_data
+from debugg_ai_sdk.tracing import Transaction
+from debugg_ai_sdk.tracing_utils import extract_sentrytrace_data
 
 
 @pytest.mark.parametrize("sampled", [True, False, None])

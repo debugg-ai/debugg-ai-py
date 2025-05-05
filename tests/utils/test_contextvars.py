@@ -10,7 +10,7 @@ def test_leaks(maybe_monkeypatched_threading):
     # Need to explicitly call _get_contextvars because the SDK has already
     # decided upon gevent on import.
 
-    from sentry_sdk import utils
+    from debugg_ai_sdk import utils
 
     _, ContextVar = utils._get_contextvars()  # noqa: N806
 

@@ -1,23 +1,23 @@
 import warnings
 from contextlib import contextmanager
 
-from sentry_sdk import (
+from debugg_ai_sdk import (
     get_client,
     get_global_scope,
     get_isolation_scope,
     get_current_scope,
 )
-from sentry_sdk._compat import with_metaclass
-from sentry_sdk.consts import INSTRUMENTER
-from sentry_sdk.scope import _ScopeManager
-from sentry_sdk.client import Client
-from sentry_sdk.tracing import (
+from debugg_ai_sdk._compat import with_metaclass
+from debugg_ai_sdk.consts import INSTRUMENTER
+from debugg_ai_sdk.scope import _ScopeManager
+from debugg_ai_sdk.client import Client
+from debugg_ai_sdk.tracing import (
     NoOpSpan,
     Span,
     Transaction,
 )
 
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     logger,
     ContextVar,
 )
@@ -40,10 +40,10 @@ if TYPE_CHECKING:
 
     from typing_extensions import Unpack
 
-    from sentry_sdk.scope import Scope
-    from sentry_sdk.client import BaseClient
-    from sentry_sdk.integrations import Integration
-    from sentry_sdk._types import (
+    from debugg_ai_sdk.scope import Scope
+    from debugg_ai_sdk.client import BaseClient
+    from debugg_ai_sdk.integrations import Integration
+    from debugg_ai_sdk._types import (
         Event,
         Hint,
         Breadcrumb,
@@ -52,7 +52,7 @@ if TYPE_CHECKING:
         LogLevelStr,
         SamplingContext,
     )
-    from sentry_sdk.tracing import TransactionKwargs
+    from debugg_ai_sdk.tracing import TransactionKwargs
 
     T = TypeVar("T")
 
@@ -736,4 +736,4 @@ _local.set(GLOBAL_HUB)
 
 
 # Circular imports
-from sentry_sdk import scope
+from debugg_ai_sdk import scope

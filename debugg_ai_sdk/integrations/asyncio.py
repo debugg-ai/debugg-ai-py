@@ -1,9 +1,9 @@
 import sys
 
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import Integration, DidNotEnable
-from sentry_sdk.utils import event_from_exception, logger, reraise
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import Integration, DidNotEnable
+from debugg_ai_sdk.utils import event_from_exception, logger, reraise
 
 try:
     import asyncio
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from typing import Any
     from collections.abc import Coroutine
 
-    from sentry_sdk._types import ExcInfo
+    from debugg_ai_sdk._types import ExcInfo
 
 
 def get_name(coro):
@@ -43,8 +43,8 @@ def patch_asyncio():
                 # type: () -> Any
                 result = None
 
-                with sentry_sdk.isolation_scope():
-                    with sentry_sdk.start_span(
+                with debugg_ai_sdk.isolation_scope():
+                    with debugg_ai_sdk.start_span(
                         op=OP.FUNCTION,
                         name=get_name(coro),
                         origin=AsyncioIntegration.origin,
@@ -103,7 +103,7 @@ def _capture_exception():
     # type: () -> ExcInfo
     exc_info = sys.exc_info()
 
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
 
     integration = client.get_integration(AsyncioIntegration)
     if integration is not None:
@@ -112,7 +112,7 @@ def _capture_exception():
             client_options=client.options,
             mechanism={"type": "asyncio", "handled": False},
         )
-        sentry_sdk.capture_event(event, hint=hint)
+        debugg_ai_sdk.capture_event(event, hint=hint)
 
     return exc_info
 

@@ -1,9 +1,9 @@
 from functools import wraps
 from typing import Any, TYPE_CHECKING
 
-from sentry_sdk.feature_flags import add_feature_flag
-from sentry_sdk.integrations import Integration, DidNotEnable, _check_minimum_version
-from sentry_sdk.utils import parse_version
+from debugg_ai_sdk.feature_flags import add_feature_flag
+from debugg_ai_sdk.integrations import Integration, DidNotEnable, _check_minimum_version
+from debugg_ai_sdk.utils import parse_version
 
 try:
     from statsig import statsig as statsig_module

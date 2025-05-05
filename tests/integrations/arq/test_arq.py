@@ -3,8 +3,8 @@ from datetime import timedelta
 
 import pytest
 
-from sentry_sdk import get_client, start_transaction
-from sentry_sdk.integrations.arq import ArqIntegration
+from debugg_ai_sdk import get_client, start_transaction
+from debugg_ai_sdk.integrations.arq import ArqIntegration
 
 import arq.worker
 from arq import cron

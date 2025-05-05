@@ -6,12 +6,12 @@ from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from os import environ
 
-import sentry_sdk
-from sentry_sdk.api import continue_trace
-from sentry_sdk.consts import OP
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import TransactionSource
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.api import continue_trace
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import TransactionSource
+from debugg_ai_sdk.utils import (
     AnnotatedValue,
     capture_internal_exceptions,
     ensure_integration_enabled,
@@ -20,8 +20,8 @@ from sentry_sdk.utils import (
     TimeoutThread,
     reraise,
 )
-from sentry_sdk.integrations import Integration
-from sentry_sdk.integrations._wsgi_common import _filter_headers
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.integrations._wsgi_common import _filter_headers
 
 from typing import TYPE_CHECKING
 
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from typing import Callable
     from typing import Optional
 
-    from sentry_sdk._types import EventProcessor, Event, Hint
+    from debugg_ai_sdk._types import EventProcessor, Event, Hint
 
     F = TypeVar("F", bound=Callable[..., Any])
 
@@ -45,10 +45,10 @@ def _wrap_init_error(init_error):
     @ensure_integration_enabled(AwsLambdaIntegration, init_error)
     def sentry_init_error(*args, **kwargs):
         # type: (*Any, **Any) -> Any
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
 
         with capture_internal_exceptions():
-            sentry_sdk.get_isolation_scope().clear_breadcrumbs()
+            debugg_ai_sdk.get_isolation_scope().clear_breadcrumbs()
 
             exc_info = sys.exc_info()
             if exc_info and all(exc_info):
@@ -57,7 +57,7 @@ def _wrap_init_error(init_error):
                     client_options=client.options,
                     mechanism={"type": "aws_lambda", "handled": False},
                 )
-                sentry_sdk.capture_event(sentry_event, hint=hint)
+                debugg_ai_sdk.capture_event(sentry_event, hint=hint)
 
             else:
                 # Fall back to AWS lambdas JSON representation of the error
@@ -65,7 +65,7 @@ def _wrap_init_error(init_error):
                 if isinstance(error_info, str):
                     error_info = json.loads(error_info)
                 sentry_event = _event_from_error_json(error_info)
-                sentry_sdk.capture_event(sentry_event)
+                debugg_ai_sdk.capture_event(sentry_event)
 
         return init_error(*args, **kwargs)
 
@@ -88,7 +88,7 @@ def _wrap_handler(handler):
         # will be the same for all events in the list, since they're all hitting
         # the lambda in the same request.)
 
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
         integration = client.get_integration(AwsLambdaIntegration)
 
         if integration is None:
@@ -109,7 +109,7 @@ def _wrap_handler(handler):
 
         configured_time = aws_context.get_remaining_time_in_millis()
 
-        with sentry_sdk.isolation_scope() as scope:
+        with debugg_ai_sdk.isolation_scope() as scope:
             timeout_thread = None
             with capture_internal_exceptions():
                 scope.clear_breadcrumbs()
@@ -156,7 +156,7 @@ def _wrap_handler(handler):
                 source=TransactionSource.COMPONENT,
                 origin=AwsLambdaIntegration.origin,
             )
-            with sentry_sdk.start_transaction(
+            with debugg_ai_sdk.start_transaction(
                 transaction,
                 custom_sampling_context={
                     "aws_event": aws_event,
@@ -172,7 +172,7 @@ def _wrap_handler(handler):
                         client_options=client.options,
                         mechanism={"type": "aws_lambda", "handled": False},
                     )
-                    sentry_sdk.capture_event(sentry_event, hint=hint)
+                    debugg_ai_sdk.capture_event(sentry_event, hint=hint)
                     reraise(*exc_info)
                 finally:
                     if timeout_thread:
@@ -184,7 +184,7 @@ def _wrap_handler(handler):
 def _drain_queue():
     # type: () -> None
     with capture_internal_exceptions():
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
         integration = client.get_integration(AwsLambdaIntegration)
         if integration is not None:
             # Flush out the event queue before AWS kills the

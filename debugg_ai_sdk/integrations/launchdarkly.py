@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from sentry_sdk.feature_flags import add_feature_flag
-from sentry_sdk.integrations import DidNotEnable, Integration
+from debugg_ai_sdk.feature_flags import add_feature_flag
+from debugg_ai_sdk.integrations import DidNotEnable, Integration
 
 try:
     import ldclient

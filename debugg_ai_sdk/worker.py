@@ -2,9 +2,9 @@ import os
 import threading
 
 from time import sleep, time
-from sentry_sdk._queue import Queue, FullError
-from sentry_sdk.utils import logger
-from sentry_sdk.consts import DEFAULT_QUEUE_SIZE
+from debugg_ai_sdk._queue import Queue, FullError
+from debugg_ai_sdk.utils import logger
+from debugg_ai_sdk.consts import DEFAULT_QUEUE_SIZE
 
 from typing import TYPE_CHECKING
 

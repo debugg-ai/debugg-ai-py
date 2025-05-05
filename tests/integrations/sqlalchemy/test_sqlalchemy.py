@@ -9,13 +9,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import text
 
-import sentry_sdk
-from sentry_sdk import capture_message, start_transaction
-from sentry_sdk.consts import DEFAULT_MAX_VALUE_LENGTH, SPANDATA
-from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from sentry_sdk.serializer import MAX_EVENT_BYTES
-from sentry_sdk.tracing_utils import record_sql_queries
-from sentry_sdk.utils import json_dumps
+import debugg_ai_sdk
+from debugg_ai_sdk import capture_message, start_transaction
+from debugg_ai_sdk.consts import DEFAULT_MAX_VALUE_LENGTH, SPANDATA
+from debugg_ai_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from debugg_ai_sdk.serializer import MAX_EVENT_BYTES
+from debugg_ai_sdk.tracing_utils import record_sql_queries
+from debugg_ai_sdk.utils import json_dumps
 
 
 def test_orm_queries(sentry_init, capture_events):
@@ -235,7 +235,7 @@ def test_large_event_not_truncated(sentry_init, capture_events):
 
     long_str = "x" * (DEFAULT_MAX_VALUE_LENGTH + 10)
 
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
 
     @scope.add_event_processor
     def processor(event, hint):

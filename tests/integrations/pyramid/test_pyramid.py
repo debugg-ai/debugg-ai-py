@@ -8,9 +8,9 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.response import Response
 from werkzeug.test import Client
 
-from sentry_sdk import capture_message, add_breadcrumb
-from sentry_sdk.integrations.pyramid import PyramidIntegration
-from sentry_sdk.serializer import MAX_DATABAG_BREADTH
+from debugg_ai_sdk import capture_message, add_breadcrumb
+from debugg_ai_sdk.integrations.pyramid import PyramidIntegration
+from debugg_ai_sdk.serializer import MAX_DATABAG_BREADTH
 from tests.conftest import unpack_werkzeug_response
 
 
@@ -355,7 +355,7 @@ def test_error_in_errorhandler(
 def test_error_in_authenticated_userid(
     sentry_init, pyramid_config, capture_events, route, get_client
 ):
-    from sentry_sdk.integrations.logging import LoggingIntegration
+    from debugg_ai_sdk.integrations.logging import LoggingIntegration
 
     sentry_init(
         send_default_pii=True,

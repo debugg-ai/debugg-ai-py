@@ -1,36 +1,36 @@
 import functools
 
-import sentry_sdk
-from sentry_sdk.tracing import SOURCE_FOR_STYLE
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
     parse_version,
     transaction_from_function,
 )
-from sentry_sdk.integrations import (
+from debugg_ai_sdk.integrations import (
     Integration,
     DidNotEnable,
     _DEFAULT_FAILED_REQUEST_STATUS_CODES,
     _check_minimum_version,
 )
-from sentry_sdk.integrations.wsgi import SentryWsgiMiddleware
-from sentry_sdk.integrations._wsgi_common import RequestExtractor
+from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.integrations._wsgi_common import RequestExtractor
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Set
 
-    from sentry_sdk.integrations.wsgi import _ScopedResponse
+    from debugg_ai_sdk.integrations.wsgi import _ScopedResponse
     from typing import Any
     from typing import Dict
     from typing import Callable
     from typing import Optional
     from bottle import FileUpload, FormsDict, LocalRequest  # type: ignore
 
-    from sentry_sdk._types import EventProcessor, Event
+    from debugg_ai_sdk._types import EventProcessor, Event
 
 try:
     from bottle import (
@@ -94,11 +94,11 @@ class BottleIntegration(Integration):
         @functools.wraps(old_handle)
         def _patched_handle(self, environ):
             # type: (Bottle, Dict[str, Any]) -> Any
-            integration = sentry_sdk.get_client().get_integration(BottleIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(BottleIntegration)
             if integration is None:
                 return old_handle(self, environ)
 
-            scope = sentry_sdk.get_isolation_scope()
+            scope = debugg_ai_sdk.get_isolation_scope()
             scope._name = "bottle"
             scope.add_event_processor(
                 _make_request_event_processor(self, bottle_request, integration)
@@ -116,7 +116,7 @@ class BottleIntegration(Integration):
             # type: (Route, *object, **object) -> Any
             prepared_callback = old_make_callback(self, *args, **kwargs)
 
-            integration = sentry_sdk.get_client().get_integration(BottleIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(BottleIntegration)
             if integration is None:
                 return prepared_callback
 
@@ -215,7 +215,7 @@ def _capture_exception(exception, handled):
     # type: (BaseException, bool) -> None
     event, hint = event_from_exception(
         exception,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": "bottle", "handled": handled},
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)

@@ -1,20 +1,20 @@
 from functools import wraps
 
-from sentry_sdk import consts
-from sentry_sdk.ai.monitoring import record_token_usage
-from sentry_sdk.consts import SPANDATA
-from sentry_sdk.ai.utils import set_data_normalized
+from debugg_ai_sdk import consts
+from debugg_ai_sdk.ai.monitoring import record_token_usage
+from debugg_ai_sdk.consts import SPANDATA
+from debugg_ai_sdk.ai.utils import set_data_normalized
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterator
-    from sentry_sdk.tracing import Span
+    from debugg_ai_sdk.tracing import Span
 
-import sentry_sdk
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.integrations import DidNotEnable, Integration
-from sentry_sdk.utils import capture_internal_exceptions, event_from_exception
+import debugg_ai_sdk
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.integrations import DidNotEnable, Integration
+from debugg_ai_sdk.utils import capture_internal_exceptions, event_from_exception
 
 try:
     from cohere.client import Client
@@ -86,10 +86,10 @@ def _capture_exception(exc):
     # type: (Any) -> None
     event, hint = event_from_exception(
         exc,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": "cohere", "handled": False},
     )
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _wrap_chat(f, streaming):
@@ -132,7 +132,7 @@ def _wrap_chat(f, streaming):
     @wraps(f)
     def new_chat(*args, **kwargs):
         # type: (*Any, **Any) -> Any
-        integration = sentry_sdk.get_client().get_integration(CohereIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(CohereIntegration)
 
         if (
             integration is None
@@ -143,7 +143,7 @@ def _wrap_chat(f, streaming):
 
         message = kwargs.get("message")
 
-        span = sentry_sdk.start_span(
+        span = debugg_ai_sdk.start_span(
             op=consts.OP.COHERE_CHAT_COMPLETIONS_CREATE,
             name="cohere.client.Chat",
             origin=CohereIntegration.origin,
@@ -225,11 +225,11 @@ def _wrap_embed(f):
     @wraps(f)
     def new_embed(*args, **kwargs):
         # type: (*Any, **Any) -> Any
-        integration = sentry_sdk.get_client().get_integration(CohereIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(CohereIntegration)
         if integration is None:
             return f(*args, **kwargs)
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=consts.OP.COHERE_EMBEDDINGS_CREATE,
             name="Cohere Embedding Creation",
             origin=CohereIntegration.origin,

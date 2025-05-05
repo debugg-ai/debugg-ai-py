@@ -3,13 +3,13 @@ import os
 import sys
 import weakref
 
-import sentry_sdk
-from sentry_sdk.integrations import Integration, DidNotEnable
-from sentry_sdk.integrations._wsgi_common import RequestExtractor
-from sentry_sdk.integrations.wsgi import SentryWsgiMiddleware
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import SOURCE_FOR_STYLE
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import Integration, DidNotEnable
+from debugg_ai_sdk.integrations._wsgi_common import RequestExtractor
+from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -27,15 +27,15 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pyramid.response import Response
     from typing import Any
-    from sentry_sdk.integrations.wsgi import _ScopedResponse
+    from debugg_ai_sdk.integrations.wsgi import _ScopedResponse
     from typing import Callable
     from typing import Dict
     from typing import Optional
     from webob.cookies import RequestCookies
     from webob.request import _FieldStorageWithFile
 
-    from sentry_sdk.utils import ExcInfo
-    from sentry_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk.utils import ExcInfo
+    from debugg_ai_sdk._types import Event, EventProcessor
 
 
 if getattr(Request, "authenticated_userid", None):
@@ -77,14 +77,14 @@ class PyramidIntegration(Integration):
         @functools.wraps(old_call_view)
         def sentry_patched_call_view(registry, request, *args, **kwargs):
             # type: (Any, Request, *Any, **Any) -> Response
-            integration = sentry_sdk.get_client().get_integration(PyramidIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(PyramidIntegration)
             if integration is None:
                 return old_call_view(registry, request, *args, **kwargs)
 
             _set_transaction_name_and_source(
-                sentry_sdk.get_current_scope(), integration.transaction_style, request
+                debugg_ai_sdk.get_current_scope(), integration.transaction_style, request
             )
-            scope = sentry_sdk.get_isolation_scope()
+            scope = debugg_ai_sdk.get_isolation_scope()
             scope.add_event_processor(
                 _make_event_processor(weakref.ref(request), integration)
             )
@@ -104,7 +104,7 @@ class PyramidIntegration(Integration):
                     self.exc_info
                     and all(self.exc_info)
                     and rv.status_int == 500
-                    and sentry_sdk.get_client().get_integration(PyramidIntegration)
+                    and debugg_ai_sdk.get_client().get_integration(PyramidIntegration)
                     is not None
                 ):
                     _capture_exception(self.exc_info)
@@ -144,15 +144,15 @@ def _capture_exception(exc_info):
 
     event, hint = event_from_exception(
         exc_info,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": "pyramid", "handled": False},
     )
 
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _set_transaction_name_and_source(scope, transaction_style, request):
-    # type: (sentry_sdk.Scope, str, Request) -> None
+    # type: (debugg_ai_sdk.Scope, str, Request) -> None
     try:
         name_for_style = {
             "route_name": request.matched_route.name,

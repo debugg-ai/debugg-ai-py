@@ -1,9 +1,9 @@
 import pytest
 from decimal import DivisionByZero
 
-from sentry_sdk import start_transaction
-from sentry_sdk.integrations.huey import HueyIntegration
-from sentry_sdk.utils import parse_version
+from debugg_ai_sdk import start_transaction
+from debugg_ai_sdk.integrations.huey import HueyIntegration
+from debugg_ai_sdk.utils import parse_version
 
 from huey import __version__ as HUEY_VERSION
 from huey.api import MemoryHuey, Result

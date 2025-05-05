@@ -4,7 +4,7 @@ import pytest
 
 from celery.contrib.testing.worker import start_worker
 
-from sentry_sdk.utils import logger
+from debugg_ai_sdk.utils import logger
 
 from tests.integrations.celery.integration_tests import run_beat
 
@@ -33,7 +33,7 @@ def celery_init(sentry_init, celery_config):
     """
     from celery import Celery
 
-    from sentry_sdk.integrations.celery import CeleryIntegration
+    from debugg_ai_sdk.integrations.celery import CeleryIntegration
 
     def inner(propagate_traces=True, monitor_beat_tasks=False, **kwargs):
         sentry_init(

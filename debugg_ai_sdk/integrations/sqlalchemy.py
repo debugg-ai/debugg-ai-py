@@ -1,7 +1,7 @@
-from sentry_sdk.consts import SPANSTATUS, SPANDATA
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.tracing_utils import add_query_source, record_sql_queries
-from sentry_sdk.utils import (
+from debugg_ai_sdk.consts import SPANSTATUS, SPANDATA
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.tracing_utils import add_query_source, record_sql_queries
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     parse_version,
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from typing import ContextManager
     from typing import Optional
 
-    from sentry_sdk.tracing import Span
+    from debugg_ai_sdk.tracing import Span
 
 
 class SqlalchemyIntegration(Integration):

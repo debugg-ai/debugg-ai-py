@@ -1,6 +1,6 @@
-import sentry_sdk
-from sentry_sdk.integrations import Integration
-from sentry_sdk.utils import capture_internal_exceptions, ensure_integration_enabled
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.utils import capture_internal_exceptions, ensure_integration_enabled
 
 from typing import TYPE_CHECKING
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from typing import Any
     from typing import Optional
 
-    from sentry_sdk._types import Event, Hint
+    from debugg_ai_sdk._types import Event, Hint
     from pyspark import SparkContext
 
 
@@ -56,13 +56,13 @@ def _start_sentry_listener(sc):
 
 def _add_event_processor(sc):
     # type: (SparkContext) -> None
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
 
     @scope.add_event_processor
     def process_event(event, hint):
         # type: (Event, Hint) -> Optional[Event]
         with capture_internal_exceptions():
-            if sentry_sdk.get_client().get_integration(SparkIntegration) is None:
+            if debugg_ai_sdk.get_client().get_integration(SparkIntegration) is None:
                 return event
 
             if sc._active_spark_context is None:
@@ -235,13 +235,13 @@ class SentryListener(SparkListener):
         data=None,  # type: Optional[dict[str, Any]]
     ):
         # type: (...) -> None
-        sentry_sdk.get_isolation_scope().add_breadcrumb(
+        debugg_ai_sdk.get_isolation_scope().add_breadcrumb(
             level=level, message=message, data=data
         )
 
     def onJobStart(self, jobStart):  # noqa: N802,N803
         # type: (Any) -> None
-        sentry_sdk.get_isolation_scope().clear_breadcrumbs()
+        debugg_ai_sdk.get_isolation_scope().clear_breadcrumbs()
 
         message = "Job {} Started".format(jobStart.jobId())
         self._add_breadcrumb(level="info", message=message)

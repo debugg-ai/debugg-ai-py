@@ -4,10 +4,10 @@ import pytest
 import rq
 from fakeredis import FakeStrictRedis
 
-import sentry_sdk
-from sentry_sdk import start_transaction
-from sentry_sdk.integrations.rq import RqIntegration
-from sentry_sdk.utils import parse_version
+import debugg_ai_sdk
+from debugg_ai_sdk import start_transaction
+from debugg_ai_sdk.integrations.rq import RqIntegration
+from debugg_ai_sdk.utils import parse_version
 
 
 @pytest.fixture(autouse=True)
@@ -181,7 +181,7 @@ def test_tracing_disabled(
     queue = rq.Queue(connection=FakeStrictRedis())
     worker = rq.SimpleWorker([queue], connection=queue.connection)
 
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
     queue.enqueue(crashing_job, foo=None)
     worker.work(burst=True)
 

@@ -1,9 +1,9 @@
-import sentry_sdk
-from sentry_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
-from sentry_sdk.integrations._wsgi_common import RequestExtractor
-from sentry_sdk.integrations.wsgi import SentryWsgiMiddleware
-from sentry_sdk.tracing import SOURCE_FOR_STYLE
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
+from debugg_ai_sdk.integrations._wsgi_common import RequestExtractor
+from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from typing import Dict
     from typing import Optional
 
-    from sentry_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk._types import Event, EventProcessor
 
 # In Falcon 3.0 `falcon.api_helpers` is renamed to `falcon.app_helpers`
 # and `falcon.API` to `falcon.App`
@@ -103,11 +103,11 @@ class SentryFalconMiddleware:
 
     def process_request(self, req, resp, *args, **kwargs):
         # type: (Any, Any, *Any, **Any) -> None
-        integration = sentry_sdk.get_client().get_integration(FalconIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(FalconIntegration)
         if integration is None:
             return
 
-        scope = sentry_sdk.get_isolation_scope()
+        scope = debugg_ai_sdk.get_isolation_scope()
         scope._name = "falcon"
         scope.add_event_processor(_make_request_event_processor(req, integration))
 
@@ -148,7 +148,7 @@ def _patch_wsgi_app():
 
     def sentry_patched_wsgi_app(self, env, start_response):
         # type: (falcon.API, Any, Any) -> Any
-        integration = sentry_sdk.get_client().get_integration(FalconIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(FalconIntegration)
         if integration is None:
             return original_wsgi_app(self, env, start_response)
 
@@ -190,10 +190,10 @@ def _patch_handle_exception():
         if _exception_leads_to_http_5xx(ex, response):
             event, hint = event_from_exception(
                 ex,
-                client_options=sentry_sdk.get_client().options,
+                client_options=debugg_ai_sdk.get_client().options,
                 mechanism={"type": "falcon", "handled": False},
             )
-            sentry_sdk.capture_event(event, hint=hint)
+            debugg_ai_sdk.capture_event(event, hint=hint)
 
         return was_handled
 
@@ -212,7 +212,7 @@ def _patch_prepare_middleware():
             # We don't support ASGI Falcon apps, so we don't patch anything here
             return original_prepare_middleware(middleware, independent_middleware, asgi)
 
-        integration = sentry_sdk.get_client().get_integration(FalconIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(FalconIntegration)
         if integration is not None:
             middleware = [SentryFalconMiddleware()] + (middleware or [])
 

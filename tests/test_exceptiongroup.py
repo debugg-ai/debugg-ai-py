@@ -1,7 +1,7 @@
 import sys
 import pytest
 
-from sentry_sdk.utils import event_from_exception
+from debugg_ai_sdk.utils import event_from_exception
 
 
 try:

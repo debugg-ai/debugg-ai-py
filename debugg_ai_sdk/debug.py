@@ -2,9 +2,9 @@ import sys
 import logging
 import warnings
 
-from sentry_sdk import get_client
-from sentry_sdk.client import _client_init_debug
-from sentry_sdk.utils import logger
+from debugg_ai_sdk import get_client
+from debugg_ai_sdk.client import _client_init_debug
+from debugg_ai_sdk.utils import logger
 from logging import LogRecord
 
 

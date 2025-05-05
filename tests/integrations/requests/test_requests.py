@@ -4,9 +4,9 @@ from unittest import mock
 import pytest
 import requests
 
-from sentry_sdk import capture_message
-from sentry_sdk.consts import SPANDATA
-from sentry_sdk.integrations.stdlib import StdlibIntegration
+from debugg_ai_sdk import capture_message
+from debugg_ai_sdk.consts import SPANDATA
+from debugg_ai_sdk.integrations.stdlib import StdlibIntegration
 from tests.conftest import ApproxDict, create_mock_http_server
 
 PORT = create_mock_http_server()

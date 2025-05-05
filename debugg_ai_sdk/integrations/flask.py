@@ -1,13 +1,13 @@
-import sentry_sdk
-from sentry_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
-from sentry_sdk.integrations._wsgi_common import (
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import _check_minimum_version, DidNotEnable, Integration
+from debugg_ai_sdk.integrations._wsgi_common import (
     DEFAULT_HTTP_METHODS_TO_CAPTURE,
     RequestExtractor,
 )
-from sentry_sdk.integrations.wsgi import SentryWsgiMiddleware
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import SOURCE_FOR_STYLE
-from sentry_sdk.utils import (
+from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     ensure_integration_enabled,
     event_from_exception,
@@ -19,8 +19,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict, Union
 
-    from sentry_sdk._types import Event, EventProcessor
-    from sentry_sdk.integrations.wsgi import _ScopedResponse
+    from debugg_ai_sdk._types import Event, EventProcessor
+    from debugg_ai_sdk.integrations.wsgi import _ScopedResponse
     from werkzeug.datastructures import FileStorage, ImmutableMultiDict
 
 
@@ -95,10 +95,10 @@ class FlaskIntegration(Integration):
 
         def sentry_patched_wsgi_app(self, environ, start_response):
             # type: (Any, Dict[str, str], Callable[..., Any]) -> _ScopedResponse
-            if sentry_sdk.get_client().get_integration(FlaskIntegration) is None:
+            if debugg_ai_sdk.get_client().get_integration(FlaskIntegration) is None:
                 return old_app(self, environ, start_response)
 
-            integration = sentry_sdk.get_client().get_integration(FlaskIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(FlaskIntegration)
 
             middleware = SentryWsgiMiddleware(
                 lambda *a, **kw: old_app(self, *a, **kw),
@@ -119,14 +119,14 @@ def _add_sentry_trace(sender, template, context, **extra):
     if "sentry_trace" in context:
         return
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
     trace_meta = Markup(scope.trace_propagation_meta())
     context["sentry_trace"] = trace_meta  # for backwards compatibility
     context["sentry_trace_meta"] = trace_meta
 
 
 def _set_transaction_name_and_source(scope, transaction_style, request):
-    # type: (sentry_sdk.Scope, str, Request) -> None
+    # type: (debugg_ai_sdk.Scope, str, Request) -> None
     try:
         name_for_style = {
             "url": request.url_rule.rule,
@@ -142,7 +142,7 @@ def _set_transaction_name_and_source(scope, transaction_style, request):
 
 def _request_started(app, **kwargs):
     # type: (Flask, **Any) -> None
-    integration = sentry_sdk.get_client().get_integration(FlaskIntegration)
+    integration = debugg_ai_sdk.get_client().get_integration(FlaskIntegration)
     if integration is None:
         return
 
@@ -151,10 +151,10 @@ def _request_started(app, **kwargs):
     # Set the transaction name and source here,
     # but rely on WSGI middleware to actually start the transaction
     _set_transaction_name_and_source(
-        sentry_sdk.get_current_scope(), integration.transaction_style, request
+        debugg_ai_sdk.get_current_scope(), integration.transaction_style, request
     )
 
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
     evt_processor = _make_request_event_processor(app, request, integration)
     scope.add_event_processor(evt_processor)
 
@@ -225,11 +225,11 @@ def _capture_exception(sender, exception, **kwargs):
     # type: (Flask, Union[ValueError, BaseException], **Any) -> None
     event, hint = event_from_exception(
         exception,
-        client_options=sentry_sdk.get_client().options,
+        client_options=debugg_ai_sdk.get_client().options,
         mechanism={"type": "flask", "handled": False},
     )
 
-    sentry_sdk.capture_event(event, hint=hint)
+    debugg_ai_sdk.capture_event(event, hint=hint)
 
 
 def _add_user_to_event(event):

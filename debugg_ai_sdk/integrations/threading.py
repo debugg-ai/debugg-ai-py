@@ -3,10 +3,10 @@ import warnings
 from functools import wraps
 from threading import Thread, current_thread
 
-import sentry_sdk
-from sentry_sdk.integrations import Integration
-from sentry_sdk.scope import use_isolation_scope, use_scope
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations import Integration
+from debugg_ai_sdk.scope import use_isolation_scope, use_scope
+from debugg_ai_sdk.utils import (
     event_from_exception,
     capture_internal_exceptions,
     logger,
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from typing import Callable
     from typing import Optional
 
-    from sentry_sdk._types import ExcInfo
+    from debugg_ai_sdk._types import ExcInfo
 
     F = TypeVar("F", bound=Callable[..., Any])
 
@@ -62,7 +62,7 @@ class ThreadingIntegration(Integration):
         @wraps(old_start)
         def sentry_start(self, *a, **kw):
             # type: (Thread, *Any, **Any) -> Any
-            integration = sentry_sdk.get_client().get_integration(ThreadingIntegration)
+            integration = debugg_ai_sdk.get_client().get_integration(ThreadingIntegration)
             if integration is None:
                 return old_start(self, *a, **kw)
 
@@ -82,12 +82,12 @@ class ThreadingIntegration(Integration):
                         "available in Django 3.1+ instead of Django channels, or upgrade to Python 3.9+.",
                         stacklevel=2,
                     )
-                    isolation_scope = sentry_sdk.get_isolation_scope()
-                    current_scope = sentry_sdk.get_current_scope()
+                    isolation_scope = debugg_ai_sdk.get_isolation_scope()
+                    current_scope = debugg_ai_sdk.get_current_scope()
 
                 else:
-                    isolation_scope = sentry_sdk.get_isolation_scope().fork()
-                    current_scope = sentry_sdk.get_current_scope().fork()
+                    isolation_scope = debugg_ai_sdk.get_isolation_scope().fork()
+                    current_scope = debugg_ai_sdk.get_current_scope().fork()
             else:
                 isolation_scope = None
                 current_scope = None
@@ -112,7 +112,7 @@ class ThreadingIntegration(Integration):
 
 
 def _wrap_run(isolation_scope_to_use, current_scope_to_use, old_run_func):
-    # type: (Optional[sentry_sdk.Scope], Optional[sentry_sdk.Scope], F) -> F
+    # type: (Optional[debugg_ai_sdk.Scope], Optional[debugg_ai_sdk.Scope], F) -> F
     @wraps(old_run_func)
     def run(*a, **kw):
         # type: (*Any, **Any) -> Any
@@ -138,13 +138,13 @@ def _capture_exception():
     # type: () -> ExcInfo
     exc_info = sys.exc_info()
 
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
     if client.get_integration(ThreadingIntegration) is not None:
         event, hint = event_from_exception(
             exc_info,
             client_options=client.options,
             mechanism={"type": "threading", "handled": False},
         )
-        sentry_sdk.capture_event(event, hint=hint)
+        debugg_ai_sdk.capture_event(event, hint=hint)
 
     return exc_info

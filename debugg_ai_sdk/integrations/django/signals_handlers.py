@@ -2,9 +2,9 @@ from functools import wraps
 
 from django.dispatch import Signal
 
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations.django import DJANGO_VERSION
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations.django import DJANGO_VERSION
 
 from typing import TYPE_CHECKING
 
@@ -46,7 +46,7 @@ def patch_signals():
     This only wraps sync receivers. Django>=5.0 introduced async receivers, but
     since we don't create transactions for ASGI Django, we don't wrap them.
     """
-    from sentry_sdk.integrations.django import DjangoIntegration
+    from debugg_ai_sdk.integrations.django import DjangoIntegration
 
     old_live_receivers = Signal._live_receivers
 
@@ -64,7 +64,7 @@ def patch_signals():
             def wrapper(*args, **kwargs):
                 # type: (Any, Any) -> Any
                 signal_name = _get_receiver_name(receiver)
-                with sentry_sdk.start_span(
+                with debugg_ai_sdk.start_span(
                     op=OP.EVENT_DJANGO,
                     name=signal_name,
                     origin=DjangoIntegration.origin,
@@ -74,7 +74,7 @@ def patch_signals():
 
             return wrapper
 
-        integration = sentry_sdk.get_client().get_integration(DjangoIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
         if (
             integration
             and integration.signals_spans

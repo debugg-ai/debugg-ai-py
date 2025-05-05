@@ -1,9 +1,9 @@
 import sys
 import logging
 
-from sentry_sdk import capture_exception, capture_event, start_transaction, start_span
-from sentry_sdk.utils import event_from_exception
-from sentry_sdk.scrubber import EventScrubber
+from debugg_ai_sdk import capture_exception, capture_event, start_transaction, start_span
+from debugg_ai_sdk.utils import event_from_exception
+from debugg_ai_sdk.scrubber import EventScrubber
 from tests.conftest import ApproxDict
 
 

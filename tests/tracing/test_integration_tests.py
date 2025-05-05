@@ -6,15 +6,15 @@ from unittest import mock
 
 import pytest
 
-import sentry_sdk
-from sentry_sdk import (
+import debugg_ai_sdk
+from debugg_ai_sdk import (
     capture_message,
     start_span,
     start_transaction,
 )
-from sentry_sdk.consts import SPANSTATUS
-from sentry_sdk.transport import Transport
-from sentry_sdk.tracing import Transaction
+from debugg_ai_sdk.consts import SPANSTATUS
+from debugg_ai_sdk.transport import Transport
+from debugg_ai_sdk.tracing import Transaction
 
 
 @pytest.mark.parametrize("sample_rate", [0.0, 1.0])
@@ -70,7 +70,7 @@ def test_continue_from_headers(
         with start_span() as old_span:
             old_span.sampled = parent_sampled
             headers = dict(
-                sentry_sdk.get_current_scope().iter_trace_propagation_headers(old_span)
+                debugg_ai_sdk.get_current_scope().iter_trace_propagation_headers(old_span)
             )
             headers["baggage"] = (
                 "other-vendor-value-1=foo;bar;baz, "
@@ -105,7 +105,7 @@ def test_continue_from_headers(
     with start_transaction(child_transaction):
         # change the transaction name from "WRONG" to make sure the change
         # is reflected in the final data
-        sentry_sdk.get_current_scope().transaction = "ho"
+        debugg_ai_sdk.get_current_scope().transaction = "ho"
         capture_message("hello")
 
     if parent_sampled is False or (sample_rate == 0 and parent_sampled is None):
@@ -155,7 +155,7 @@ def test_propagate_traces_deprecation_warning(sentry_init, sample_rate):
         with start_span() as old_span:
             with pytest.warns(DeprecationWarning):
                 dict(
-                    sentry_sdk.get_current_scope().iter_trace_propagation_headers(
+                    debugg_ai_sdk.get_current_scope().iter_trace_propagation_headers(
                         old_span
                     )
                 )
@@ -296,7 +296,7 @@ def test_trace_propagation_meta_head_sdk(sentry_init):
     with start_transaction(transaction):
         with start_span(op="foo", name="foodesc") as current_span:
             span = current_span
-            meta = sentry_sdk.get_current_scope().trace_propagation_meta()
+            meta = debugg_ai_sdk.get_current_scope().trace_propagation_meta()
 
     ind = meta.find(">") + 1
     sentry_trace, baggage = meta[:ind], meta[ind:]

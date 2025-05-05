@@ -4,8 +4,8 @@ from unittest import mock
 
 import pytest
 
-import sentry_sdk
-from sentry_sdk.tracing_utils import Baggage
+import debugg_ai_sdk
+from debugg_ai_sdk.tracing_utils import Baggage
 
 
 @pytest.mark.parametrize("sample_rand", (0.0, 0.25, 0.5, 0.75))
@@ -22,7 +22,7 @@ def test_deterministic_sampled(sentry_init, capture_events, sample_rate, sample_
     with mock.patch(
         "sentry_sdk.tracing_utils.Random.uniform", return_value=sample_rand
     ):
-        with sentry_sdk.start_transaction() as transaction:
+        with debugg_ai_sdk.start_transaction() as transaction:
             assert (
                 transaction.get_baggage().sentry_items["sample_rand"]
                 == f"{sample_rand:.6f}"  # noqa: E231
@@ -46,7 +46,7 @@ def test_transaction_uses_incoming_sample_rand(
     sentry_init(traces_sample_rate=sample_rate)
     events = capture_events()
 
-    with sentry_sdk.start_transaction(baggage=baggage) as transaction:
+    with debugg_ai_sdk.start_transaction(baggage=baggage) as transaction:
         assert (
             transaction.get_baggage().sentry_items["sample_rand"]
             == f"{sample_rand:.6f}"  # noqa: E231
@@ -77,7 +77,7 @@ def test_decimal_context(sentry_init, capture_events):
         with mock.patch(
             "sentry_sdk.tracing_utils.Random.uniform", return_value=0.123456789
         ):
-            with sentry_sdk.start_transaction() as transaction:
+            with debugg_ai_sdk.start_transaction() as transaction:
                 assert (
                     transaction.get_baggage().sentry_items["sample_rand"] == "0.123456"
                 )

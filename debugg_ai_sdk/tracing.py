@@ -4,10 +4,10 @@ import warnings
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 
-import sentry_sdk
-from sentry_sdk.consts import INSTRUMENTER, SPANSTATUS, SPANDATA
-from sentry_sdk.profiler.continuous_profiler import get_profiler_id
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import INSTRUMENTER, SPANSTATUS, SPANDATA
+from debugg_ai_sdk.profiler.continuous_profiler import get_profiler_id
+from debugg_ai_sdk.utils import (
     get_current_thread_meta,
     is_valid_sample_rate,
     logger,
@@ -36,9 +36,9 @@ if TYPE_CHECKING:
     P = ParamSpec("P")
     R = TypeVar("R")
 
-    from sentry_sdk.profiler.continuous_profiler import ContinuousProfile
-    from sentry_sdk.profiler.transaction_profiler import Profile
-    from sentry_sdk._types import (
+    from debugg_ai_sdk.profiler.continuous_profiler import ContinuousProfile
+    from debugg_ai_sdk.profiler.transaction_profiler import Profile
+    from debugg_ai_sdk._types import (
         Event,
         MeasurementUnit,
         SamplingContext,
@@ -76,7 +76,7 @@ if TYPE_CHECKING:
         description: str
         """A description of what operation is being performed within the span. This argument is DEPRECATED. Please use the `name` parameter, instead."""
 
-        hub: Optional["sentry_sdk.Hub"]
+        hub: Optional["debugg_ai_sdk.Hub"]
         """The hub to use for this span. This argument is DEPRECATED. Please use the `scope` parameter, instead."""
 
         status: str
@@ -91,7 +91,7 @@ if TYPE_CHECKING:
         will be used.
         """
 
-        scope: "sentry_sdk.Scope"
+        scope: "debugg_ai_sdk.Scope"
         """The scope to use for this span. If not provided, we use the current scope."""
 
         origin: str
@@ -292,11 +292,11 @@ class Span:
         sampled=None,  # type: Optional[bool]
         op=None,  # type: Optional[str]
         description=None,  # type: Optional[str]
-        hub=None,  # type: Optional[sentry_sdk.Hub]  # deprecated
+        hub=None,  # type: Optional[debugg_ai_sdk.Hub]  # deprecated
         status=None,  # type: Optional[str]
         containing_transaction=None,  # type: Optional[Transaction]
         start_timestamp=None,  # type: Optional[Union[datetime, float]]
-        scope=None,  # type: Optional[sentry_sdk.Scope]
+        scope=None,  # type: Optional[debugg_ai_sdk.Scope]
         origin="manual",  # type: str
         name=None,  # type: Optional[str]
     ):
@@ -381,7 +381,7 @@ class Span:
 
     def __enter__(self):
         # type: () -> Span
-        scope = self.scope or sentry_sdk.get_current_scope()
+        scope = self.scope or debugg_ai_sdk.get_current_scope()
         old_span = scope.span
         scope.span = self
         self._context_manager_state = (scope, old_span)
@@ -429,7 +429,7 @@ class Span:
                 stacklevel=2,
             )
 
-        configuration_instrumenter = sentry_sdk.get_client().options["instrumenter"]
+        configuration_instrumenter = debugg_ai_sdk.get_client().options["instrumenter"]
 
         if instrumenter != configuration_instrumenter:
             return NoOpSpan()
@@ -652,7 +652,7 @@ class Span:
         return self.status == "ok"
 
     def finish(self, scope=None, end_timestamp=None):
-        # type: (Optional[sentry_sdk.Scope], Optional[Union[float, datetime]]) -> Optional[str]
+        # type: (Optional[debugg_ai_sdk.Scope], Optional[Union[float, datetime]]) -> Optional[str]
         """
         Sets the end timestamp of the span.
 
@@ -684,7 +684,7 @@ class Span:
         except AttributeError:
             self.timestamp = datetime.now(timezone.utc)
 
-        scope = scope or sentry_sdk.get_current_scope()
+        scope = scope or debugg_ai_sdk.get_current_scope()
         maybe_create_breadcrumbs_from_span(scope, self)
 
         return None
@@ -908,10 +908,10 @@ class Transaction(Span):
 
     def _get_scope_from_finish_args(
         self,
-        scope_arg,  # type: Optional[Union[sentry_sdk.Scope, sentry_sdk.Hub]]
-        hub_arg,  # type: Optional[Union[sentry_sdk.Scope, sentry_sdk.Hub]]
+        scope_arg,  # type: Optional[Union[debugg_ai_sdk.Scope, debugg_ai_sdk.Hub]]
+        hub_arg,  # type: Optional[Union[debugg_ai_sdk.Scope, debugg_ai_sdk.Hub]]
     ):
-        # type: (...) -> Optional[sentry_sdk.Scope]
+        # type: (...) -> Optional[debugg_ai_sdk.Scope]
         """
         Logic to get the scope from the arguments passed to finish. This
         function exists for backwards compatibility with the old finish.
@@ -928,7 +928,7 @@ class Transaction(Span):
 
             scope_or_hub = hub_arg
 
-        if isinstance(scope_or_hub, sentry_sdk.Hub):
+        if isinstance(scope_or_hub, debugg_ai_sdk.Hub):
             warnings.warn(
                 "Passing a Hub to finish is deprecated. Please pass a Scope, instead.",
                 DeprecationWarning,
@@ -941,10 +941,10 @@ class Transaction(Span):
 
     def finish(
         self,
-        scope=None,  # type: Optional[sentry_sdk.Scope]
+        scope=None,  # type: Optional[debugg_ai_sdk.Scope]
         end_timestamp=None,  # type: Optional[Union[float, datetime]]
         *,
-        hub=None,  # type: Optional[sentry_sdk.Hub]
+        hub=None,  # type: Optional[debugg_ai_sdk.Hub]
     ):
         # type: (...) -> Optional[str]
         """Finishes the transaction and sends it to Sentry.
@@ -969,10 +969,10 @@ class Transaction(Span):
         # or `hub` could both either be a `Scope` or a `Hub`.
         scope = self._get_scope_from_finish_args(
             scope, hub
-        )  # type: Optional[sentry_sdk.Scope]
+        )  # type: Optional[debugg_ai_sdk.Scope]
 
-        scope = scope or self.scope or sentry_sdk.get_current_scope()
-        client = sentry_sdk.get_client()
+        scope = scope or self.scope or debugg_ai_sdk.get_current_scope()
+        client = debugg_ai_sdk.get_client()
 
         if not client.is_active():
             # We have no active client and therefore nowhere to send this transaction.
@@ -1155,7 +1155,7 @@ class Transaction(Span):
         4. If `traces_sampler` is not defined and there's no parent sampling
         decision, `traces_sample_rate` will be used.
         """
-        client = sentry_sdk.get_client()
+        client = debugg_ai_sdk.get_client()
 
         transaction_description = "{op}transaction <{name}>".format(
             op=("<" + self.op + "> " if self.op else ""), name=self.name
@@ -1301,10 +1301,10 @@ class NoOpSpan(Span):
 
     def finish(
         self,
-        scope=None,  # type: Optional[sentry_sdk.Scope]
+        scope=None,  # type: Optional[debugg_ai_sdk.Scope]
         end_timestamp=None,  # type: Optional[Union[float, datetime]]
         *,
-        hub=None,  # type: Optional[sentry_sdk.Hub]
+        hub=None,  # type: Optional[debugg_ai_sdk.Hub]
     ):
         # type: (...) -> Optional[str]
         """
@@ -1361,7 +1361,7 @@ def trace(func=None):
         async def my_async_function():
             ...
     """
-    from sentry_sdk.tracing_utils import start_child_span_decorator
+    from debugg_ai_sdk.tracing_utils import start_child_span_decorator
 
     # This patterns allows usage of both @sentry_traced and @sentry_traced(...)
     # See https://stackoverflow.com/questions/52126071/decorator-with-arguments-avoid-parenthesis-when-no-arguments/52126278
@@ -1373,7 +1373,7 @@ def trace(func=None):
 
 # Circular imports
 
-from sentry_sdk.tracing_utils import (
+from debugg_ai_sdk.tracing_utils import (
     Baggage,
     EnvironHeaders,
     extract_sentrytrace_data,
@@ -1385,4 +1385,4 @@ from sentry_sdk.tracing_utils import (
 with warnings.catch_warnings():
     # The code in this file which uses `LocalAggregator` is only called from the deprecated `metrics` module.
     warnings.simplefilter("ignore", DeprecationWarning)
-    from sentry_sdk.metrics import LocalAggregator
+    from debugg_ai_sdk.metrics import LocalAggregator

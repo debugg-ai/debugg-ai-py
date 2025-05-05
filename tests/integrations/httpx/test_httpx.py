@@ -4,10 +4,10 @@ from unittest import mock
 import httpx
 import pytest
 
-import sentry_sdk
-from sentry_sdk import capture_message, start_transaction
-from sentry_sdk.consts import MATCH_ALL, SPANDATA
-from sentry_sdk.integrations.httpx import HttpxIntegration
+import debugg_ai_sdk
+from debugg_ai_sdk import capture_message, start_transaction
+from debugg_ai_sdk.consts import MATCH_ALL, SPANDATA
+from debugg_ai_sdk.integrations.httpx import HttpxIntegration
 from tests.conftest import ApproxDict
 
 
@@ -328,7 +328,7 @@ def test_option_trace_propagation_targets(
         integrations=[HttpxIntegration()],
     )
 
-    with sentry_sdk.start_transaction():  # Must be in a transaction to propagate headers
+    with debugg_ai_sdk.start_transaction():  # Must be in a transaction to propagate headers
         if asyncio.iscoroutinefunction(httpx_client.get):
             asyncio.get_event_loop().run_until_complete(httpx_client.get(url))
         else:

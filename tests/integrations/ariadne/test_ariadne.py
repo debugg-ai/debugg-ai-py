@@ -4,10 +4,10 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from flask import Flask, request, jsonify
 
-from sentry_sdk.integrations.ariadne import AriadneIntegration
-from sentry_sdk.integrations.fastapi import FastApiIntegration
-from sentry_sdk.integrations.flask import FlaskIntegration
-from sentry_sdk.integrations.starlette import StarletteIntegration
+from debugg_ai_sdk.integrations.ariadne import AriadneIntegration
+from debugg_ai_sdk.integrations.fastapi import FastApiIntegration
+from debugg_ai_sdk.integrations.flask import FlaskIntegration
+from debugg_ai_sdk.integrations.starlette import StarletteIntegration
 
 
 def schema_factory():

@@ -4,9 +4,9 @@ import pytest
 
 from unittest import mock
 
-from sentry_sdk.integrations.celery import _update_celery_task_headers
-import sentry_sdk
-from sentry_sdk.tracing_utils import Baggage
+from debugg_ai_sdk.integrations.celery import _update_celery_task_headers
+import debugg_ai_sdk
+from debugg_ai_sdk.tracing_utils import Baggage
 
 
 BAGGAGE_VALUE = (
@@ -75,8 +75,8 @@ def test_span_with_transaction(sentry_init):
     headers = {}
     monitor_beat_tasks = False
 
-    with sentry_sdk.start_transaction(name="test_transaction") as transaction:
-        with sentry_sdk.start_span(op="test_span") as span:
+    with debugg_ai_sdk.start_transaction(name="test_transaction") as transaction:
+        with debugg_ai_sdk.start_span(op="test_span") as span:
             outgoing_headers = _update_celery_task_headers(
                 headers, span, monitor_beat_tasks
             )
@@ -97,8 +97,8 @@ def test_span_with_transaction_custom_headers(sentry_init):
         "sentry-trace": SENTRY_TRACE_VALUE,
     }
 
-    with sentry_sdk.start_transaction(name="test_transaction") as transaction:
-        with sentry_sdk.start_span(op="test_span") as span:
+    with debugg_ai_sdk.start_transaction(name="test_transaction") as transaction:
+        with debugg_ai_sdk.start_span(op="test_span") as span:
             outgoing_headers = _update_celery_task_headers(headers, span, False)
 
             assert outgoing_headers["sentry-trace"] == span.to_traceparent()
@@ -139,7 +139,7 @@ def test_celery_trace_propagation_default(sentry_init, monitor_beat_tasks):
     headers = {}
     span = None
 
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
 
     outgoing_headers = _update_celery_task_headers(headers, span, monitor_beat_tasks)
 
@@ -175,7 +175,7 @@ def test_celery_trace_propagation_traces_sample_rate(
     headers = {}
     span = None
 
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
 
     outgoing_headers = _update_celery_task_headers(headers, span, monitor_beat_tasks)
 
@@ -211,7 +211,7 @@ def test_celery_trace_propagation_enable_tracing(
     headers = {}
     span = None
 
-    scope = sentry_sdk.get_isolation_scope()
+    scope = debugg_ai_sdk.get_isolation_scope()
 
     outgoing_headers = _update_celery_task_headers(headers, span, monitor_beat_tasks)
 

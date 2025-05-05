@@ -4,8 +4,8 @@ Instrumentation for Redis Blaster (rb)
 https://github.com/getsentry/rb
 """
 
-from sentry_sdk.integrations.redis._sync_common import patch_redis_client
-from sentry_sdk.integrations.redis.modules.queries import _set_db_data
+from debugg_ai_sdk.integrations.redis._sync_common import patch_redis_client
+from debugg_ai_sdk.integrations.redis.modules.queries import _set_db_data
 
 
 def _patch_rb():

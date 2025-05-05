@@ -1,13 +1,13 @@
 import os
 from collections import deque
 
-from sentry_sdk._compat import PY311
-from sentry_sdk.utils import filename_for_module
+from debugg_ai_sdk._compat import PY311
+from debugg_ai_sdk.utils import filename_for_module
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from sentry_sdk._lru_cache import LRUCache
+    from debugg_ai_sdk._lru_cache import LRUCache
     from types import FrameType
     from typing import Deque
     from typing import List

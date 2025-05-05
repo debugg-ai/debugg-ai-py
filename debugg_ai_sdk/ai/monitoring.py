@@ -1,10 +1,10 @@
 import inspect
 from functools import wraps
 
-import sentry_sdk.utils
-from sentry_sdk import start_span
-from sentry_sdk.tracing import Span
-from sentry_sdk.utils import ContextVar
+import debugg_ai_sdk.utils
+from debugg_ai_sdk import start_span
+from debugg_ai_sdk.tracing import Span
+from debugg_ai_sdk.utils import ContextVar
 
 from typing import TYPE_CHECKING
 
@@ -46,12 +46,12 @@ def ai_track(description, **span_kwargs):
                     try:
                         res = f(*args, **kwargs)
                     except Exception as e:
-                        event, hint = sentry_sdk.utils.event_from_exception(
+                        event, hint = debugg_ai_sdk.utils.event_from_exception(
                             e,
-                            client_options=sentry_sdk.get_client().options,
+                            client_options=debugg_ai_sdk.get_client().options,
                             mechanism={"type": "ai_monitoring", "handled": False},
                         )
-                        sentry_sdk.capture_event(event, hint=hint)
+                        debugg_ai_sdk.capture_event(event, hint=hint)
                         raise e from None
                     finally:
                         _ai_pipeline_name.set(None)
@@ -75,12 +75,12 @@ def ai_track(description, **span_kwargs):
                     try:
                         res = await f(*args, **kwargs)
                     except Exception as e:
-                        event, hint = sentry_sdk.utils.event_from_exception(
+                        event, hint = debugg_ai_sdk.utils.event_from_exception(
                             e,
-                            client_options=sentry_sdk.get_client().options,
+                            client_options=debugg_ai_sdk.get_client().options,
                             mechanism={"type": "ai_monitoring", "handled": False},
                         )
-                        sentry_sdk.capture_event(event, hint=hint)
+                        debugg_ai_sdk.capture_event(event, hint=hint)
                         raise e from None
                     finally:
                         _ai_pipeline_name.set(None)

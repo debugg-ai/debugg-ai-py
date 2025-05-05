@@ -1,7 +1,7 @@
 import pytest
 
-import sentry_sdk
-from sentry_sdk.ai.monitoring import ai_track
+import debugg_ai_sdk
+from debugg_ai_sdk.ai.monitoring import ai_track
 
 
 def test_ai_track(sentry_init, capture_events):
@@ -16,7 +16,7 @@ def test_ai_track(sentry_init, capture_events):
     def pipeline():
         tool()
 
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         pipeline()
 
     transaction = events[0]
@@ -43,7 +43,7 @@ def test_ai_track_with_tags(sentry_init, capture_events):
     def pipeline():
         tool()
 
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         pipeline(sentry_tags={"user": "colin"}, sentry_data={"some_data": "value"})
 
     transaction = events[0]
@@ -74,7 +74,7 @@ async def test_ai_track_async(sentry_init, capture_events):
     async def async_pipeline():
         await async_tool()
 
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         await async_pipeline()
 
     transaction = events[0]
@@ -102,7 +102,7 @@ async def test_ai_track_async_with_tags(sentry_init, capture_events):
     async def async_pipeline():
         await async_tool()
 
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         await async_pipeline(
             sentry_tags={"user": "czyber"}, sentry_data={"some_data": "value"}
         )

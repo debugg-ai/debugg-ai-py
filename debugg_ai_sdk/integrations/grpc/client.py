@@ -1,7 +1,7 @@
-import sentry_sdk
-from sentry_sdk.consts import OP
-from sentry_sdk.integrations import DidNotEnable
-from sentry_sdk.integrations.grpc.consts import SPAN_ORIGIN
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import OP
+from debugg_ai_sdk.integrations import DidNotEnable
+from debugg_ai_sdk.integrations.grpc.consts import SPAN_ORIGIN
 
 from typing import TYPE_CHECKING
 
@@ -27,7 +27,7 @@ class ClientInterceptor(
         # type: (ClientInterceptor, Callable[[ClientCallDetails, Message], _UnaryOutcome], ClientCallDetails, Message) -> _UnaryOutcome
         method = client_call_details.method
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.GRPC_CLIENT,
             name="unary unary call to %s" % method,
             origin=SPAN_ORIGIN,
@@ -48,7 +48,7 @@ class ClientInterceptor(
         # type: (ClientInterceptor, Callable[[ClientCallDetails, Message], Union[Iterable[Any], UnaryStreamCall]], ClientCallDetails, Message) -> Union[Iterator[Message], Call]
         method = client_call_details.method
 
-        with sentry_sdk.start_span(
+        with debugg_ai_sdk.start_span(
             op=OP.GRPC_CLIENT,
             name="unary stream call to %s" % method,
             origin=SPAN_ORIGIN,
@@ -77,7 +77,7 @@ class ClientInterceptor(
         for (
             key,
             value,
-        ) in sentry_sdk.get_current_scope().iter_trace_propagation_headers():
+        ) in debugg_ai_sdk.get_current_scope().iter_trace_propagation_headers():
             metadata.append((key, value))
 
         client_call_details = grpc._interceptor._ClientCallDetails(

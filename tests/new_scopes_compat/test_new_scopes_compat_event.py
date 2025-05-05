@@ -2,10 +2,10 @@ import pytest
 
 from unittest import mock
 
-import sentry_sdk
-from sentry_sdk.hub import Hub
-from sentry_sdk.integrations import iter_default_integrations
-from sentry_sdk.scrubber import EventScrubber, DEFAULT_DENYLIST
+import debugg_ai_sdk
+from debugg_ai_sdk.hub import Hub
+from debugg_ai_sdk.integrations import iter_default_integrations
+from debugg_ai_sdk.scrubber import EventScrubber, DEFAULT_DENYLIST
 
 
 """
@@ -243,7 +243,7 @@ def _faulty_function():
     try:
         raise ValueError("This is a test exception")
     except ValueError as ex:
-        sentry_sdk.capture_exception(ex)
+        debugg_ai_sdk.capture_exception(ex)
 
 
 def _test_before_send(event, hint):
@@ -267,22 +267,22 @@ def _generate_event_data(scope=None):
     """
     Generates some data to be used in the events sent by the tests.
     """
-    sentry_sdk.set_level("warning-X")
+    debugg_ai_sdk.set_level("warning-X")
 
-    sentry_sdk.add_breadcrumb(
+    debugg_ai_sdk.add_breadcrumb(
         category="info-level",
         message="Authenticated user %s",
         level="info",
         data={"breadcrumb1": "somedata"},
     )
-    sentry_sdk.add_breadcrumb(
+    debugg_ai_sdk.add_breadcrumb(
         category="error-level",
         message="Authenticated user %s",
         level="error",
         data={"breadcrumb2": "somedata"},
     )
 
-    sentry_sdk.set_context(
+    debugg_ai_sdk.set_context(
         "character",
         {
             "name": "Mighty Fighter",
@@ -291,18 +291,18 @@ def _generate_event_data(scope=None):
         },
     )
 
-    sentry_sdk.set_extra("extra1", "extra1_value")
-    sentry_sdk.set_extra("extra2", "extra2_value")
-    sentry_sdk.set_extra("should_be_removed_by_event_scrubber", "XXX")
+    debugg_ai_sdk.set_extra("extra1", "extra1_value")
+    debugg_ai_sdk.set_extra("extra2", "extra2_value")
+    debugg_ai_sdk.set_extra("should_be_removed_by_event_scrubber", "XXX")
 
-    sentry_sdk.set_tag("tag1", "tag1_value")
-    sentry_sdk.set_tag("tag2", "tag2_value")
+    debugg_ai_sdk.set_tag("tag1", "tag1_value")
+    debugg_ai_sdk.set_tag("tag2", "tag2_value")
 
-    sentry_sdk.set_user(
+    debugg_ai_sdk.set_user(
         {"id": "123", "email": "jane.doe@example.com", "ip_address": "211.161.1.124"}
     )
 
-    sentry_sdk.set_measurement("memory_used", 456, "byte")
+    debugg_ai_sdk.set_measurement("memory_used", 456, "byte")
 
     if scope is not None:
         scope.add_attachment(bytes=b"Hello World", filename="hello.txt")
@@ -335,11 +335,11 @@ def test_event(sentry_init, capture_envelopes, expected_error, expected_transact
 
     envelopes = capture_envelopes()
 
-    with sentry_sdk.start_transaction(
+    with debugg_ai_sdk.start_transaction(
         name="test_transaction", op="test_transaction_op"
     ) as trx:
-        with sentry_sdk.start_span(op="test_span") as span:
-            with sentry_sdk.configure_scope() as scope:  # configure scope
+        with debugg_ai_sdk.start_span(op="test_span") as span:
+            with debugg_ai_sdk.configure_scope() as scope:  # configure scope
                 _generate_event_data(scope)
                 _faulty_function()
 
@@ -365,17 +365,17 @@ def test_event2(sentry_init, capture_envelopes, expected_error, expected_transac
     envelopes = capture_envelopes()
 
     with Hub(Hub.current):
-        sentry_sdk.set_tag("A", 1)  # will not be added
+        debugg_ai_sdk.set_tag("A", 1)  # will not be added
 
     with Hub.current:  # with hub
-        with sentry_sdk.push_scope() as scope:
+        with debugg_ai_sdk.push_scope() as scope:
             scope.set_tag("B", 1)  # will not be added
 
-        with sentry_sdk.start_transaction(
+        with debugg_ai_sdk.start_transaction(
             name="test_transaction", op="test_transaction_op"
         ) as trx:
-            with sentry_sdk.start_span(op="test_span") as span:
-                with sentry_sdk.configure_scope() as scope:  # configure scope
+            with debugg_ai_sdk.start_span(op="test_span") as span:
+                with debugg_ai_sdk.configure_scope() as scope:  # configure scope
                     _generate_event_data(scope)
                     _faulty_function()
 
@@ -401,17 +401,17 @@ def test_event3(sentry_init, capture_envelopes, expected_error, expected_transac
     envelopes = capture_envelopes()
 
     with Hub(Hub.current):
-        sentry_sdk.set_tag("A", 1)  # will not be added
+        debugg_ai_sdk.set_tag("A", 1)  # will not be added
 
     with Hub.current:  # with hub
-        with sentry_sdk.push_scope() as scope:
+        with debugg_ai_sdk.push_scope() as scope:
             scope.set_tag("B", 1)  # will not be added
 
-        with sentry_sdk.push_scope() as scope:  # push scope
-            with sentry_sdk.start_transaction(
+        with debugg_ai_sdk.push_scope() as scope:  # push scope
+            with debugg_ai_sdk.start_transaction(
                 name="test_transaction", op="test_transaction_op"
             ) as trx:
-                with sentry_sdk.start_span(op="test_span") as span:
+                with debugg_ai_sdk.start_span(op="test_span") as span:
                     _generate_event_data(scope)
                     _faulty_function()
 
@@ -437,17 +437,17 @@ def test_event4(sentry_init, capture_envelopes, expected_error, expected_transac
     envelopes = capture_envelopes()
 
     with Hub(Hub.current):
-        sentry_sdk.set_tag("A", 1)  # will not be added
+        debugg_ai_sdk.set_tag("A", 1)  # will not be added
 
     with Hub(Hub.current):  # with hub clone
-        with sentry_sdk.push_scope() as scope:
+        with debugg_ai_sdk.push_scope() as scope:
             scope.set_tag("B", 1)  # will not be added
 
-        with sentry_sdk.start_transaction(
+        with debugg_ai_sdk.start_transaction(
             name="test_transaction", op="test_transaction_op"
         ) as trx:
-            with sentry_sdk.start_span(op="test_span") as span:
-                with sentry_sdk.configure_scope() as scope:  # configure scope
+            with debugg_ai_sdk.start_span(op="test_span") as span:
+                with debugg_ai_sdk.configure_scope() as scope:  # configure scope
                     _generate_event_data(scope)
                     _faulty_function()
 
@@ -473,17 +473,17 @@ def test_event5(sentry_init, capture_envelopes, expected_error, expected_transac
     envelopes = capture_envelopes()
 
     with Hub(Hub.current):
-        sentry_sdk.set_tag("A", 1)  # will not be added
+        debugg_ai_sdk.set_tag("A", 1)  # will not be added
 
     with Hub(Hub.current):  # with hub clone
-        with sentry_sdk.push_scope() as scope:
+        with debugg_ai_sdk.push_scope() as scope:
             scope.set_tag("B", 1)  # will not be added
 
-        with sentry_sdk.push_scope() as scope:  # push scope
-            with sentry_sdk.start_transaction(
+        with debugg_ai_sdk.push_scope() as scope:  # push scope
+            with debugg_ai_sdk.start_transaction(
                 name="test_transaction", op="test_transaction_op"
             ) as trx:
-                with sentry_sdk.start_span(op="test_span") as span:
+                with debugg_ai_sdk.start_span(op="test_span") as span:
                     _generate_event_data(scope)
                     _faulty_function()
 

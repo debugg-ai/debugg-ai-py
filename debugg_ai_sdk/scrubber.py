@@ -1,4 +1,4 @@
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
     AnnotatedValue,
     iter_event_frames,
@@ -7,7 +7,7 @@ from sentry_sdk.utils import (
 from typing import TYPE_CHECKING, cast, List, Dict
 
 if TYPE_CHECKING:
-    from sentry_sdk._types import Event
+    from debugg_ai_sdk._types import Event
     from typing import Optional
 
 

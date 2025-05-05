@@ -1,7 +1,7 @@
 import os
 import mimetypes
 
-from sentry_sdk.envelope import Item, PayloadRef
+from debugg_ai_sdk.envelope import Item, PayloadRef
 
 from typing import TYPE_CHECKING
 

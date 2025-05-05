@@ -1,9 +1,9 @@
 from functools import wraps
 from inspect import iscoroutinefunction
 
-from sentry_sdk.crons import capture_checkin
-from sentry_sdk.crons.consts import MonitorStatus
-from sentry_sdk.utils import now
+from debugg_ai_sdk.crons import capture_checkin
+from debugg_ai_sdk.crons.consts import MonitorStatus
+from debugg_ai_sdk.utils import now
 
 from typing import TYPE_CHECKING
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
         cast,
         overload,
     )
-    from sentry_sdk._types import MonitorConfig
+    from debugg_ai_sdk._types import MonitorConfig
 
     P = ParamSpec("P")
     R = TypeVar("R")

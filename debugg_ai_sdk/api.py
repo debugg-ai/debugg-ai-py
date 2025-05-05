@@ -2,12 +2,12 @@ import inspect
 import warnings
 from contextlib import contextmanager
 
-from sentry_sdk import tracing_utils, Client
-from sentry_sdk._init_implementation import init
-from sentry_sdk.consts import INSTRUMENTER
-from sentry_sdk.scope import Scope, _ScopeManager, new_scope, isolation_scope
-from sentry_sdk.tracing import NoOpSpan, Transaction, trace
-from sentry_sdk.crons import monitor
+from debugg_ai_sdk import tracing_utils, Client
+from debugg_ai_sdk._init_implementation import init
+from debugg_ai_sdk.consts import INSTRUMENTER
+from debugg_ai_sdk.scope import Scope, _ScopeManager, new_scope, isolation_scope
+from debugg_ai_sdk.tracing import NoOpSpan, Transaction, trace
+from debugg_ai_sdk.crons import monitor
 
 from typing import TYPE_CHECKING
 
@@ -26,8 +26,8 @@ if TYPE_CHECKING:
 
     from typing_extensions import Unpack
 
-    from sentry_sdk.client import BaseClient
-    from sentry_sdk._types import (
+    from debugg_ai_sdk.client import BaseClient
+    from debugg_ai_sdk._types import (
         Event,
         Hint,
         Breadcrumb,
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
         LogLevelStr,
         SamplingContext,
     )
-    from sentry_sdk.tracing import Span, TransactionKwargs
+    from debugg_ai_sdk.tracing import Span, TransactionKwargs
 
     T = TypeVar("T")
     F = TypeVar("F", bound=Callable[..., Any])

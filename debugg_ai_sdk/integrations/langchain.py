@@ -1,14 +1,14 @@
 from collections import OrderedDict
 from functools import wraps
 
-import sentry_sdk
-from sentry_sdk.ai.monitoring import set_ai_pipeline_name, record_token_usage
-from sentry_sdk.consts import OP, SPANDATA
-from sentry_sdk.ai.utils import set_data_normalized
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import Span
-from sentry_sdk.integrations import DidNotEnable, Integration
-from sentry_sdk.utils import logger, capture_internal_exceptions
+import debugg_ai_sdk
+from debugg_ai_sdk.ai.monitoring import set_ai_pipeline_name, record_token_usage
+from debugg_ai_sdk.consts import OP, SPANDATA
+from debugg_ai_sdk.ai.utils import set_data_normalized
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import Span
+from debugg_ai_sdk.integrations import DidNotEnable, Integration
+from debugg_ai_sdk.utils import logger, capture_internal_exceptions
 
 from typing import TYPE_CHECKING
 
@@ -123,7 +123,7 @@ class SentryLangchainCallback(BaseCallbackHandler):  # type: ignore[misc]
         span_data = self.span_map[run_id]
         if not span_data:
             return
-        sentry_sdk.capture_exception(error, span_data.span.scope)
+        debugg_ai_sdk.capture_exception(error, span_data.span.scope)
         span_data.span.__exit__(None, None, None)
         del self.span_map[run_id]
 
@@ -143,7 +143,7 @@ class SentryLangchainCallback(BaseCallbackHandler):  # type: ignore[misc]
                 watched_span = WatchedSpan(parent_span.span.start_child(**kwargs))
                 parent_span.children.append(watched_span)
         if watched_span is None:
-            watched_span = WatchedSpan(sentry_sdk.start_span(**kwargs))
+            watched_span = WatchedSpan(debugg_ai_sdk.start_span(**kwargs))
 
         if kwargs.get("op", "").startswith("ai.pipeline."):
             if kwargs.get("name"):
@@ -419,7 +419,7 @@ def _wrap_configure(f):
     def new_configure(*args, **kwargs):
         # type: (Any, Any) -> Any
 
-        integration = sentry_sdk.get_client().get_integration(LangchainIntegration)
+        integration = debugg_ai_sdk.get_client().get_integration(LangchainIntegration)
         if integration is None:
             return f(*args, **kwargs)
 

@@ -12,8 +12,8 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from functools import wraps, partial
 
-import sentry_sdk
-from sentry_sdk.utils import (
+import debugg_ai_sdk
+from debugg_ai_sdk.utils import (
     ContextVar,
     now,
     nanosecond_time,
@@ -21,8 +21,8 @@ from sentry_sdk.utils import (
     serialize_frame,
     json_dumps,
 )
-from sentry_sdk.envelope import Envelope, Item
-from sentry_sdk.tracing import TransactionSource
+from debugg_ai_sdk.envelope import Envelope, Item
+from debugg_ai_sdk.tracing import TransactionSource
 
 from typing import TYPE_CHECKING
 
@@ -38,16 +38,16 @@ if TYPE_CHECKING:
     from typing import Tuple
     from typing import Union
 
-    from sentry_sdk._types import BucketKey
-    from sentry_sdk._types import DurationUnit
-    from sentry_sdk._types import FlushedMetricValue
-    from sentry_sdk._types import MeasurementUnit
-    from sentry_sdk._types import MetricMetaKey
-    from sentry_sdk._types import MetricTagValue
-    from sentry_sdk._types import MetricTags
-    from sentry_sdk._types import MetricTagsInternal
-    from sentry_sdk._types import MetricType
-    from sentry_sdk._types import MetricValue
+    from debugg_ai_sdk._types import BucketKey
+    from debugg_ai_sdk._types import DurationUnit
+    from debugg_ai_sdk._types import FlushedMetricValue
+    from debugg_ai_sdk._types import MeasurementUnit
+    from debugg_ai_sdk._types import MetricMetaKey
+    from debugg_ai_sdk._types import MetricTagValue
+    from debugg_ai_sdk._types import MetricTags
+    from debugg_ai_sdk._types import MetricTagsInternal
+    from debugg_ai_sdk._types import MetricType
+    from debugg_ai_sdk._types import MetricValue
 
 
 warnings.warn(
@@ -725,7 +725,7 @@ def _tags_to_dict(tags):
 
 def _get_aggregator():
     # type: () -> Optional[MetricsAggregator]
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
     return (
         client.metrics_aggregator
         if client.is_active() and client.metrics_aggregator is not None
@@ -735,7 +735,7 @@ def _get_aggregator():
 
 def _get_aggregator_and_update_tags(key, value, unit, tags):
     # type: (str, Optional[MetricValue], MeasurementUnit, Optional[MetricTags]) -> Tuple[Optional[MetricsAggregator], Optional[LocalAggregator], Optional[MetricTags]]
-    client = sentry_sdk.get_client()
+    client = debugg_ai_sdk.get_client()
     if not client.is_active() or client.metrics_aggregator is None:
         return None, None, tags
 
@@ -743,7 +743,7 @@ def _get_aggregator_and_update_tags(key, value, unit, tags):
     updated_tags.setdefault("release", client.options["release"])
     updated_tags.setdefault("environment", client.options["environment"])
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
     local_aggregator = None
 
     # We go with the low-level API here to access transaction information as
@@ -807,7 +807,7 @@ class _Timing:
         self.value = value
         self.unit = unit
         self.entered = None  # type: Optional[float]
-        self._span = None  # type: Optional[sentry_sdk.tracing.Span]
+        self._span = None  # type: Optional[debugg_ai_sdk.tracing.Span]
         self.stacklevel = stacklevel
 
     def _validate_invocation(self, context):
@@ -821,7 +821,7 @@ class _Timing:
         # type: (...) -> _Timing
         self.entered = TIMING_FUNCTIONS[self.unit]()
         self._validate_invocation("context-manager")
-        self._span = sentry_sdk.start_span(op="metric.timing", name=self.key)
+        self._span = debugg_ai_sdk.start_span(op="metric.timing", name=self.key)
         if self.tags:
             for key, value in self.tags.items():
                 if isinstance(value, (tuple, list)):

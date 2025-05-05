@@ -12,9 +12,9 @@ if FakeRedisAsync is None:
         allow_module_level=True,
     )
 
-from sentry_sdk.integrations.redis import RedisIntegration
-from sentry_sdk.utils import parse_version
-import sentry_sdk
+from debugg_ai_sdk.integrations.redis import RedisIntegration
+from debugg_ai_sdk.utils import parse_version
+import debugg_ai_sdk
 
 
 FAKEREDIS_VERSION = parse_version(fakeredis.__version__)
@@ -31,7 +31,7 @@ async def test_no_cache_basic(sentry_init, capture_events):
     events = capture_events()
 
     connection = FakeRedisAsync()
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         await connection.get("myasynccachekey")
 
     (event,) = events
@@ -53,7 +53,7 @@ async def test_cache_basic(sentry_init, capture_events):
     events = capture_events()
 
     connection = FakeRedisAsync()
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         await connection.get("myasynccachekey")
 
     (event,) = events
@@ -77,7 +77,7 @@ async def test_cache_keys(sentry_init, capture_events):
     events = capture_events()
 
     connection = FakeRedisAsync()
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         await connection.get("asomethingelse")
         await connection.get("ablub")
         await connection.get("ablubkeything")
@@ -116,7 +116,7 @@ async def test_cache_data(sentry_init, capture_events):
     events = capture_events()
 
     connection = FakeRedisAsync(host="mycacheserver.io", port=6378)
-    with sentry_sdk.start_transaction():
+    with debugg_ai_sdk.start_transaction():
         await connection.get("myasynccachekey")
         await connection.set("myasynccachekey", "事实胜于雄辩")
         await connection.get("myasynccachekey")

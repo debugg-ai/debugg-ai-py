@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from sentry_sdk.tracing_utils import PropagationContext
+from debugg_ai_sdk.tracing_utils import PropagationContext
 
 
 SAMPLED_FLAG = {

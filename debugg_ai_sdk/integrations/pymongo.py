@@ -1,12 +1,12 @@
 import copy
 import json
 
-import sentry_sdk
-from sentry_sdk.consts import SPANSTATUS, SPANDATA, OP
-from sentry_sdk.integrations import DidNotEnable, Integration
-from sentry_sdk.scope import should_send_default_pii
-from sentry_sdk.tracing import Span
-from sentry_sdk.utils import capture_internal_exceptions
+import debugg_ai_sdk
+from debugg_ai_sdk.consts import SPANSTATUS, SPANDATA, OP
+from debugg_ai_sdk.integrations import DidNotEnable, Integration
+from debugg_ai_sdk.scope import should_send_default_pii
+from debugg_ai_sdk.tracing import Span
+from debugg_ai_sdk.utils import capture_internal_exceptions
 
 try:
     from pymongo import monitoring
@@ -117,7 +117,7 @@ class CommandTracer(monitoring.CommandListener):
 
     def started(self, event):
         # type: (CommandStartedEvent) -> None
-        if sentry_sdk.get_client().get_integration(PyMongoIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(PyMongoIntegration) is None:
             return
 
         with capture_internal_exceptions():
@@ -156,7 +156,7 @@ class CommandTracer(monitoring.CommandListener):
                 command = _strip_pii(command)
 
             query = json.dumps(command, default=str)
-            span = sentry_sdk.start_span(
+            span = debugg_ai_sdk.start_span(
                 op=OP.DB,
                 name=query,
                 origin=PyMongoIntegration.origin,
@@ -173,7 +173,7 @@ class CommandTracer(monitoring.CommandListener):
                 span.set_data(key, value)
 
             with capture_internal_exceptions():
-                sentry_sdk.add_breadcrumb(
+                debugg_ai_sdk.add_breadcrumb(
                     message=query, category="query", type=OP.DB, data=tags
                 )
 
@@ -181,7 +181,7 @@ class CommandTracer(monitoring.CommandListener):
 
     def failed(self, event):
         # type: (CommandFailedEvent) -> None
-        if sentry_sdk.get_client().get_integration(PyMongoIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(PyMongoIntegration) is None:
             return
 
         try:
@@ -193,7 +193,7 @@ class CommandTracer(monitoring.CommandListener):
 
     def succeeded(self, event):
         # type: (CommandSucceededEvent) -> None
-        if sentry_sdk.get_client().get_integration(PyMongoIntegration) is None:
+        if debugg_ai_sdk.get_client().get_integration(PyMongoIntegration) is None:
             return
 
         try:

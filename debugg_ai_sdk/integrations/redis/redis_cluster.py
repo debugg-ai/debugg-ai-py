@@ -5,14 +5,14 @@ This is part of the main redis-py client.
 https://github.com/redis/redis-py/blob/master/redis/cluster.py
 """
 
-from sentry_sdk.integrations.redis._sync_common import (
+from debugg_ai_sdk.integrations.redis._sync_common import (
     patch_redis_client,
     patch_redis_pipeline,
 )
-from sentry_sdk.integrations.redis.modules.queries import _set_db_data_on_span
-from sentry_sdk.integrations.redis.utils import _parse_rediscluster_command
+from debugg_ai_sdk.integrations.redis.modules.queries import _set_db_data_on_span
+from debugg_ai_sdk.integrations.redis.utils import _parse_rediscluster_command
 
-from sentry_sdk.utils import capture_internal_exceptions
+from debugg_ai_sdk.utils import capture_internal_exceptions
 
 from typing import TYPE_CHECKING
 
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
         RedisCluster as AsyncRedisCluster,
         ClusterPipeline as AsyncClusterPipeline,
     )
-    from sentry_sdk.tracing import Span
+    from debugg_ai_sdk.tracing import Span
 
 
 def _set_async_cluster_db_data(span, async_redis_cluster_instance):
@@ -81,7 +81,7 @@ def _patch_redis_cluster():
     except ImportError:
         pass
     else:
-        from sentry_sdk.integrations.redis._async_common import (
+        from debugg_ai_sdk.integrations.redis._async_common import (
             patch_redis_async_client,
             patch_redis_async_pipeline,
         )

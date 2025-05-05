@@ -1,10 +1,10 @@
-from sentry_sdk.scope import Scope
-from sentry_sdk.transport import Transport, HttpTransport
-from sentry_sdk.client import Client
+from debugg_ai_sdk.scope import Scope
+from debugg_ai_sdk.transport import Transport, HttpTransport
+from debugg_ai_sdk.client import Client
 
-from sentry_sdk.api import *  # noqa
+from debugg_ai_sdk.api import *  # noqa
 
-from sentry_sdk.consts import VERSION  # noqa
+from debugg_ai_sdk.consts import VERSION  # noqa
 
 __all__ = [  # noqa
     "Hub",
@@ -50,10 +50,10 @@ __all__ = [  # noqa
 ]
 
 # Initialize the debug support after everything is loaded
-from sentry_sdk.debug import init_debug_support
+from debugg_ai_sdk.debug import init_debug_support
 
 init_debug_support()
 del init_debug_support
 
 # circular imports
-from sentry_sdk.hub import Hub
+from debugg_ai_sdk.hub import Hub

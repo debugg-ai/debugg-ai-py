@@ -11,13 +11,13 @@ from opentelemetry.trace import (
 )
 from opentelemetry.trace.propagation import get_current_span
 
-from sentry_sdk.integrations.opentelemetry.consts import (
+from debugg_ai_sdk.integrations.opentelemetry.consts import (
     SENTRY_BAGGAGE_KEY,
     SENTRY_TRACE_KEY,
 )
-from sentry_sdk.integrations.opentelemetry.propagator import SentryPropagator
-from sentry_sdk.integrations.opentelemetry.span_processor import SentrySpanProcessor
-from sentry_sdk.tracing_utils import Baggage
+from debugg_ai_sdk.integrations.opentelemetry.propagator import SentryPropagator
+from debugg_ai_sdk.integrations.opentelemetry.span_processor import SentrySpanProcessor
+from debugg_ai_sdk.tracing_utils import Baggage
 
 
 @pytest.mark.forked

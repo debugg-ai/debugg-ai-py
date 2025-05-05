@@ -1,6 +1,6 @@
 from functools import partial, partialmethod
 
-from sentry_sdk.utils import transaction_from_function
+from debugg_ai_sdk.utils import transaction_from_function
 
 
 class MyClass:

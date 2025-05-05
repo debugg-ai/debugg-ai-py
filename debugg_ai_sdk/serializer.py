@@ -3,7 +3,7 @@ import math
 from collections.abc import Mapping, Sequence, Set
 from datetime import datetime
 
-from sentry_sdk.utils import (
+from debugg_ai_sdk.utils import (
     AnnotatedValue,
     capture_internal_exception,
     disable_capture_event,
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from typing import Type
     from typing import Union
 
-    from sentry_sdk._types import NotImplementedType
+    from debugg_ai_sdk._types import NotImplementedType
 
     Span = Dict[str, Any]
 

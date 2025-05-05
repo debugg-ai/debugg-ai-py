@@ -1,6 +1,6 @@
 import inspect
 import os
-import sentry_sdk
+import debugg_ai_sdk
 import sys
 import threading
 import time
@@ -10,21 +10,21 @@ from unittest import mock
 
 import pytest
 
-from sentry_sdk import start_transaction
-from sentry_sdk.profiler.transaction_profiler import (
+from debugg_ai_sdk import start_transaction
+from debugg_ai_sdk.profiler.transaction_profiler import (
     GeventScheduler,
     Profile,
     Scheduler,
     ThreadScheduler,
     setup_profiler,
 )
-from sentry_sdk.profiler.utils import (
+from debugg_ai_sdk.profiler.utils import (
     extract_frame,
     extract_stack,
     frame_id,
     get_frame_name,
 )
-from sentry_sdk._lru_cache import LRUCache
+from debugg_ai_sdk._lru_cache import LRUCache
 
 try:
     import gevent
@@ -818,7 +818,7 @@ def test_profile_processing(
 
 
 def test_hub_backwards_compatibility(suppress_deprecation_warnings):
-    hub = sentry_sdk.Hub()
+    hub = debugg_ai_sdk.Hub()
 
     with pytest.warns(DeprecationWarning):
         profile = Profile(True, 0, hub=hub)
@@ -826,7 +826,7 @@ def test_hub_backwards_compatibility(suppress_deprecation_warnings):
     with pytest.warns(DeprecationWarning):
         assert profile.hub is hub
 
-    new_hub = sentry_sdk.Hub()
+    new_hub = debugg_ai_sdk.Hub()
 
     with pytest.warns(DeprecationWarning):
         profile.hub = new_hub
