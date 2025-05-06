@@ -105,7 +105,7 @@ class _LoguruBaseHandler(_BaseHandler):
 
 
 class LoguruEventHandler(_LoguruBaseHandler, EventHandler):
-    """Modified version of :class:`sentry_sdk.integrations.logging.EventHandler` to use loguru's level names."""
+    """Modified version of :class:`debugg_ai_sdk.integrations.logging.EventHandler` to use loguru's level names."""
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
@@ -118,7 +118,7 @@ class LoguruEventHandler(_LoguruBaseHandler, EventHandler):
 
 
 class LoguruBreadcrumbHandler(_LoguruBaseHandler, BreadcrumbHandler):
-    """Modified version of :class:`sentry_sdk.integrations.logging.BreadcrumbHandler` to use loguru's level names."""
+    """Modified version of :class:`debugg_ai_sdk.integrations.logging.BreadcrumbHandler` to use loguru's level names."""
 
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None

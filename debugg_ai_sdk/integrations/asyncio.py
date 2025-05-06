@@ -93,7 +93,7 @@ def patch_asyncio():
         # When there is no running loop, we have nothing to patch.
         logger.warning(
             "There is no running asyncio loop so there is nothing Sentry can patch. "
-            "Please make sure you call sentry_sdk.init() within a running "
+            "Please make sure you call debugg_ai_sdk.init() within a running "
             "asyncio loop for the AsyncioIntegration to work. "
             "See https://docs.sentry.io/platforms/python/integrations/asyncio/"
         )

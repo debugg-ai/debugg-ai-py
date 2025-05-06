@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
-"""
-Sentry-Python - Sentry SDK for Python
-=====================================
 
-**Sentry-Python is an SDK for Sentry.** Check out `GitHub
-<https://github.com/getsentry/sentry-python>`_ to find out more.
+"""
+Debugg-AI-Python - Enable your personal AI QA engineer
+
+**Debugg-AI-Python is a logging SDK that enables your personal AI 
+QA engineer to log and track errors, metrics, and events in your 
+application.** 
+
+Check out `GitHub <https://github.com/debugg-ai/debugg-ai-python>` to find out more.
+Built on top of `Sentry-Python <https://github.com/getsentry/sentry-python>`_
 """
 
 import os
@@ -20,21 +24,21 @@ def get_file_text(file_name):
 
 
 setup(
-    name="sentry-sdk",
-    version="2.27.0",
-    author="Sentry Team and Contributors",
-    author_email="hello@sentry.io",
-    url="https://github.com/getsentry/sentry-python",
+    name="debugg-ai-sdk",
+    version="0.1.3",
+    description="Debugg AI's official Python sdk for connecting your personal AI QA engineer",
+    author="Debugg AI Team",
+    author_email="support@debugg.ai",
+    url="https://debugg.ai",
     project_urls={
-        "Documentation": "https://docs.sentry.io/platforms/python/",
-        "Changelog": "https://github.com/getsentry/sentry-python/blob/master/CHANGELOG.md",
+        "Documentation": "https://docs.debugg.ai/platforms/python",
+        "Source": "https://github.com/debugg-ai/debugg-ai-python",
     },
-    description="Python client for Sentry (https://sentry.io)",
     long_description=get_file_text("README.md"),
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=("tests", "tests.*")),
     # PEP 561
-    package_data={"sentry_sdk": ["py.typed"]},
+    package_data={"debugg_ai_sdk": ["py.typed"]},
     zip_safe=False,
     license="MIT",
     python_requires=">=3.6",
@@ -83,16 +87,11 @@ setup(
         "tornado": ["tornado>=6"],
         "unleash": ["UnleashClient>=6.0.1"],
     },
-    entry_points={
-        "opentelemetry_propagator": [
-            "sentry=sentry_sdk.integrations.opentelemetry:SentryPropagator"
-        ]
-    },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: BSD License",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

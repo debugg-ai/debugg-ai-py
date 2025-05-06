@@ -1,125 +1,187 @@
-<a href="https://sentry.io/?utm_source=github&utm_medium=logo" target="_blank">
-  <img src="https://sentry-brand.storage.googleapis.com/github-banners/github-sdk-python.png" alt="Sentry for Python">
-</a>
-<div align="center">
-
-_Bad software is everywhere, and we're tired of it. Sentry is on a mission to help developers write better software faster, so we can get back to enjoying technology. If you want to join us
-[<kbd>**Check out our open positions**</kbd>](https://sentry.io/careers/)_.
-
-[![Discord](https://img.shields.io/discord/621778831602221064?logo=discord&labelColor=%20%235462eb&logoColor=%20%23f5f5f5&color=%20%235462eb)](https://discord.gg/wdNEHETs87)
-[![Twitter Follow](https://img.shields.io/twitter/follow/getsentry?label=@getsentry&style=social)](https://twitter.com/intent/follow?screen_name=getsentry)
-[![PyPi page link -- version](https://img.shields.io/pypi/v/sentry-sdk.svg)](https://pypi.python.org/pypi/sentry-sdk)
-<img src="https://img.shields.io/badge/python-3.7 | 3.8 | 3.9 | 3.10 | 3.11 | 3.12 | 3.13-blue.svg" alt="python">
-[![Build Status](https://github.com/getsentry/sentry-python/actions/workflows/ci.yml/badge.svg)](https://github.com/getsentry/sentry-python/actions/workflows/ci.yml)
-
-<br/>
+<!-- Replace with your own logo -->
+<!-- ![DebuggAI logo](media/header-comm.jpg) -->
 
 </div>
 
+<h1 align="center">DebuggAI (debugg-ai-py)</h1>
 
-# Official Sentry SDK for Python
-
-Welcome to the official Python SDK for **[Sentry](http://sentry.io/)**.
-
-
-## 📦 Getting Started
-
-### Prerequisites
-
-You need a Sentry [account](https://sentry.io/signup/) and [project](https://docs.sentry.io/product/projects/).
-
-### Installation
-
-Getting Sentry into your project is straightforward. Just run this command in your terminal:
-
-```bash
-pip install --upgrade sentry-sdk
-```
-
-### Basic Configuration
-
-Here's a quick configuration example to get Sentry up and running:
-
-```python
-import sentry_sdk
-
-sentry_sdk.init(
-    "https://12927b5f211046b575ee51fd8b1ac34f@o1.ingest.sentry.io/1",  # Your DSN here
-
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of traces for performance monitoring.
-    traces_sample_rate=1.0,
-)
-```
-
-With this configuration, Sentry will monitor for exceptions and performance issues.
-
-### Quick Usage Example
-
-To generate some events that will show up in Sentry, you can log messages or capture errors:
-
-```python
-import sentry_sdk
-sentry_sdk.init(...)  # same as above
-
-sentry_sdk.capture_message("Hello Sentry!")  # You'll see this in your Sentry dashboard.
-
-raise ValueError("Oops, something went wrong!")  # This will create an error event in Sentry.
-```
+Debugg AI's Python sdk for enabling your personal AI QA engineer
 
 
-## 📚 Documentation
+<div align="center">
 
-For more details on advanced usage, integrations, and customization, check out the full documentation on [https://docs.sentry.io](https://docs.sentry.io/).
+DebuggAI super‑charges engineers with an AI‑powered custom QA Engineer personalized to every user that _finds_ and _fixes_ bugs while your app runs locally, in production, or in CI. DebuggAI's Agent works with you in the background to generate, run, and improve your test suites to ensure that every PR is ready to go. Stop waiting for problems to pop up and build robust code without the big headache of managing your tests.
 
+</div>
 
-## 🧩 Integrations
+<div align="center">
 
-Sentry integrates with a ton of popular Python libraries and frameworks, including [FastAPI](https://docs.sentry.io/platforms/python/integrations/fastapi/), [Django](https://docs.sentry.io/platforms/python/integrations/django/), [Celery](https://docs.sentry.io/platforms/python/integrations/celery/), [OpenAI](https://docs.sentry.io/platforms/python/integrations/openai/) and many, many more.  Check out the [full list of integrations](https://docs.sentry.io/platforms/python/integrations/) to get the full picture.
-
-
-## 🚧 Migrating Between Versions?
-
-### From `1.x` to `2.x`
-
-If you're using the older `1.x` version of the SDK, now's the time to upgrade to `2.x`. It includes significant upgrades and new features. Check our [migration guide](https://docs.sentry.io/platforms/python/migration/1.x-to-2.x) for assistance.
-
-### From `raven-python`
-
-Using the legacy `raven-python` client? It's now in maintenance mode, and we recommend migrating to the new SDK for an improved experience. Get all the details in our [migration guide](https://docs.sentry.io/platforms/python/migration/raven-to-sentry-sdk/).
-
-
-## 🙌 Want to Contribute?
-
-We'd love your help in improving the Sentry SDK! Whether it's fixing bugs, adding features, writing new integrations, or enhancing documentation, every contribution is valuable.
-
-For details on how to contribute, please read our [contribution guide](CONTRIBUTING.md) and explore the [open issues](https://github.com/getsentry/sentry-python/issues).
-
-
-## 🛟 Need Help?
-
-If you encounter issues or need help setting up or configuring the SDK, don't hesitate to reach out to the [Sentry Community on Discord](https://discord.com/invite/Ww9hbqr). There is a ton of great people there ready to help!
-
-
-## 🔗 Resources
-
-Here are all resources to help you make the most of Sentry:
-
-- [Documentation](https://docs.sentry.io/platforms/python/) - Official documentation to get started.
-- [Discord](https://img.shields.io/discord/621778831602221064) - Join our Discord community.
-- [X/Twitter](https://twitter.com/intent/follow?screen_name=getsentry) -  Follow us on X (Twitter) for updates.
-- [Stack Overflow](https://stackoverflow.com/questions/tagged/sentry) - Questions and answers related to Sentry.
-
-<a name="license"></a>
-## 📃 License
-
-The SDK is open-source and available under the MIT license. Check out the [LICENSE](LICENSE) file for more information.
-
-
-## 😘 Contributors
-
-Thanks to everyone who has helped improve the SDK!
-
-<a href="https://github.com/getsentry/sentry-python/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=getsentry/sentry-python" />
+<a href="https://docs.debugg.ai" target="_blank">
+  <img src="https://img.shields.io/badge/docs-debuggai-%235D0E41" height="22" />
 </a>
+<a href="https://discord.gg/frJsD2Vx" target="_blank">
+  <img src="https://img.shields.io/badge/discord-join-debuggai.svg?labelColor=191937&color=6F6FF7&logo=discord" height="22" />
+</a>
+
+</div>
+
+---
+
+## ✨ Why DebuggAI?
+
+Most AI coding tools focus on **writing** code. DebuggAI focuses on the other 50 % of an engineer’s life: **getting it to run.**
+
+* **AI Test Suites** — We let you focus on the code while our QA engineering agent handles the rest. DebuggAI builds & runs test suites in the background to ensure old code continues to run and new code avoids possible edge cases BEFORE it gets to a PR, or worse to your users. 
+* **1‑line monitoring SDK** — drop‑in client (Node, Python, Go) that captures rich runtime context remotely similar to Sentry or Datadog  
+* **AI Debug** — Errors are instantly sent to failure lines in your IDE so you can see what happened and why, making solving it easy.
+* **Instant Fix Suggestions** — one‑click patches and PRs generated from stack‑trace + context  
+* **Source‑map de‑minification** — readable traces even for bundled / minified front‑end code  
+* **Branch‑aware log search** — slice errors by branch, release, or feature flag to zero in fast  
+
+
+---
+
+## 📺 Demo - Get Instant Insight Into Runtime Issues
+
+### 🔍 Typical workflows:
+
+1. You use your favorite AI agent to write code
+2. You run your app and it crashes (ah whyyyyy!)
+3. DebuggAI sees the error, grabs the full stack trace + context, and uses it to generate a solution & show you EXACTLY where to look
+4. You review the solution, edit it locally if needed, and apply it
+
+### 🔍 How it works
+
+![DebuggAI Demo](https://debuggai.s3.us-east-2.amazonaws.com/trimmed-screen%20%281%29.gif)
+
+---
+
+## 🖥️ Core IDE Features
+
+| Feature | Description |
+|---------|-------------|
+| **Inline Issue Highlighter** | See issues in realtime in your IDE, with full stack traces and suggested fixes |
+| **AI Test Generator** | Go from 0 to 100% test coverage for files with a single command |
+| **Test iteration** | Run & Improve tests in the background while you code |
+| **Future Proof** | Continually add new tests as new errors arise to ensure your code is future proof |
+
+
+---
+
+## 🚀 Getting Started
+
+1. **Install the extension**  
+   - [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=debugg-ai.debuggai)  
+   - Jetbrains coming soon
+
+2. **Create a project**  
+    - [Sign up & create a project in the DebuggAI app](https://app.debugg.ai)
+
+        ![Create a project](https://debuggai.s3.us-east-2.amazonaws.com/issues-page.png)
+
+3. **Add the Python Logging SDK** (using `pip`)  
+
+   ```python
+     pip install debugg-ai-sdk
+   ```
+
+4. **Initialize** (one line):
+
+   * Get the initialization code from the DebuggAI app
+
+     ![Get the initialization code](https://static-debugg-ai.s3.us-east-2.amazonaws.com/debugg-ai-init-code.png)
+
+   * Initialize the SDK
+
+     ```python
+       # app.py
+       import debugg_ai_sdk
+       debugg_ai_sdk.init(
+        dsn=f"<your_project_dsn>",
+        # Depends on your implementation but info level provides 
+        # more helpful context to the agents than ERROR-only.
+        level='info',
+        environment="local",
+        # Readable name to differentiate local computers for engineers
+        host_name="tj-home-desktop",
+        # other optional params..
+       )
+     ```
+
+   * Log errors 
+
+      ```python
+        class TestClass:
+          def __init__(self):
+              
+              self.test_var = "test"
+              
+          def divide_by_zero(self):
+              return 1 / 0
+
+          def test_function():
+              # Fundtion that pretends to do something
+              logger.info("Doing something")
+              
+              test_class = TestClass()
+              test_class.divide_by_zero()
+              
+
+        def main():
+            logger.info("Hello, world!")
+
+            test_function()
+
+        if __name__ == "__main__":
+            main()
+            
+      ```
+
+5. **Trigger an error** – head back to the IDE and watch DebuggAI suggest a fix ⚡
+
+
+Full walkthrough ▶ [docs.debugg.ai/getting-started](https://docs.debugg.ai)
+
+---
+
+## 🛠️ Configuration
+
+You can log in to your DebuggAI account directly in the extension, and then it will automatically connect to your project.
+
+---
+
+## Contact & Support
+
+If you have any questions or need personalized support:
+
+- **Email**: support@debugg.ai 
+- **Discord**: Join our Discord community at [DebuggAI Discord Server](https://discord.gg/frJsD2Vx)  
+- **Documentation**: [Official DebuggAI Docs](https://docs.debugg.ai)
+
+
+---
+
+## 🤝  Interested in Contributing?
+
+We're looking to expand the DebuggAI team!
+
+If you're interested in joining the team or contributing to the project, please reach out to us at [hello@debugg.ai](mailto:hello@debugg.ai).
+
+---
+
+## 📜 License & Credits
+
+* **Code:** [MIT](LICENSE) © 2025 Debugg, Inc.
+* **Foundation:** proudly built on open-source technology.
+
+---
+
+## Attribution
+
+We at Debugg AI want to thank the open-source community for their contributions. Particularly Sentry for the work on this SDK. DebuggAI is building the first fully AI QA Engineer that can automatically generate test suites and highlight issues in your app, but Sentry continues to be a great option for Application Monitoring. Use both for the best results!
+
+---
+
+<div align="center">
+  <sub>Made with ❤️ and too many stack traces in San Francisco.</sub>
+</div>

@@ -63,9 +63,9 @@ def test_subprocess_basic(
             sys.executable,
             "-c",
             "import os; "
-            "import sentry_sdk; "
-            "from sentry_sdk.integrations.stdlib import get_subprocess_traceparent_headers; "
-            "sentry_sdk.init(); "
+            "import debugg_ai_sdk; "
+            "from debugg_ai_sdk.integrations.stdlib import get_subprocess_traceparent_headers; "
+            "debugg_ai_sdk.init(); "
             "assert os.environ['FOO'] == 'bar'; "
             "print(dict(get_subprocess_traceparent_headers()))",
         ]

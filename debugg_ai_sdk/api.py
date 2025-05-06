@@ -88,7 +88,7 @@ __all__ = [
 def scopemethod(f):
     # type: (F) -> F
     f.__doc__ = "%s\n\n%s" % (
-        "Alias for :py:meth:`sentry_sdk.Scope.%s`" % f.__name__,
+        "Alias for :py:meth:`debugg_ai_sdk.Scope.%s`" % f.__name__,
         inspect.getdoc(getattr(Scope, f.__name__)),
     )
     return f
@@ -97,7 +97,7 @@ def scopemethod(f):
 def clientmethod(f):
     # type: (F) -> F
     f.__doc__ = "%s\n\n%s" % (
-        "Alias for :py:meth:`sentry_sdk.Client.%s`" % f.__name__,
+        "Alias for :py:meth:`debugg_ai_sdk.Client.%s`" % f.__name__,
         inspect.getdoc(getattr(Client, f.__name__)),
     )
     return f
@@ -145,7 +145,7 @@ def get_current_scope():
 def last_event_id():
     # type: () -> Optional[str]
     """
-    See :py:meth:`sentry_sdk.Scope.last_event_id` documentation regarding
+    See :py:meth:`debugg_ai_sdk.Scope.last_event_id` documentation regarding
     this method's limitations.
     """
     return Scope.last_event_id()
@@ -235,7 +235,7 @@ def configure_scope(  # noqa: F811
     :returns: If no callback is provided, returns a context manager that returns the scope.
     """
     warnings.warn(
-        "sentry_sdk.configure_scope is deprecated and will be removed in the next major version. "
+        "debugg_ai_sdk.configure_scope is deprecated and will be removed in the next major version. "
         "Please consult our migration guide to learn how to migrate to the new API: "
         "https://docs.sentry.io/platforms/python/migration/1.x-to-2.x#scope-configuring",
         DeprecationWarning,
@@ -287,7 +287,7 @@ def push_scope(  # noqa: F811
         be used to pop the scope again.
     """
     warnings.warn(
-        "sentry_sdk.push_scope is deprecated and will be removed in the next major version. "
+        "debugg_ai_sdk.push_scope is deprecated and will be removed in the next major version. "
         "Please consult our migration guide to learn how to migrate to the new API: "
         "https://docs.sentry.io/platforms/python/migration/1.x-to-2.x#scope-pushing",
         DeprecationWarning,
@@ -393,7 +393,7 @@ def start_transaction(
         will be removed in the next major version.
     :param custom_sampling_context: The transaction's custom sampling context.
     :param kwargs: Optional keyword arguments to be passed to the Transaction
-        constructor. See :py:class:`sentry_sdk.tracing.Transaction` for
+        constructor. See :py:class:`debugg_ai_sdk.tracing.Transaction` for
         available arguments.
     """
     return get_current_scope().start_transaction(

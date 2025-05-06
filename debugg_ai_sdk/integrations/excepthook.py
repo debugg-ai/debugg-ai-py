@@ -46,7 +46,7 @@ class ExcepthookIntegration(Integration):
 
 def _make_excepthook(old_excepthook):
     # type: (Excepthook) -> Excepthook
-    def sentry_sdk_excepthook(type_, value, traceback):
+    def debugg_ai_sdk_excepthook(type_, value, traceback):
         # type: (Type[BaseException], BaseException, Optional[TracebackType]) -> None
         integration = debugg_ai_sdk.get_client().get_integration(ExcepthookIntegration)
 
@@ -67,7 +67,7 @@ def _make_excepthook(old_excepthook):
 
         return old_excepthook(type_, value, traceback)
 
-    return sentry_sdk_excepthook
+    return debugg_ai_sdk_excepthook
 
 
 def _should_send(always_run=False):

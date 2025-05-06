@@ -205,7 +205,7 @@ def test_passes_parent_sampling_decision_in_sampling_context(
         assert sampling_context["parent_sampled"] is parent_sampling_decision
 
     with mock.patch(
-        "sentry_sdk.tracing.Transaction._set_initial_sampling_decision",
+        "debugg_ai_sdk.tracing.Transaction._set_initial_sampling_decision",
         mock_set_initial_sampling_decision,
     ):
         start_transaction(transaction=transaction)

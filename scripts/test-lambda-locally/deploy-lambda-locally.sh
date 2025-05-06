@@ -22,4 +22,4 @@ cd package && zip -r ../lambda_deployment_package.zip . && cd ..
 uv run sam local start-api \
     --skip-pull-image \
     --force-image-build \
-    --parameter-overrides SentryDsn=$SENTRY_DSN
+    --parameter-overrides SentryDsn=$DEBUGGAI_INGEST_URL

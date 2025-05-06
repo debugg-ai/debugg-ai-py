@@ -22,7 +22,7 @@ def init_huey(sentry_init):
             send_default_pii=True,
         )
 
-        return MemoryHuey(name="sentry_sdk")
+        return MemoryHuey(name="debugg_ai_sdk")
 
     return inner
 

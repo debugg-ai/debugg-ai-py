@@ -1,5 +1,16 @@
 # Changelog
 
+
+# 0.1.0
+
+
+### Endpoint & envelope configurations
+
+Support for DebuggAI endpoints
+
+-----
+
+
 ## 2.27.0
 
 ### Various fixes & improvements
@@ -58,7 +69,7 @@
 - fix(logs): Use repr instead of json for message and arguments (#4227) by @colin-sentry
 - fix(logs): Debug output from Sentry logs should always be `debug` level. (#4224) by @antonpirker
 - fix(ai): Do not consume anthropic streaming stop (#4232) by @colin-sentry
-- fix(spotlight): Do not spam sentry_sdk.warnings logger w/ Spotlight (#4219) by @BYK
+- fix(spotlight): Do not spam debugg_ai_sdk.warnings logger w/ Spotlight (#4219) by @BYK
 - fix(docs): fixed code snippet (#4218) by @antonpirker
 - build(deps): bump actions/create-github-app-token from 1.11.7 to 1.12.0 (#4214) by @dependabot
 
@@ -77,11 +88,11 @@
   ```python
   import logging
 
-  import sentry_sdk
-  from sentry_sdk.integrations.logging import LoggingIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.logging import LoggingIntegration
 
   # Setup Sentry SDK to send log messages with a level of "error" or higher to Sentry.
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
     dsn="...",
     _experiments={
         "enable_sentry_logs": True
@@ -307,7 +318,7 @@
 
 - New: introduce `rust_tracing` integration. See https://docs.sentry.io/platforms/python/integrations/rust_tracing/ (#3717) by @matt-codecov
 - Auto enable Litestar integration (#3540) by @provinzkraut
-- Deprecate `sentry_sdk.init` context manager (#3729) by @szokeasaurusrex
+- Deprecate `debugg_ai_sdk.init` context manager (#3729) by @szokeasaurusrex
 - feat(spotlight): Send PII to Spotlight when no DSN is set (#3804) by @BYK
 - feat(spotlight): Add info logs when Sentry is enabled (#3735) by @BYK
 - feat(spotlight): Inject Spotlight button on Django (#3751) by @BYK
@@ -390,7 +401,7 @@
   should be reported to Sentry.
 
     ```python
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         integrations=[
             BottleIntegration(
                 failed_request_status_codes={403, *range(500, 600)},
@@ -420,7 +431,7 @@
   Here's how to use it:
 
   ```python
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       integrations=[
           DjangoIntegration(
               http_methods_to_capture=("GET", "POST"),
@@ -453,7 +464,7 @@
   Here's how to use it (substitute Flask for your framework integration):
 
   ```python
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       integrations=[
         FlaskIntegration(
             http_methods_to_capture=("GET", "POST"),
@@ -471,7 +482,7 @@
   should be reported to Sentry.
 
     ```python
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         integrations=[
             AioHttpIntegration(
                 failed_request_status_codes={403, *range(500, 600)},
@@ -497,7 +508,7 @@
   of integers and containers to a set:
 
   ```python
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       integrations=StarletteIntegration(
           failed_request_status_codes={403, *range(500, 600)},
       ),
@@ -520,7 +531,7 @@
 
 ### Miscellaneous
 
-- Deprecate `sentry_sdk.metrics` (#3512) by @szokeasaurusrex
+- Deprecate `debugg_ai_sdk.metrics` (#3512) by @szokeasaurusrex
 - Add `name` parameter to `start_span()` and deprecate `description` parameter (#3524 & #3525) by @antonpirker
 - Fix `add_query_source` with modules outside of project root (#3313) by @rominf
 - Test more integrations on 3.13 (#3578) by @sentrivana
@@ -568,15 +579,15 @@
 
 - **New integration:** [Ray](https://docs.sentry.io/platforms/python/integrations/ray/) (#2400) (#2444) by @glowskir
 
-  Usage: (add the RayIntegration to your `sentry_sdk.init()` call and make sure it is called in the worker processes)
+  Usage: (add the RayIntegration to your `debugg_ai_sdk.init()` call and make sure it is called in the worker processes)
   ```python
   import ray
 
-  import sentry_sdk
-  from sentry_sdk.integrations.ray import RayIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.ray import RayIntegration
 
   def init_sentry():
-      sentry_sdk.init(
+      debugg_ai_sdk.init(
           dsn="...",
           traces_sample_rate=1.0,
           integrations=[RayIntegration()],
@@ -592,14 +603,14 @@
 
 - **New integration:** [Litestar](https://docs.sentry.io/platforms/python/integrations/litestar/) (#2413) (#3358) by @KellyWalker
 
-  Usage: (add the LitestarIntegration to your `sentry_sdk.init()`)
+  Usage: (add the LitestarIntegration to your `debugg_ai_sdk.init()`)
   ```python
   from litestar import Litestar, get
 
-  import sentry_sdk
-  from sentry_sdk.integrations.litestar import LitestarIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.litestar import LitestarIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       traces_sample_rate=1.0,
       integrations=[LitestarIntegration()],
@@ -614,14 +625,14 @@
   For more information, see the documentation for the [Litestar integration](https://docs.sentry.io/platforms/python/integrations/litestar/).
 
 - **New integration:** [Dramatiq](https://docs.sentry.io/platforms/python/integrations/dramatiq/) from @jacobsvante (#3397) by @antonpirker
-  Usage: (add the DramatiqIntegration to your `sentry_sdk.init()`)
+  Usage: (add the DramatiqIntegration to your `debugg_ai_sdk.init()`)
   ```python
   import dramatiq
 
-  import sentry_sdk
-  from sentry_sdk.integrations.dramatiq import DramatiqIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.dramatiq import DramatiqIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       traces_sample_rate=1.0,
       integrations=[DramatiqIntegration()],
@@ -682,10 +693,10 @@
   config option to provide a list of integrations to disable:
 
   ```python
-  import sentry_sdk
-  from sentry_sdk.integrations.flask import FlaskIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.flask import FlaskIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       # Do not use the Flask integration even if Flask is installed.
       disabled_integrations=[
           FlaskIntegration(),
@@ -705,7 +716,7 @@
 - Support Django 5.1 (#3207) by @sentrivana
 - Remove apparently unnecessary `if` (#3298) by @szokeasaurusrex
 - Preliminary support for Python 3.13 (#3200) by @sentrivana
-- Move `sentry_sdk.init` out of `hub.py` (#3276) by @szokeasaurusrex
+- Move `debugg_ai_sdk.init` out of `hub.py` (#3276) by @szokeasaurusrex
 - Unhardcode integration list (#3240) by @rominf
 - Allow passing of PostgreSQL port in tests (#3281) by @rominf
 - Add tests for `@ai_track` decorator (#3325) by @colin-sentry
@@ -721,7 +732,7 @@
 
 - Add client cert and key support to `HttpTransport` (#3258) by @grammy-jiang
 
-  Add `cert_file` and `key_file` to your `sentry_sdk.init` to use a custom client cert and key. Alternatively, the environment variables `CLIENT_CERT_FILE` and `CLIENT_KEY_FILE` can be used as well.
+  Add `cert_file` and `key_file` to your `debugg_ai_sdk.init` to use a custom client cert and key. Alternatively, the environment variables `CLIENT_CERT_FILE` and `CLIENT_KEY_FILE` can be used as well.
 
 - OpenAI: Lazy initialize tiktoken to avoid http at import time (#3287) by @colin-sentry
 - OpenAI, Langchain: Make tiktoken encoding name configurable + tiktoken usage opt-in (#3289) by @colin-sentry
@@ -731,7 +742,7 @@
   The request was fetching a `tiktoken` encoding in order to correctly measure token usage in some OpenAI and Langchain calls. This behavior is now opt-in. The choice of encoding to use was made configurable as well. To opt in, set the `tiktoken_encoding_name` parameter in the OpenAPI or Langchain integration.
 
   ```python
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       integrations=[
           OpenAIIntegration(tiktoken_encoding_name="cl100k_base"),
           LangchainIntegration(tiktoken_encoding_name="cl100k_base"),
@@ -741,7 +752,7 @@
 
 - PyMongo: Send query description as valid JSON (#3291) by @0Calories
 - Remove Python 2 compatibility code (#3284) by @szokeasaurusrex
-- Fix `sentry_sdk.init` type hint (#3283) by @szokeasaurusrex
+- Fix `debugg_ai_sdk.init` type hint (#3283) by @szokeasaurusrex
 - Deprecate `hub` in `Profile` (#3270) by @szokeasaurusrex
 - Stop using `Hub` in `init` (#3275) by @szokeasaurusrex
 - Delete `_should_send_default_pii` (#3274) by @szokeasaurusrex
@@ -850,10 +861,10 @@ This change fixes a regression in our cron monitoring feature, which caused cron
   status codes should be sent as events to Sentry. Here's how it works:
 
   ```python
-  from sentry_sdk.integrations.starlette import StarletteIntegration
-  from sentry_sdk.integrations.fastapi import FastApiIntegration
+  from debugg_ai_sdk.integrations.starlette import StarletteIntegration
+  from debugg_ai_sdk.integrations.fastapi import FastApiIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       # ...
       integrations=[
           StarletteIntegration(
@@ -953,9 +964,9 @@ This change fixes a regression in our cron monitoring feature, which caused cron
   Usage: (Langchain is auto enabling, so you do not need to do anything special)
   ```python
   from langchain_openai import ChatOpenAI
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       enable_tracing=True,
       traces_sample_rate=1.0,
@@ -968,13 +979,13 @@ This change fixes a regression in our cron monitoring feature, which caused cron
 
 - **New integration:** [Anthropic](https://docs.sentry.io/platforms/python/integrations/anthropic/) (#2831) by @czyber
 
-  Usage: (add the AnthropicIntegration to your `sentry_sdk.init()` call)
+  Usage: (add the AnthropicIntegration to your `debugg_ai_sdk.init()` call)
   ```python
   from anthropic import Anthropic
 
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       enable_tracing=True,
       traces_sample_rate=1.0,
@@ -990,10 +1001,10 @@ This change fixes a regression in our cron monitoring feature, which caused cron
   Usage: (Huggingface Hub is auto enabling, so you do not need to do anything special)
 
   ```python
-  import sentry_sdk
+  import debugg_ai_sdk
   from huggingface_hub import InferenceClient
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       enable_tracing=True,
       traces_sample_rate=1.0,
@@ -1057,34 +1068,34 @@ For a shorter version of what you need to do, to upgrade to Sentry SDK 2.0 see: 
 - The Pyramid integration will not capture errors that might happen in `authenticated_userid()` in a custom `AuthenticationPolicy` class.
 - The method `need_code_loation` of the `MetricsAggregator` was renamed to `need_code_location`.
 - The `BackgroundWorker` thread used to process events was renamed from `raven-sentry.BackgroundWorker` to `sentry-sdk.BackgroundWorker`.
-- The `reraise` function was moved from `sentry_sdk._compat` to `sentry_sdk.utils`.
-- The `_ScopeManager` was moved from `sentry_sdk.hub` to `sentry_sdk.scope`.
-- Moved the contents of `tracing_utils_py3.py` to `tracing_utils.py`. The `start_child_span_decorator` is now in `sentry_sdk.tracing_utils`.
-- The actual implementation of `get_current_span` was moved to `sentry_sdk.tracing_utils`. `sentry_sdk.get_current_span` is still accessible as part of the top-level API.
-- `sentry_sdk.tracing_utils.add_query_source()`: Removed the `hub` parameter. It is not necessary anymore.
-- `sentry_sdk.tracing_utils.record_sql_queries()`: Removed the `hub` parameter. It is not necessary anymore.
-- `sentry_sdk.tracing_utils.get_current_span()` does now take a `scope` instead of a `hub` as parameter.
-- `sentry_sdk.tracing_utils.should_propagate_trace()` now takes a `Client` instead of a `Hub` as first parameter.
-- `sentry_sdk.utils.is_sentry_url()` now takes a `Client` instead of a `Hub` as first parameter.
-- `sentry_sdk.utils._get_contextvars` does not return a tuple with three values, but a tuple with two values. The `copy_context` was removed.
+- The `reraise` function was moved from `debugg_ai_sdk._compat` to `debugg_ai_sdk.utils`.
+- The `_ScopeManager` was moved from `debugg_ai_sdk.hub` to `debugg_ai_sdk.scope`.
+- Moved the contents of `tracing_utils_py3.py` to `tracing_utils.py`. The `start_child_span_decorator` is now in `debugg_ai_sdk.tracing_utils`.
+- The actual implementation of `get_current_span` was moved to `debugg_ai_sdk.tracing_utils`. `debugg_ai_sdk.get_current_span` is still accessible as part of the top-level API.
+- `debugg_ai_sdk.tracing_utils.add_query_source()`: Removed the `hub` parameter. It is not necessary anymore.
+- `debugg_ai_sdk.tracing_utils.record_sql_queries()`: Removed the `hub` parameter. It is not necessary anymore.
+- `debugg_ai_sdk.tracing_utils.get_current_span()` does now take a `scope` instead of a `hub` as parameter.
+- `debugg_ai_sdk.tracing_utils.should_propagate_trace()` now takes a `Client` instead of a `Hub` as first parameter.
+- `debugg_ai_sdk.utils.is_sentry_url()` now takes a `Client` instead of a `Hub` as first parameter.
+- `debugg_ai_sdk.utils._get_contextvars` does not return a tuple with three values, but a tuple with two values. The `copy_context` was removed.
 - If you create a transaction manually and later mutate the transaction in a `configure_scope` block this does not work anymore. Here is a recipe on how to change your code to make it work:
     Your existing implementation:
     ```python
-    transaction = sentry_sdk.transaction(...)
+    transaction = debugg_ai_sdk.transaction(...)
 
     # later in the code execution:
 
-    with sentry_sdk.configure_scope() as scope:
+    with debugg_ai_sdk.configure_scope() as scope:
         scope.set_transaction_name("new-transaction-name")
     ```
 
     needs to be changed to this:
     ```python
-    transaction = sentry_sdk.transaction(...)
+    transaction = debugg_ai_sdk.transaction(...)
 
     # later in the code execution:
 
-    scope = sentry_sdk.get_current_scope()
+    scope = debugg_ai_sdk.get_current_scope()
     scope.set_transaction_name("new-transaction-name")
     ```
 - The classes listed in the table below are now abstract base classes. Therefore, they can no longer be instantiated. Subclasses can only be instantiated if they implement all of the abstract methods.
@@ -1093,10 +1104,10 @@ For a shorter version of what you need to do, to upgrade to Sentry SDK 2.0 see: 
 
   | Class                                 | Abstract methods                       |
   | ------------------------------------- | -------------------------------------- |
-  | `sentry_sdk.integrations.Integration` | `setup_once`                           |
-  | `sentry_sdk.metrics.Metric`           | `add`, `serialize_value`, and `weight` |
-  | `sentry_sdk.profiler.Scheduler`       | `setup` and `teardown`                 |
-  | `sentry_sdk.transport.Transport`      | `capture_envelope`                     |
+  | `debugg_ai_sdk.integrations.Integration` | `setup_once`                           |
+  | `debugg_ai_sdk.metrics.Metric`           | `add`, `serialize_value`, and `weight` |
+  | `debugg_ai_sdk.profiler.Scheduler`       | `setup` and `teardown`                 |
+  | `debugg_ai_sdk.transport.Transport`      | `capture_envelope`                     |
 
     </details>
 
@@ -1109,23 +1120,23 @@ For a shorter version of what you need to do, to upgrade to Sentry SDK 2.0 see: 
 - Removed support for Flask 0.\*.
 - Removed support for gRPC < 1.39.
 - Removed support for Tornado < 6.
-- Removed `last_event_id()` top level API. The last event ID is still returned by `capture_event()`, `capture_exception()` and `capture_message()` but the top level API `sentry_sdk.last_event_id()` has been removed.
+- Removed `last_event_id()` top level API. The last event ID is still returned by `capture_event()`, `capture_exception()` and `capture_message()` but the top level API `debugg_ai_sdk.last_event_id()` has been removed.
 - Removed support for sending events to the `/store` endpoint. Everything is now sent to the `/envelope` endpoint. If you're on SaaS you don't have to worry about this, but if you're running Sentry yourself you'll need version `20.6.0` or higher of self-hosted Sentry.
 - The deprecated `with_locals` configuration option was removed. Use `include_local_variables` instead. See https://docs.sentry.io/platforms/python/configuration/options/#include-local-variables.
 - The deprecated `request_bodies` configuration option was removed. Use `max_request_body_size`. See https://docs.sentry.io/platforms/python/configuration/options/#max-request-body-size.
 - Removed support for `user.segment`. It was also removed from the trace header as well as from the dynamic sampling context.
 - Removed support for the `install` method for custom integrations. Please use `setup_once` instead.
-- Removed `sentry_sdk.tracing.Span.new_span`. Use `sentry_sdk.tracing.Span.start_child` instead.
-- Removed `sentry_sdk.tracing.Transaction.new_span`. Use `sentry_sdk.tracing.Transaction.start_child` instead.
-- Removed support for creating transactions via `sentry_sdk.tracing.Span(transaction=...)`. To create a transaction, please use `sentry_sdk.tracing.Transaction(name=...)`.
-- Removed `sentry_sdk.utils.Auth.store_api_url`.
-- `sentry_sdk.utils.Auth.get_api_url`'s now accepts a `sentry_sdk.consts.EndpointType` enum instead of a string as its only parameter. We recommend omitting this argument when calling the function, since the parameter's default value is the only possible `sentry_sdk.consts.EndpointType` value. The parameter exists for future compatibility.
-- Removed `tracing_utils_py2.py`. The `start_child_span_decorator` is now in `sentry_sdk.tracing_utils`.
-- Removed the `sentry_sdk.profiler.Scheduler.stop_profiling` method. Any calls to this method can simply be removed, since this was a no-op method.
+- Removed `debugg_ai_sdk.tracing.Span.new_span`. Use `debugg_ai_sdk.tracing.Span.start_child` instead.
+- Removed `debugg_ai_sdk.tracing.Transaction.new_span`. Use `debugg_ai_sdk.tracing.Transaction.start_child` instead.
+- Removed support for creating transactions via `debugg_ai_sdk.tracing.Span(transaction=...)`. To create a transaction, please use `debugg_ai_sdk.tracing.Transaction(name=...)`.
+- Removed `debugg_ai_sdk.utils.Auth.store_api_url`.
+- `debugg_ai_sdk.utils.Auth.get_api_url`'s now accepts a `debugg_ai_sdk.consts.EndpointType` enum instead of a string as its only parameter. We recommend omitting this argument when calling the function, since the parameter's default value is the only possible `debugg_ai_sdk.consts.EndpointType` value. The parameter exists for future compatibility.
+- Removed `tracing_utils_py2.py`. The `start_child_span_decorator` is now in `debugg_ai_sdk.tracing_utils`.
+- Removed the `debugg_ai_sdk.profiler.Scheduler.stop_profiling` method. Any calls to this method can simply be removed, since this was a no-op method.
 
 ### Deprecated
 
-- Using the `Hub` directly as well as using hub-based APIs has been deprecated. Where available, use [the top-level API instead](sentry_sdk/api.py); otherwise use the [scope API](sentry_sdk/scope.py) or the [client API](sentry_sdk/client.py).
+- Using the `Hub` directly as well as using hub-based APIs has been deprecated. Where available, use [the top-level API instead](debugg_ai_sdk/api.py); otherwise use the [scope API](debugg_ai_sdk/scope.py) or the [client API](debugg_ai_sdk/client.py).
 
   Before:
 
@@ -1137,9 +1148,9 @@ For a shorter version of what you need to do, to upgrade to Sentry SDK 2.0 see: 
   After:
 
   ```python
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  with sentry_sdk.start_span(...):
+  with debugg_ai_sdk.start_span(...):
       # do something
   ```
 
@@ -1155,9 +1166,9 @@ For a shorter version of what you need to do, to upgrade to Sentry SDK 2.0 see: 
   After:
 
   ```python
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  with sentry_sdk.isolation_scope() as scope:
+  with debugg_ai_sdk.isolation_scope() as scope:
       # do something with the forked scope
   ```
 
@@ -1173,7 +1184,7 @@ For a shorter version of what you need to do, to upgrade to Sentry SDK 2.0 see: 
   After:
 
   ```python
-  from sentry_sdk import get_isolation_scope
+  from debugg_ai_sdk import get_isolation_scope
 
   scope = get_isolation_scope()
   # do something with `scope`
@@ -1191,23 +1202,23 @@ For a shorter version of what you need to do, to upgrade to Sentry SDK 2.0 see: 
   After:
 
   ```python
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  with sentry_sdk.new_scope() as scope:
+  with debugg_ai_sdk.new_scope() as scope:
       # do something with `scope`
   ```
 
-- Accessing the client via the hub has been deprecated. Use the top-level `sentry_sdk.get_client()` to get the current client.
+- Accessing the client via the hub has been deprecated. Use the top-level `debugg_ai_sdk.get_client()` to get the current client.
 - `profiler_mode` and `profiles_sample_rate` have been deprecated as `_experiments` options. Use them as top level options instead:
   ```python
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       ...,
       profiler_mode="thread",
       profiles_sample_rate=1.0,
   )
   ```
-- Deprecated `sentry_sdk.transport.Transport.capture_event`. Please use `sentry_sdk.transport.Transport.capture_envelope`, instead.
-- Passing a function to `sentry_sdk.init`'s `transport` keyword argument has been deprecated. If you wish to provide a custom transport, please pass a `sentry_sdk.transport.Transport` instance or a subclass.
+- Deprecated `debugg_ai_sdk.transport.Transport.capture_event`. Please use `debugg_ai_sdk.transport.Transport.capture_envelope`, instead.
+- Passing a function to `debugg_ai_sdk.init`'s `transport` keyword argument has been deprecated. If you wish to provide a custom transport, please pass a `debugg_ai_sdk.transport.Transport` instance or a subclass.
 - The parameter `propagate_hub` in `ThreadingIntegration()` was deprecated and renamed to `propagate_scope`.
 
 ## 1.45.0
@@ -1221,7 +1232,7 @@ This is the final 1.x release for the forseeable future. Development will contin
   It's now possible to provide `monitor_config` to the `monitor` decorator/context manager directly:
 
   ```python
-  from sentry_sdk.crons import monitor
+  from debugg_ai_sdk.crons import monitor
 
   # All keys except `schedule` are optional
   monitor_config = {
@@ -1246,9 +1257,9 @@ This is the final 1.x release for the forseeable future. Development will contin
 
   ```python
   import django.db.models.signals
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       ...
       integrations=[
           DjangoIntegration(
@@ -1278,7 +1289,7 @@ This is the final 1.x release for the forseeable future. Development will contin
       del tags["release"]
       return True
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       ...
       _experiments={
           "before_emit_metric": before_emit,
@@ -1335,9 +1346,9 @@ This is the final 1.x release for the forseeable future. Development will contin
   you can try turning on TCP keep-alive:
 
   ```python
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       # ...your usual settings...
       keep_alive=True,
   )
@@ -1372,9 +1383,9 @@ This is the final 1.x release for the forseeable future. Development will contin
   ```python
   from openai import OpenAI
 
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="___PUBLIC_DSN___",
       enable_tracing=True,
       traces_sample_rate=1.0,
@@ -1401,10 +1412,10 @@ This is the final 1.x release for the forseeable future. Development will contin
   PII recursively. With this release, you can enable this behavior with:
 
   ```python
-  import sentry_sdk
-  from sentry_sdk.scrubber import EventScrubber
+  import debugg_ai_sdk
+  from debugg_ai_sdk.scrubber import EventScrubber
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       # ...your usual settings...
       event_scrubber=EventScrubber(recursive=True),
   )
@@ -1419,9 +1430,9 @@ This is the final 1.x release for the forseeable future. Development will contin
   ```python
   import socket
   from urllib3.connection import HTTPConnection
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       # ...your usual settings...
       socket_options=HTTPConnection.default_socket_options + [
           (socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),
@@ -1496,7 +1507,7 @@ This is the final 1.x release for the forseeable future. Development will contin
 - Fix uWSGI workers hanging (#2694) by @sentrivana
 - Make metrics work with `gevent` (#2694) by @sentrivana
 - Guard against `engine.url` being `None` (#2708) by @sentrivana
-- Fix performance regression in `sentry_sdk.utils._generate_installed_modules` (#2703) by @GlenWalker
+- Fix performance regression in `debugg_ai_sdk.utils._generate_installed_modules` (#2703) by @GlenWalker
 - Guard against Sentry initialization mid SQLAlchemy cursor (#2702) by @apmorton
 - Fix yaml generation script (#2695) by @sentrivana
 - Fix AWS Lambda workflow (#2710) by @sentrivana
@@ -1517,7 +1528,7 @@ This is the final 1.x release for the forseeable future. Development will contin
 - Reformat with `black==24.1.0` (#2680) by @sentrivana
 - Cleaning up existing code to prepare for new Scopes API (#2611) by @antonpirker
 - Moved redis related tests to databases (#2674) by @antonpirker
-- Improve `sentry_sdk.trace` type hints (#2633) by @szokeasaurusrex
+- Improve `debugg_ai_sdk.trace` type hints (#2633) by @szokeasaurusrex
 - Bump `checkouts/data-schemas` from `e9f7d58` to `aa7058c` (#2639) by @dependabot
 
 ## 1.39.2
@@ -1580,7 +1591,7 @@ This is the final 1.x release for the forseeable future. Development will contin
 
 - Move installed modules code to utils (#2429) by @sentrivana
 
-    Note: We moved the internal function `_get_installed_modules` from `sentry_sdk.integrations.modules` to `sentry_sdk.utils`.
+    Note: We moved the internal function `_get_installed_modules` from `debugg_ai_sdk.integrations.modules` to `debugg_ai_sdk.utils`.
     So if you use this function you have to update your imports
 
 - Add code locations for metrics (#2526) by @jan-auer
@@ -1611,13 +1622,13 @@ This is the final 1.x release for the forseeable future. Development will contin
 
   Our gRPC integration now instruments incoming unary-unary grpc requests and outgoing unary-unary, unary-stream grpc requests using grpcio channels. Everything works now for sync and async code.
 
-  Before this release you had to add Sentry interceptors by hand to your gRPC code, now the only thing you need to do is adding the `GRPCIntegration` to you `sentry_sdk_init()` call. (See [documentation](https://docs.sentry.io/platforms/python/integrations/grpc/) for more information):
+  Before this release you had to add Sentry interceptors by hand to your gRPC code, now the only thing you need to do is adding the `GRPCIntegration` to you `debugg_ai_sdk_init()` call. (See [documentation](https://docs.sentry.io/platforms/python/integrations/grpc/) for more information):
 
   ```python
-  import sentry_sdk
-  from sentry_sdk.integrations.grpc import GRPCIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.grpc import GRPCIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="___PUBLIC_DSN___",
       enable_tracing=True,
       integrations=[
@@ -1683,10 +1694,10 @@ This is the final 1.x release for the forseeable future. Development will contin
     Usage:
 
     ```python
-      import sentry_sdk
-      from sentry_sdk.integrations.gql import GQLIntegration
+      import debugg_ai_sdk
+      from debugg_ai_sdk.integrations.gql import GQLIntegration
 
-      sentry_sdk.init(
+      debugg_ai_sdk.init(
           dsn='___PUBLIC_DSN___',
           integrations=[
               GQLIntegration(),
@@ -1699,10 +1710,10 @@ This is the final 1.x release for the forseeable future. Development will contin
     Usage:
 
     ```python
-      import sentry_sdk
-      from sentry_sdk.integrations.graphene import GrapheneIntegration
+      import debugg_ai_sdk
+      from debugg_ai_sdk.integrations.graphene import GrapheneIntegration
 
-      sentry_sdk.init(
+      debugg_ai_sdk.init(
           dsn='___PUBLIC_DSN___',
           integrations=[
               GrapheneIntegration(),
@@ -1715,10 +1726,10 @@ This is the final 1.x release for the forseeable future. Development will contin
     Usage:
 
     ```python
-      import sentry_sdk
-      from sentry_sdk.integrations.strawberry import StrawberryIntegration
+      import debugg_ai_sdk
+      from debugg_ai_sdk.integrations.strawberry import StrawberryIntegration
 
-      sentry_sdk.init(
+      debugg_ai_sdk.init(
           dsn='___PUBLIC_DSN___',
           integrations=[
               # make sure to set async_execution to False if you're executing
@@ -1734,10 +1745,10 @@ This is the final 1.x release for the forseeable future. Development will contin
     Usage:
 
     ```python
-      import sentry_sdk
-      from sentry_sdk.integrations.ariadne import AriadneIntegration
+      import debugg_ai_sdk
+      from debugg_ai_sdk.integrations.ariadne import AriadneIntegration
 
-      sentry_sdk.init(
+      debugg_ai_sdk.init(
           dsn='___PUBLIC_DSN___',
           integrations=[
               AriadneIntegration(),
@@ -1777,10 +1788,10 @@ This is the final 1.x release for the forseeable future. Development will contin
   Usage:
 
   ```python
-    import sentry_sdk
-    from sentry_sdk.integrations.clickhouse_driver import ClickhouseDriverIntegration
+    import debugg_ai_sdk
+    from debugg_ai_sdk.integrations.clickhouse_driver import ClickhouseDriverIntegration
 
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         dsn='___PUBLIC_DSN___',
         integrations=[
             ClickhouseDriverIntegration(),
@@ -1795,10 +1806,10 @@ This is the final 1.x release for the forseeable future. Development will contin
   Usage:
 
   ```python
-    import sentry_sdk
-    from sentry_sdk.integrations.asyncpg import AsyncPGIntegration
+    import debugg_ai_sdk
+    from debugg_ai_sdk.integrations.asyncpg import AsyncPGIntegration
 
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         dsn='___PUBLIC_DSN___',
         integrations=[
             AsyncPGIntegration(),
@@ -1812,11 +1823,11 @@ This is the final 1.x release for the forseeable future. Development will contin
 
   Usage:
   ```python
-    import sentry_sdk
-    from sentry_sdk.integrations.celery import CeleryIntegration
+    import debugg_ai_sdk
+    from debugg_ai_sdk.integrations.celery import CeleryIntegration
 
     # Enable global distributed traces (this is the default, just to be explicit.)
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         dsn='___PUBLIC_DSN___',
         integrations=[
             CeleryIntegration(propagate_traces=True),
@@ -1868,7 +1879,7 @@ This is the final 1.x release for the forseeable future. Development will contin
     then initializing the SDK with:
 
     ```python
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         # ...your usual options...
         _experiments={"otel_powered_performance": True},
     )
@@ -1894,7 +1905,7 @@ This is the final 1.x release for the forseeable future. Development will contin
     To disable this behavior, use:
 
     ```python
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         # ...your usual options...
         enable_backpressure_handling=False,
     )
@@ -2075,7 +2086,7 @@ By: @mgaligniana (#1773)
           "some-task-a",
           "payment-check-.*",
       ]
-      sentry_sdk.init(
+      debugg_ai_sdk.init(
           dsn='___PUBLIC_DSN___',
           integrations=[
               CeleryIntegration(
@@ -2114,10 +2125,10 @@ By: @mgaligniana (#1773)
 
   ```python
   from loguru import logger
-  import sentry_sdk
-  from sentry_sdk.integrations.loguru import LoguruIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.loguru import LoguruIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="___PUBLIC_DSN___",
       integrations=[
           LoguruIntegration(),
@@ -2169,7 +2180,7 @@ By: @mgaligniana (#1773)
   _Note:_ This will add spans for all requests to the caches configured in Django. This will probably add some overhead to your server an also add multiple spans to your performance waterfall diagrams. If you do not want this, you can disable this feature in the DjangoIntegration:
 
   ```python
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       integrations=[
           DjangoIntegration(cache_spans=False),
@@ -2206,7 +2217,7 @@ By: @mgaligniana (#1773)
   Example for **disabling** trimming of redis commands in spans or breadcrumbs:
 
   ```python
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
     integrations=[
       RedisIntegration(max_data_size=None),
     ]
@@ -2216,7 +2227,7 @@ By: @mgaligniana (#1773)
   Example for custom trim size of redis commands in spans or breadcrumbs:
 
   ```python
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
     integrations=[
       RedisIntegration(max_data_size=50),
     ]
@@ -2264,8 +2275,8 @@ By: @mgaligniana (#1773)
   from celery import Celery, signals
   from celery.schedules import crontab
 
-  import sentry_sdk
-  from sentry_sdk.integrations.celery import CeleryIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.celery import CeleryIntegration
 
 
   app = Celery('tasks', broker='...')
@@ -2279,7 +2290,7 @@ By: @mgaligniana (#1773)
 
   @signals.celeryd_init.connect
   def init_sentry(**kwargs):
-      sentry_sdk.init(
+      debugg_ai_sdk.init(
           dsn='...',
           integrations=[CeleryIntegration(monitor_beat_tasks=True)],  # 👈 here
           environment="local.dev.grace",
@@ -2299,7 +2310,7 @@ By: @mgaligniana (#1773)
 
   ```python
   import grpc
-  from sentry_sdk.integrations.grpc.server import ServerInterceptor
+  from debugg_ai_sdk.integrations.grpc.server import ServerInterceptor
 
 
   server = grpc.server(
@@ -2312,7 +2323,7 @@ By: @mgaligniana (#1773)
 
   ```python
   import grpc
-  from sentry_sdk.integrations.grpc.client import ClientInterceptor
+  from debugg_ai_sdk.integrations.grpc.client import ClientInterceptor
 
 
   with grpc.insecure_channel("example.com:12345") as channel:
@@ -2329,9 +2340,9 @@ By: @mgaligniana (#1773)
   Usage:
 
   ```python
-  import sentry_sdk
-  from sentry_sdk.integrations.socket import SocketIntegration
-  sentry_sdk.init(
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.socket import SocketIntegration
+  debugg_ai_sdk.init(
       dsn="___PUBLIC_DSN___",
       integrations=[
           SocketIntegration(),
@@ -2352,9 +2363,9 @@ By: @mgaligniana (#1773)
   Add a new `EventScrubber` class that scrubs certain potentially sensitive interfaces with a `DEFAULT_DENYLIST`. The default scrubber is automatically run if `send_default_pii = False`:
 
   ```python
-  import sentry_sdk
-  from sentry_sdk.scrubber import EventScrubber
-  sentry_sdk.init(
+  import debugg_ai_sdk
+  from debugg_ai_sdk.scrubber import EventScrubber
+  debugg_ai_sdk.init(
       # ...
       send_default_pii=False,
       event_scrubber=EventScrubber(),  # this is set by default
@@ -2364,10 +2375,10 @@ By: @mgaligniana (#1773)
   You can also pass in a custom `denylist` to the `EventScrubber` class and filter additional fields that you want.
 
   ```python
-  from sentry_sdk.scrubber import EventScrubber, DEFAULT_DENYLIST
+  from debugg_ai_sdk.scrubber import EventScrubber, DEFAULT_DENYLIST
   # custom denylist
   denylist = DEFAULT_DENYLIST + ["my_sensitive_var"]
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       # ...
       send_default_pii=False,
       event_scrubber=EventScrubber(denylist=denylist),
@@ -2387,7 +2398,7 @@ By: @mgaligniana (#1773)
       {"qualified_name": "collections.Counter.most_common"},
   ]
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       # ...
       traces_sample_rate=1.0,
       functions_to_trace=functions_to_trace,
@@ -2421,9 +2432,9 @@ By: @mgaligniana (#1773)
   from celery import Celery, signals
   from celery.schedules import crontab
 
-  import sentry_sdk
-  from sentry_sdk.crons import monitor
-  from sentry_sdk.integrations.celery import CeleryIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.crons import monitor
+  from debugg_ai_sdk.integrations.celery import CeleryIntegration
 
 
   # 1. Setup your Celery beat configuration
@@ -2443,7 +2454,7 @@ By: @mgaligniana (#1773)
   #@signals.celeryd_init.connect
   @signals.beat_init.connect
   def init_sentry(**kwargs):
-      sentry_sdk.init(
+      debugg_ai_sdk.init(
           dsn='...',
           integrations=[CeleryIntegration()],
           environment="local.dev.grace",
@@ -2468,9 +2479,9 @@ By: @mgaligniana (#1773)
   Usage: Just add the new decorator to your function, and a span will be created for it:
 
   ```python
-  import sentry_sdk
+  import debugg_ai_sdk
 
-  @sentry_sdk.trace
+  @debugg_ai_sdk.trace
   def my_complex_function():
     # do stuff
     ...
@@ -2487,7 +2498,7 @@ By: @mgaligniana (#1773)
 - Fix: Update `get_json` function call for werkzeug 2.1.0+ (#1939) by @michielderoos
 - Fix: Returning the tasks result. (#1931) by @antonpirker
 - Fix: Rename MYPY to TYPE_CHECKING (#1934) by @untitaker
-- Fix: Fix type annotation for ignore_errors in sentry_sdk.init() (#1928) by @tiangolo
+- Fix: Fix type annotation for ignore_errors in debugg_ai_sdk.init() (#1928) by @tiangolo
 - Tests: Start a real http server instead of mocking libs (#1938) by @antonpirker
 
 ## 1.16.0
@@ -2508,11 +2519,11 @@ By: @mgaligniana (#1773)
   from arq import create_pool
   from arq.connections import RedisSettings
 
-  import sentry_sdk
-  from sentry_sdk.integrations.arq import ArqIntegration
-  from sentry_sdk.tracing import TransactionSource
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.arq import ArqIntegration
+  from debugg_ai_sdk.tracing import TransactionSource
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       integrations=[ArqIntegration()],
   )
@@ -2530,7 +2541,7 @@ By: @mgaligniana (#1773)
       await ctx['session'].aclose()
 
   async def main():
-      with sentry_sdk.start_transaction(name="testing_arq_tasks", source=TransactionSource.COMPONENT):
+      with debugg_ai_sdk.start_transaction(name="testing_arq_tasks", source=TransactionSource.COMPONENT):
           redis = await create_pool(RedisSettings())
           for url in ('https://facebook.com', 'https://microsoft.com', 'https://github.com', "asdf"
                       ):
@@ -2579,10 +2590,10 @@ By: @mgaligniana (#1773)
 
   from huey import SqliteHuey, crontab
 
-  import sentry_sdk
-  from sentry_sdk.integrations.huey import HueyIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.huey import HueyIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       integrations=[
           HueyIntegration(),
@@ -2602,13 +2613,13 @@ By: @mgaligniana (#1773)
   ```python
   from demo import add_numbers, flaky_task, nightly_backup
 
-  import sentry_sdk
-  from sentry_sdk.integrations.huey import HueyIntegration
-  from sentry_sdk.tracing import TransactionSource, Transaction
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.huey import HueyIntegration
+  from debugg_ai_sdk.tracing import TransactionSource, Transaction
 
 
   def main():
-      sentry_sdk.init(
+      debugg_ai_sdk.init(
           dsn="...",
           integrations=[
               HueyIntegration(),
@@ -2616,7 +2627,7 @@ By: @mgaligniana (#1773)
           traces_sample_rate=1.0,
       )
 
-      with sentry_sdk.start_transaction(name="testing_huey_tasks", source=TransactionSource.COMPONENT):
+      with debugg_ai_sdk.start_transaction(name="testing_huey_tasks", source=TransactionSource.COMPONENT):
           r = add_numbers(1, 2)
 
   if __name__ == "__main__":
@@ -2645,13 +2656,13 @@ By: @mgaligniana (#1773)
   Usage:
 
   ```python
-    import sentry_sdk
+    import debugg_ai_sdk
 
     def strip_sensitive_data(event, hint):
         # modify event here (or return `None` if you want to drop the event entirely)
         return event
 
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         # ...
         before_send_transaction=strip_sensitive_data,
     )
@@ -2685,10 +2696,10 @@ By: @mgaligniana (#1773)
   ```python
   from starlite import Starlite, get
 
-  import sentry_sdk
-  from sentry_sdk.integrations.starlite import StarliteIntegration
+  import debugg_ai_sdk
+  from debugg_ai_sdk.integrations.starlite import StarliteIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       traces_sample_rate=1.0,
       integrations=[
@@ -2955,9 +2966,9 @@ We can do better and in the future we will do our best to not break your code ag
   ```python
   from starlette.applications import Starlette
 
-  from sentry_sdk.integrations.starlette import StarletteIntegration
+  from debugg_ai_sdk.integrations.starlette import StarletteIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       integrations=[StarletteIntegration()],
   )
@@ -2974,10 +2985,10 @@ We can do better and in the future we will do our best to not break your code ag
   ```python
   from fastapi import FastAPI
 
-  from sentry_sdk.integrations.starlette import StarletteIntegration
-  from sentry_sdk.integrations.fastapi import FastApiIntegration
+  from debugg_ai_sdk.integrations.starlette import StarletteIntegration
+  from debugg_ai_sdk.integrations.fastapi import FastApiIntegration
 
-  sentry_sdk.init(
+  debugg_ai_sdk.init(
       dsn="...",
       integrations=[StarletteIntegration(), FastApiIntegration()],
   )
@@ -3583,7 +3594,7 @@ This release contains a breaking change
 
 ## 0.7.4
 
-- Read release and environment from process environment like the Raven SDK does. The keys are called `SENTRY_RELEASE` and `SENTRY_ENVIRONMENT`.
+- Read release and environment from process environment like the Raven SDK does. The keys are called `SENTRY_RELEASE` and `debuggai_environment`.
 - Fix a bug in the `serverless` integration where it would not push a new scope for each function call (leaking tags and other things across calls).
 - Experimental support for type hints.
 

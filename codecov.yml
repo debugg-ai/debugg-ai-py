@@ -8,7 +8,7 @@ coverage:
 
 ignore:
   - "tests"
-  - "sentry_sdk/_types.py"
+  - "debugg_ai_sdk/_types.py"
 
 # Read more here: https://docs.codecov.com/docs/pull-request-comments
 comment:

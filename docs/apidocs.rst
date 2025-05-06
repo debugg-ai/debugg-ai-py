@@ -2,53 +2,53 @@
 API Docs
 ========
 
-.. autoclass:: sentry_sdk.Hub
+.. autoclass:: debugg_ai_sdk.Hub
     :members:
 
-.. autoclass:: sentry_sdk.Scope
+.. autoclass:: debugg_ai_sdk.Scope
     :members:
 
-.. autoclass:: sentry_sdk.Client
+.. autoclass:: debugg_ai_sdk.Client
     :members:
 
-.. autoclass:: sentry_sdk.client.BaseClient
+.. autoclass:: debugg_ai_sdk.client.BaseClient
     :members:
 
-.. autoclass:: sentry_sdk.client.NonRecordingClient
+.. autoclass:: debugg_ai_sdk.client.NonRecordingClient
     :members:
 
-.. autoclass:: sentry_sdk.client._Client
+.. autoclass:: debugg_ai_sdk.client._Client
     :members:
 
-.. autoclass:: sentry_sdk.Transport
+.. autoclass:: debugg_ai_sdk.Transport
     :members:
 
-.. autoclass:: sentry_sdk.HttpTransport
+.. autoclass:: debugg_ai_sdk.HttpTransport
     :members:
 
-.. autoclass:: sentry_sdk.tracing.Transaction
+.. autoclass:: debugg_ai_sdk.tracing.Transaction
    :members:
 
-.. autoclass:: sentry_sdk.tracing.Span
+.. autoclass:: debugg_ai_sdk.tracing.Span
    :members:
 
-.. autoclass:: sentry_sdk.profiler.transaction_profiler.Profile
+.. autoclass:: debugg_ai_sdk.profiler.transaction_profiler.Profile
    :members:
 
-.. autoclass:: sentry_sdk.session.Session
+.. autoclass:: debugg_ai_sdk.session.Session
    :members:
 
-.. autoclass:: sentry_sdk.attachments.Attachment
+.. autoclass:: debugg_ai_sdk.attachments.Attachment
    :members:
 
-.. autoclass:: sentry_sdk.scrubber.EventScrubber
+.. autoclass:: debugg_ai_sdk.scrubber.EventScrubber
    :members:
 
-.. autoclass:: sentry_sdk.monitor.Monitor
+.. autoclass:: debugg_ai_sdk.monitor.Monitor
    :members:
 
-.. autoclass:: sentry_sdk.envelope.Envelope
+.. autoclass:: debugg_ai_sdk.envelope.Envelope
    :members:
 
-.. autoclass:: sentry_sdk.envelope.Item
+.. autoclass:: debugg_ai_sdk.envelope.Item
    :members:

@@ -120,7 +120,7 @@ class LocalLambdaStack(Stack):
                 type="AWS::Serverless::Function",
                 properties={
                     "CodeUri": os.path.join(LAMBDA_FUNCTION_DIR, lambda_dir),
-                    "Handler": "sentry_sdk.integrations.init_serverless_sdk.sentry_lambda_handler",
+                    "Handler": "debugg_ai_sdk.integrations.init_serverless_sdk.sentry_lambda_handler",
                     "Runtime": PYTHON_VERSION,
                     "Timeout": LAMBDA_FUNCTION_TIMEOUT,
                     "Layers": [
@@ -128,7 +128,7 @@ class LocalLambdaStack(Stack):
                     ],  # Add layer containing the Sentry SDK to function.
                     "Environment": {
                         "Variables": {
-                            "SENTRY_DSN": dsn,
+                            "DEBUGGAI_INGEST_URL": dsn,
                             "SENTRY_INITIAL_HANDLER": "index.handler",
                             "SENTRY_TRACES_SAMPLE_RATE": "1.0",
                         }
@@ -155,7 +155,7 @@ class LocalLambdaStack(Stack):
         for lambda_dir in lambda_dirs:
             # Copy the Sentry SDK into the function directory
             sdk_path = os.path.join(
-                LAMBDA_FUNCTION_WITH_EMBEDDED_SDK_DIR, lambda_dir, "sentry_sdk"
+                LAMBDA_FUNCTION_WITH_EMBEDDED_SDK_DIR, lambda_dir, "debugg_ai_sdk"
             )
             if not os.path.exists(sdk_path):
                 # Find the Sentry SDK in the current environment
@@ -197,7 +197,7 @@ class LocalLambdaStack(Stack):
                     "Timeout": LAMBDA_FUNCTION_TIMEOUT,
                     "Environment": {
                         "Variables": {
-                            "SENTRY_DSN": dsn,
+                            "DEBUGGAI_INGEST_URL": dsn,
                         }
                     },
                 },

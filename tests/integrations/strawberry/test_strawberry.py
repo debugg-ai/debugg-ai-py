@@ -104,7 +104,7 @@ def test_async_execution_uses_async_extension(sentry_init):
     sentry_init(integrations=[StrawberryIntegration(async_execution=True)])
 
     with mock.patch(
-        "sentry_sdk.integrations.strawberry._get_installed_modules",
+        "debugg_ai_sdk.integrations.strawberry._get_installed_modules",
         return_value={"flask": "2.3.3"},
     ):
         # actual installed modules should not matter, the explicit option takes
@@ -117,7 +117,7 @@ def test_sync_execution_uses_sync_extension(sentry_init):
     sentry_init(integrations=[StrawberryIntegration(async_execution=False)])
 
     with mock.patch(
-        "sentry_sdk.integrations.strawberry._get_installed_modules",
+        "debugg_ai_sdk.integrations.strawberry._get_installed_modules",
         return_value={"fastapi": "0.103.1", "starlette": "0.27.0"},
     ):
         # actual installed modules should not matter, the explicit option takes
@@ -130,7 +130,7 @@ def test_infer_execution_type_from_installed_packages_async(sentry_init):
     sentry_init(integrations=[StrawberryIntegration()])
 
     with mock.patch(
-        "sentry_sdk.integrations.strawberry._get_installed_modules",
+        "debugg_ai_sdk.integrations.strawberry._get_installed_modules",
         return_value={"fastapi": "0.103.1", "starlette": "0.27.0"},
     ):
         schema = strawberry.Schema(Query)
@@ -141,7 +141,7 @@ def test_infer_execution_type_from_installed_packages_sync(sentry_init):
     sentry_init(integrations=[StrawberryIntegration()])
 
     with mock.patch(
-        "sentry_sdk.integrations.strawberry._get_installed_modules",
+        "debugg_ai_sdk.integrations.strawberry._get_installed_modules",
         return_value={"flask": "2.3.3"},
     ):
         schema = strawberry.Schema(Query)

@@ -14,7 +14,7 @@ def id_function(val):
 @dataclass(frozen=True)
 class ShouldBeIncludedTestCase:
     id: str
-    is_sentry_sdk_frame: bool
+    is_debugg_ai_sdk_frame: bool
     namespace: Optional[str] = None
     in_app_include: Optional[List[str]] = None
     in_app_exclude: Optional[List[str]] = None
@@ -28,14 +28,14 @@ class ShouldBeIncludedTestCase:
         (
             ShouldBeIncludedTestCase(
                 id="Frame from Sentry SDK",
-                is_sentry_sdk_frame=True,
+                is_debugg_ai_sdk_frame=True,
             ),
             False,
         ),
         (
             ShouldBeIncludedTestCase(
                 id="Frame from Django installed in virtualenv inside project root",
-                is_sentry_sdk_frame=False,
+                is_debugg_ai_sdk_frame=False,
                 abs_path="/home/username/some_project/.venv/lib/python3.12/site-packages/django/db/models/sql/compiler",
                 project_root="/home/username/some_project",
                 namespace="django.db.models.sql.compiler",
@@ -46,7 +46,7 @@ class ShouldBeIncludedTestCase:
         (
             ShouldBeIncludedTestCase(
                 id="Frame from project",
-                is_sentry_sdk_frame=False,
+                is_debugg_ai_sdk_frame=False,
                 abs_path="/home/username/some_project/some_project/__init__.py",
                 project_root="/home/username/some_project",
                 namespace="some_project",
@@ -56,7 +56,7 @@ class ShouldBeIncludedTestCase:
         (
             ShouldBeIncludedTestCase(
                 id="Frame from project module in `in_app_exclude`",
-                is_sentry_sdk_frame=False,
+                is_debugg_ai_sdk_frame=False,
                 abs_path="/home/username/some_project/some_project/exclude_me/some_module.py",
                 project_root="/home/username/some_project",
                 namespace="some_project.exclude_me.some_module",
@@ -67,7 +67,7 @@ class ShouldBeIncludedTestCase:
         (
             ShouldBeIncludedTestCase(
                 id="Frame from system-wide installed Django",
-                is_sentry_sdk_frame=False,
+                is_debugg_ai_sdk_frame=False,
                 abs_path="/usr/lib/python3.12/site-packages/django/db/models/sql/compiler",
                 project_root="/home/username/some_project",
                 namespace="django.db.models.sql.compiler",
@@ -77,7 +77,7 @@ class ShouldBeIncludedTestCase:
         (
             ShouldBeIncludedTestCase(
                 id="Frame from system-wide installed Django with `django` in `in_app_include`",
-                is_sentry_sdk_frame=False,
+                is_debugg_ai_sdk_frame=False,
                 abs_path="/usr/lib/python3.12/site-packages/django/db/models/sql/compiler",
                 project_root="/home/username/some_project",
                 namespace="django.db.models.sql.compiler",

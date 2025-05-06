@@ -73,7 +73,7 @@ def test_transaction_uses_downsampled_rate(
     assert monitor.downsample_factor == 1
 
     # make sure we don't sample the transaction
-    with mock.patch("sentry_sdk.tracing_utils.Random.uniform", return_value=0.75):
+    with mock.patch("debugg_ai_sdk.tracing_utils.Random.uniform", return_value=0.75):
         with debugg_ai_sdk.start_transaction(name="foobar") as transaction:
             assert transaction.sampled is False
             assert transaction.sample_rate == 0.5

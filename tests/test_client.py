@@ -52,15 +52,15 @@ class _TestTransport(Transport):
 
 
 def test_transport_option(monkeypatch):
-    if "SENTRY_DSN" in os.environ:
-        monkeypatch.delenv("SENTRY_DSN")
+    if "DEBUGGAI_INGEST_URL" in os.environ:
+        monkeypatch.delenv("DEBUGGAI_INGEST_URL")
 
     dsn = "https://foo@sentry.io/123"
     dsn2 = "https://bar@sentry.io/124"
     assert str(Client(dsn=dsn).dsn) == dsn
     assert Client().dsn is None
 
-    monkeypatch.setenv("SENTRY_DSN", dsn)
+    monkeypatch.setenv("DEBUGGAI_INGEST_URL", dsn)
     transport = _TestTransport({"dsn": dsn2})
     assert str(transport.parsed_dsn) == dsn2
     assert str(Client(transport=transport).dsn) == dsn
@@ -584,7 +584,7 @@ def test_atexit(tmpdir, monkeypatch, num_messages, http2):
         dedent(
             """
     import time
-    from sentry_sdk import init, transport, capture_message
+    from debugg_ai_sdk import init, transport, capture_message
 
     def capture_envelope(self, envelope):
         time.sleep(0.1)
@@ -1130,7 +1130,7 @@ def test_debug_option(
     env_var_value,
     debug_output_expected,
 ):
-    monkeypatch.setenv("SENTRY_DEBUG", env_var_value)
+    monkeypatch.setenv("DEBUGGAI_DEBUG", env_var_value)
 
     if client_option is None:
         sentry_init()
@@ -1214,7 +1214,7 @@ class IssuesSamplerTestConfig:
         raise self.exception_to_raise()
 
 
-@mock.patch("sentry_sdk.client.random.random", return_value=0.618)
+@mock.patch("debugg_ai_sdk.client.random.random", return_value=0.618)
 @pytest.mark.parametrize(
     "test_config",
     (

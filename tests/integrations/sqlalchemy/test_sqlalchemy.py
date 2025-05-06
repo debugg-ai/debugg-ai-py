@@ -566,7 +566,7 @@ def test_no_query_source_if_duration_too_short(sentry_init, capture_events):
                 pass
 
         with mock.patch(
-            "sentry_sdk.integrations.sqlalchemy.record_sql_queries",
+            "debugg_ai_sdk.integrations.sqlalchemy.record_sql_queries",
             fake_record_sql_queries,
         ):
             assert session.query(Person).first() == bob
@@ -632,7 +632,7 @@ def test_query_source_if_duration_over_threshold(sentry_init, capture_events):
                 pass
 
         with mock.patch(
-            "sentry_sdk.integrations.sqlalchemy.record_sql_queries",
+            "debugg_ai_sdk.integrations.sqlalchemy.record_sql_queries",
             fake_record_sql_queries,
         ):
             assert session.query(Person).first() == bob

@@ -187,10 +187,11 @@ if TYPE_CHECKING:
             "monitor_config": Mapping[str, object],
             "monitor_slug": Optional[str],
             "platform": Literal["python"],
-            "profile": object,  # Should be sentry_sdk.profiler.Profile, but we can't import that here due to circular imports
+            "profile": object,  # Should be debugg_ai_sdk.profiler.Profile, but we can't import that here due to circular imports
             "release": str,
             "request": dict[str, object],
             "sdk": Mapping[str, object],
+            "host_name": str,
             "server_name": str,
             "spans": Annotated[list[dict[str, object]]],
             "stacktrace": dict[

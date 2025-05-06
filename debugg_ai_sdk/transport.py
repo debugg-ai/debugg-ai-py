@@ -61,7 +61,7 @@ for option in [
 class Transport(ABC):
     """Baseclass for all transports.
 
-    A transport is used to send an event to sentry.
+    A transport is used to send an event to debuggai.
     """
 
     parsed_dsn = None  # type: Optional[Dsn]
@@ -330,8 +330,9 @@ class BaseHttpTransport(Transport):
         headers,
         endpoint_type=EndpointType.ENVELOPE,
         envelope=None,
+        json=None,
     ):
-        # type: (Self, bytes, Dict[str, str], EndpointType, Optional[Envelope]) -> None
+        # type: (Self, Union[bytes, Dict[str, Any]], Dict[str, str], EndpointType, Optional[Envelope]) -> None
 
         def record_loss(reason):
             # type: (str) -> None
@@ -344,7 +345,7 @@ class BaseHttpTransport(Transport):
         headers.update(
             {
                 "User-Agent": str(self._auth.client),
-                "X-Sentry-Auth": str(self._auth.to_header()),
+                "X-Debugg-Auth": str(self._auth.to_header()),
             }
         )
         try:
@@ -353,6 +354,7 @@ class BaseHttpTransport(Transport):
                 endpoint_type,
                 body,
                 headers,
+                json=json,
             )
         except Exception:
             self.on_dropped_event("network")
@@ -480,7 +482,7 @@ class BaseHttpTransport(Transport):
         if client_report_item is not None:
             envelope.items.append(client_report_item)
 
-        content_encoding, body = self._serialize_envelope(envelope)
+        content_encoding, body = self._serialize_envelope_simple(envelope)
 
         assert self.parsed_dsn is not None
         logger.debug(
@@ -491,18 +493,25 @@ class BaseHttpTransport(Transport):
         )
 
         headers = {
-            "Content-Type": "application/x-sentry-envelope",
+            "Content-Type": "application/json",
         }
         if content_encoding:
             headers["Content-Encoding"] = content_encoding
 
         self._send_request(
-            body.getvalue(),
+            None if content_encoding is None else body,
             headers=headers,
             endpoint_type=EndpointType.ENVELOPE,
             envelope=envelope,
+            json=body,
         )
         return None
+
+    def _serialize_envelope_simple(self, envelope):
+        # type: (Self, Envelope) -> tuple[Optional[str], Dict[str, Any]]
+        content_encoding = None
+        body = envelope.serialize_simple()
+        return content_encoding, body
 
     def _serialize_envelope(self, envelope):
         # type: (Self, Envelope) -> tuple[Optional[str], io.BytesIO]
@@ -551,8 +560,9 @@ class BaseHttpTransport(Transport):
         endpoint_type,
         body,
         headers,
+        json=None,
     ):
-        # type: (Self, str, EndpointType, Any, Mapping[str, str]) -> Union[urllib3.BaseHTTPResponse, httpcore.Response]
+        # type: (Self, str, EndpointType, Any, Mapping[str, str], Optional[Dict[str, Any]]) -> Union[urllib3.BaseHTTPResponse, httpcore.Response]
         raise NotImplementedError()
 
     def capture_envelope(
@@ -711,13 +721,15 @@ class HttpTransport(BaseHttpTransport):
         endpoint_type,
         body,
         headers,
+        json=None,
     ):
-        # type: (Self, str, EndpointType, Any, Mapping[str, str]) -> urllib3.BaseHTTPResponse
+        # type: (Self, str, EndpointType, Any, Mapping[str, str], Optional[Dict[str, Any]]) -> urllib3.BaseHTTPResponse
         return self._pool.request(
             method,
             self._auth.get_api_url(endpoint_type),
             body=body,
             headers=headers,
+            json=json,
         )
 
 
@@ -763,8 +775,9 @@ else:
             endpoint_type,
             body,
             headers,
+            json=None,
         ):
-            # type: (Self, str, EndpointType, Any, Mapping[str, str]) -> httpcore.Response
+            # type: (Self, str, EndpointType, Any, Mapping[str, str], Optional[Dict[str, Any]]) -> httpcore.Response
             response = self._pool.request(
                 method,
                 self._auth.get_api_url(endpoint_type),
@@ -778,6 +791,7 @@ else:
                         "read": self.TIMEOUT,
                     }
                 },
+                json=json,
             )
             return response
 

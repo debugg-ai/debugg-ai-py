@@ -490,7 +490,7 @@ def test_task_headers(celery):
 
     # This is how the Celery Beat auto-instrumentation starts a task
     # in the monkey patched version of `apply_async`
-    # in `sentry_sdk/integrations/celery.py::_wrap_apply_async()`
+    # in `debugg_ai_sdk/integrations/celery.py::_wrap_apply_async()`
     result = dummy_task.apply_async(args=(1, 0), headers=sentry_crons_setup)
 
     expected_headers = sentry_crons_setup.copy()
@@ -510,7 +510,7 @@ def test_baggage_propagation(init_celery):
         return _get_headers(self)
 
     # patch random.uniform to return a predictable sample_rand value
-    with mock.patch("sentry_sdk.tracing_utils.Random.uniform", return_value=0.5):
+    with mock.patch("debugg_ai_sdk.tracing_utils.Random.uniform", return_value=0.5):
         with start_transaction() as transaction:
             result = dummy_task.apply_async(
                 args=(1, 0),

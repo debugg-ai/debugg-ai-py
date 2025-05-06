@@ -93,7 +93,7 @@ def test_omit_url_data_if_parsing_fails(sentry_init, capture_events):
     url = f"http://localhost:{PORT}/ok"  # noqa:E231
 
     with mock.patch(
-        "sentry_sdk.integrations.stdlib.parse_url",
+        "debugg_ai_sdk.integrations.stdlib.parse_url",
         side_effect=ValueError,
     ):
         response = requests.get(url)

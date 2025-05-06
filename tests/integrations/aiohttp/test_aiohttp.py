@@ -290,7 +290,7 @@ async def test_tracing_unparseable_url(sentry_init, aiohttp_client, capture_even
 
     client = await aiohttp_client(app)
     with mock.patch(
-        "sentry_sdk.integrations.aiohttp.parse_url", side_effect=ValueError
+        "debugg_ai_sdk.integrations.aiohttp.parse_url", side_effect=ValueError
     ):
         resp = await client.get("/")
 
@@ -632,7 +632,7 @@ async def test_outgoing_trace_headers_append_to_baggage(
 
     raw_server = await aiohttp_raw_server(handler)
 
-    with mock.patch("sentry_sdk.tracing_utils.Random.uniform", return_value=0.5):
+    with mock.patch("debugg_ai_sdk.tracing_utils.Random.uniform", return_value=0.5):
         with start_transaction(
             name="/interactions/other-dogs/new-dog",
             op="greeting.sniff",

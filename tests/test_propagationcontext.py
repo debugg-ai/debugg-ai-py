@@ -145,7 +145,7 @@ def test_sample_rand_filled(parent_sampled, sample_rate, expected_interval):
         rv.uniform = mock_uniform
         return rv
 
-    with mock.patch("sentry_sdk.tracing_utils.Random", mock_random_class):
+    with mock.patch("debugg_ai_sdk.tracing_utils.Random", mock_random_class):
         ctx = PropagationContext().from_incoming_data(
             {
                 "sentry-trace": f"00000000000000000000000000000000-0000000000000000{SAMPLED_FLAG[parent_sampled]}",
@@ -171,7 +171,7 @@ def test_sample_rand_rounds_down():
         rv.uniform = mock_uniform
         return rv
 
-    with mock.patch("sentry_sdk.tracing_utils.Random", mock_random_class):
+    with mock.patch("debugg_ai_sdk.tracing_utils.Random", mock_random_class):
         ctx = PropagationContext().from_incoming_data(
             {
                 "sentry-trace": "00000000000000000000000000000000-0000000000000000",

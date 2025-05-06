@@ -58,7 +58,7 @@ def expected_error(integrations):
                                     "context_line": '        raise ValueError("This is a test exception")',
                                     "post_context": [
                                         "    except ValueError as ex:",
-                                        "        sentry_sdk.capture_exception(ex)",
+                                        "        debugg_ai_sdk.capture_exception(ex)",
                                         "",
                                         "",
                                         "def _test_before_send(event, hint):",
@@ -308,7 +308,7 @@ def _generate_event_data(scope=None):
         scope.add_attachment(bytes=b"Hello World", filename="hello.txt")
 
 
-def _init_sentry_sdk(sentry_init):
+def _init_debugg_ai_sdk(sentry_init):
     sentry_init(
         environment="checking-compatibility-with-sdk1",
         release="0.1.2rc3",
@@ -331,7 +331,7 @@ def _init_sentry_sdk(sentry_init):
 
 
 def test_event(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_sentry_sdk(sentry_init)
+    _init_debugg_ai_sdk(sentry_init)
 
     envelopes = capture_envelopes()
 
@@ -360,7 +360,7 @@ def test_event(sentry_init, capture_envelopes, expected_error, expected_transact
 
 
 def test_event2(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_sentry_sdk(sentry_init)
+    _init_debugg_ai_sdk(sentry_init)
 
     envelopes = capture_envelopes()
 
@@ -396,7 +396,7 @@ def test_event2(sentry_init, capture_envelopes, expected_error, expected_transac
 
 
 def test_event3(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_sentry_sdk(sentry_init)
+    _init_debugg_ai_sdk(sentry_init)
 
     envelopes = capture_envelopes()
 
@@ -432,7 +432,7 @@ def test_event3(sentry_init, capture_envelopes, expected_error, expected_transac
 
 
 def test_event4(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_sentry_sdk(sentry_init)
+    _init_debugg_ai_sdk(sentry_init)
 
     envelopes = capture_envelopes()
 
@@ -468,7 +468,7 @@ def test_event4(sentry_init, capture_envelopes, expected_error, expected_transac
 
 
 def test_event5(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_sentry_sdk(sentry_init)
+    _init_debugg_ai_sdk(sentry_init)
 
     envelopes = capture_envelopes()
 

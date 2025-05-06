@@ -36,7 +36,7 @@ exclude_also = [
 #
 
 [tool.pytest.ini_options]
-addopts = "-vvv -rfEs -s --durations=5 --cov=./sentry_sdk --cov-branch --cov-report= --tb=short --junitxml=.junitxml"
+addopts = "-vvv -rfEs -s --durations=5 --cov=./debugg_ai_sdk --cov-branch --cov-report= --tb=short --junitxml=.junitxml"
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
 markers = [
@@ -143,12 +143,12 @@ module = "blinker.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "sentry_sdk._queue"
+module = "debugg_ai_sdk._queue"
 ignore_missing_imports = true
 disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]
-module = "sentry_sdk._lru_cache"
+module = "debugg_ai_sdk._lru_cache"
 disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]

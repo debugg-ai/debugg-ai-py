@@ -171,7 +171,7 @@ def test_outgoing_trace_headers_append_to_baggage(
     url = "http://example.com/"
 
     # patch random.uniform to return a predictable sample_rand value
-    with mock.patch("sentry_sdk.tracing_utils.Random.uniform", return_value=0.5):
+    with mock.patch("debugg_ai_sdk.tracing_utils.Random.uniform", return_value=0.5):
         with start_transaction(
             name="/interactions/other-dogs/new-dog",
             op="greeting.sniff",
@@ -369,7 +369,7 @@ def test_omit_url_data_if_parsing_fails(sentry_init, capture_events, httpx_mock)
 
     events = capture_events()
     with mock.patch(
-        "sentry_sdk.integrations.httpx.parse_url",
+        "debugg_ai_sdk.integrations.httpx.parse_url",
         side_effect=ValueError,
     ):
         response = httpx_client.get(url)

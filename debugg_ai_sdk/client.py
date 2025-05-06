@@ -72,7 +72,7 @@ _client_init_debug = ContextVar("client_init_debug")
 
 
 SDK_INFO = {
-    "name": "sentry.python",  # SDK name will be overridden after integrations have been loaded with sentry_sdk.integrations.setup_integrations()
+    "name": "sentry.python",  # SDK name will be overridden after integrations have been loaded with debugg_ai_sdk.integrations.setup_integrations()
     "version": VERSION,
     "packages": [{"name": "pypi:sentry-sdk", "version": VERSION}],
 }  # type: SDKInfo
@@ -101,16 +101,16 @@ def _get_options(*args, **kwargs):
         rv[key] = value
 
     if rv["dsn"] is None:
-        rv["dsn"] = os.environ.get("SENTRY_DSN")
+        rv["dsn"] = os.environ.get("DEBUGGAI_INGEST_URL")
 
     if rv["release"] is None:
         rv["release"] = get_default_release()
 
     if rv["environment"] is None:
-        rv["environment"] = os.environ.get("SENTRY_ENVIRONMENT") or "production"
+        rv["environment"] = os.environ.get("DEBUGGAI_ENVIRONMENT") or "production"
 
     if rv["debug"] is None:
-        rv["debug"] = env_to_bool(os.environ.get("SENTRY_DEBUG", "False"), strict=True)
+        rv["debug"] = env_to_bool(os.environ.get("DEBUGGAI_DEBUG", "False"), strict=True)
 
     if rv["server_name"] is None and hasattr(socket, "gethostname"):
         rv["server_name"] = socket.gethostname()
@@ -268,7 +268,7 @@ class _Client(BaseClient):
     the client options as keyword arguments and optionally the DSN as first
     argument.
 
-    Alias of :py:class:`sentry_sdk.Client`. (Was created for better intelisense support)
+    Alias of :py:class:`debugg_ai_sdk.Client`. (Was created for better intelisense support)
     """
 
     def __init__(self, *args, **kwargs):
@@ -288,7 +288,7 @@ class _Client(BaseClient):
     def _setup_instrumentation(self, functions_to_trace):
         # type: (Sequence[Dict[str, str]]) -> None
         """
-        Instruments the functions given in the list `functions_to_trace` with the `@sentry_sdk.tracing.trace` decorator.
+        Instruments the functions given in the list `functions_to_trace` with the `@debugg_ai_sdk.tracing.trace` decorator.
         """
         for function in functions_to_trace:
             class_name = None
@@ -396,11 +396,11 @@ class _Client(BaseClient):
                 )
                 self.options["instrumenter"] = INSTRUMENTER.OTEL
                 if (
-                    "sentry_sdk.integrations.opentelemetry.integration.OpenTelemetryIntegration"
+                    "debugg_ai_sdk.integrations.opentelemetry.integration.OpenTelemetryIntegration"
                     not in _DEFAULT_INTEGRATIONS
                 ):
                     _DEFAULT_INTEGRATIONS.append(
-                        "sentry_sdk.integrations.opentelemetry.integration.OpenTelemetryIntegration",
+                        "debugg_ai_sdk.integrations.opentelemetry.integration.OpenTelemetryIntegration",
                     )
 
             self.integrations = setup_integrations(
@@ -571,7 +571,7 @@ class _Client(BaseClient):
                     ]
                 }
 
-        for key in "release", "environment", "server_name", "dist":
+        for key in "release", "environment", "server_name", "dist", "host_name":
             if event.get(key) is None and self.options[key] is not None:
                 event[key] = str(self.options[key]).strip()
         if event.get("sdk") is None:
@@ -816,7 +816,7 @@ class _Client(BaseClient):
 
         :param hint: Contains metadata about the event that can be read from `before_send`, such as the original exception object or a HTTP request object.
 
-        :param scope: An optional :py:class:`sentry_sdk.Scope` to apply to events.
+        :param scope: An optional :py:class:`debugg_ai_sdk.Scope` to apply to events.
 
         :returns: An event ID. May be `None` if there is no DSN set or of if the SDK decided to discard the event for other reasons. In such situations setting `debug=True` on `init()` may help.
         """

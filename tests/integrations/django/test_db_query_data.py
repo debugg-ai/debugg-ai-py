@@ -361,7 +361,7 @@ def test_no_query_source_if_duration_too_short(sentry_init, client, capture_even
             pass
 
     with mock.patch(
-        "sentry_sdk.integrations.django.record_sql_queries",
+        "debugg_ai_sdk.integrations.django.record_sql_queries",
         fake_record_sql_queries,
     ):
         _, status, _ = unpack_werkzeug_response(
@@ -419,7 +419,7 @@ def test_query_source_if_duration_over_threshold(sentry_init, client, capture_ev
             pass
 
     with mock.patch(
-        "sentry_sdk.integrations.django.record_sql_queries",
+        "debugg_ai_sdk.integrations.django.record_sql_queries",
         fake_record_sql_queries,
     ):
         _, status, _ = unpack_werkzeug_response(

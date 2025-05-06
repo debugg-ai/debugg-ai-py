@@ -1,2 +1,2 @@
 include LICENSE
-include sentry_sdk/py.typed
+include debugg_ai_sdk/py.typed

@@ -6,7 +6,7 @@ import warnings
 #
 # This lives in tests/__init__.py because apparently even tests/conftest.py
 # gets loaded too late.
-assert "sentry_sdk" not in sys.modules
+assert "debugg_ai_sdk" not in sys.modules
 
 _warning_recorder_mgr = warnings.catch_warnings(record=True)
 _warning_recorder = _warning_recorder_mgr.__enter__()

@@ -69,7 +69,7 @@ class SentryHubDeprecationWarning(DeprecationWarning):
     """
 
     _MESSAGE = (
-        "`sentry_sdk.Hub` is deprecated and will be removed in a future major release. "
+        "`debugg_ai_sdk.Hub` is deprecated and will be removed in a future major release. "
         "Please consult our 1.x to 2.x migration guide for details on how to migrate "
         "`Hub` usage to the new API: "
         "https://docs.sentry.io/platforms/python/migration/1.x-to-2.x"
@@ -117,7 +117,7 @@ class HubMeta(type):
 class Hub(with_metaclass(HubMeta)):  # type: ignore
     """
     .. deprecated:: 2.0.0
-        The Hub is deprecated. Its functionality will be merged into :py:class:`sentry_sdk.scope.Scope`.
+        The Hub is deprecated. Its functionality will be merged into :py:class:`debugg_ai_sdk.scope.Scope`.
 
     The hub wraps the concurrency management of the SDK.  Each thread has
     its own hub but the hub might transfer with the flow of execution if
@@ -225,7 +225,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.client._Client.get_integration` instead.
+            Please use :py:meth:`debugg_ai_sdk.client._Client.get_integration` instead.
 
         Returns the integration for this hub by name or class.  If there
         is no client bound or the client does not have that integration
@@ -242,7 +242,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This property is deprecated and will be removed in a future release.
-            Please use :py:func:`sentry_sdk.api.get_client` instead.
+            Please use :py:func:`debugg_ai_sdk.api.get_client` instead.
 
         Returns the current client on the hub.
         """
@@ -283,7 +283,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.set_client` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.set_client` instead.
 
         Binds a new client to the hub.
         """
@@ -294,21 +294,21 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.capture_event` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.capture_event` instead.
 
         Captures an event.
 
-        Alias of :py:meth:`sentry_sdk.Scope.capture_event`.
+        Alias of :py:meth:`debugg_ai_sdk.Scope.capture_event`.
 
         :param event: A ready-made event that can be directly sent to Sentry.
 
         :param hint: Contains metadata about the event that can be read from `before_send`, such as the original exception object or a HTTP request object.
 
-        :param scope: An optional :py:class:`sentry_sdk.Scope` to apply to events.
+        :param scope: An optional :py:class:`debugg_ai_sdk.Scope` to apply to events.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
         :param scope_kwargs: Optional data to apply to event.
-            For supported `**scope_kwargs` see :py:meth:`sentry_sdk.Scope.update_from_kwargs`.
+            For supported `**scope_kwargs` see :py:meth:`debugg_ai_sdk.Scope.update_from_kwargs`.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
         """
         last_event_id = get_current_scope().capture_event(
@@ -326,24 +326,24 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.capture_message` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.capture_message` instead.
 
         Captures a message.
 
-        Alias of :py:meth:`sentry_sdk.Scope.capture_message`.
+        Alias of :py:meth:`debugg_ai_sdk.Scope.capture_message`.
 
         :param message: The string to send as the message to Sentry.
 
         :param level: If no level is provided, the default level is `info`.
 
-        :param scope: An optional :py:class:`sentry_sdk.Scope` to apply to events.
+        :param scope: An optional :py:class:`debugg_ai_sdk.Scope` to apply to events.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
         :param scope_kwargs: Optional data to apply to event.
-            For supported `**scope_kwargs` see :py:meth:`sentry_sdk.Scope.update_from_kwargs`.
+            For supported `**scope_kwargs` see :py:meth:`debugg_ai_sdk.Scope.update_from_kwargs`.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
-        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`sentry_sdk.client._Client.capture_event`).
+        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`debugg_ai_sdk.client._Client.capture_event`).
         """
         last_event_id = get_current_scope().capture_message(
             message, level=level, scope=scope, **scope_kwargs
@@ -359,22 +359,22 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.capture_exception` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.capture_exception` instead.
 
         Captures an exception.
 
-        Alias of :py:meth:`sentry_sdk.Scope.capture_exception`.
+        Alias of :py:meth:`debugg_ai_sdk.Scope.capture_exception`.
 
         :param error: An exception to capture. If `None`, `sys.exc_info()` will be used.
 
-        :param scope: An optional :py:class:`sentry_sdk.Scope` to apply to events.
+        :param scope: An optional :py:class:`debugg_ai_sdk.Scope` to apply to events.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
         :param scope_kwargs: Optional data to apply to event.
-            For supported `**scope_kwargs` see :py:meth:`sentry_sdk.Scope.update_from_kwargs`.
+            For supported `**scope_kwargs` see :py:meth:`debugg_ai_sdk.Scope.update_from_kwargs`.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
-        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`sentry_sdk.client._Client.capture_event`).
+        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`debugg_ai_sdk.client._Client.capture_event`).
         """
         last_event_id = get_current_scope().capture_exception(
             error, scope=scope, **scope_kwargs
@@ -390,7 +390,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.add_breadcrumb` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.add_breadcrumb` instead.
 
         Adds a breadcrumb.
 
@@ -406,21 +406,21 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.start_span` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.start_span` instead.
 
         Start a span whose parent is the currently active span or transaction, if any.
 
-        The return value is a :py:class:`sentry_sdk.tracing.Span` instance,
+        The return value is a :py:class:`debugg_ai_sdk.tracing.Span` instance,
         typically used as a context manager to start and stop timing in a `with`
         block.
 
         Only spans contained in a transaction are sent to Sentry. Most
         integrations start a transaction at the appropriate time, for example
         for every incoming HTTP request. Use
-        :py:meth:`sentry_sdk.start_transaction` to start a new transaction when
+        :py:meth:`debugg_ai_sdk.start_transaction` to start a new transaction when
         one is not already in progress.
 
-        For supported `**kwargs` see :py:class:`sentry_sdk.tracing.Span`.
+        For supported `**kwargs` see :py:class:`debugg_ai_sdk.tracing.Span`.
         """
         scope = get_current_scope()
         return scope.start_span(instrumenter=instrumenter, **kwargs)
@@ -436,7 +436,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.start_transaction` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.start_transaction` instead.
 
         Start and return a transaction.
 
@@ -459,7 +459,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         When the transaction is finished, it will be sent to Sentry with all its
         finished child spans.
 
-        For supported `**kwargs` see :py:class:`sentry_sdk.tracing.Transaction`.
+        For supported `**kwargs` see :py:class:`debugg_ai_sdk.tracing.Transaction`.
         """
         scope = get_current_scope()
 
@@ -477,7 +477,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.continue_trace` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.continue_trace` instead.
 
         Sets the propagation context from environment or headers and returns a transaction.
         """
@@ -593,7 +593,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.start_session` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.start_session` instead.
 
         Starts a new session.
         """
@@ -606,7 +606,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.end_session` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.end_session` instead.
 
         Ends the current session if there is one.
         """
@@ -617,7 +617,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.stop_auto_session_tracking` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.stop_auto_session_tracking` instead.
 
         Stops automatic session tracking.
 
@@ -631,7 +631,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.resume_auto_session_tracking` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.resume_auto_session_tracking` instead.
 
         Resumes automatic session tracking for the current scope if
         disabled earlier.  This requires that generally automatic session
@@ -648,9 +648,9 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.client._Client.flush` instead.
+            Please use :py:meth:`debugg_ai_sdk.client._Client.flush` instead.
 
-        Alias for :py:meth:`sentry_sdk.client._Client.flush`
+        Alias for :py:meth:`debugg_ai_sdk.client._Client.flush`
         """
         return get_client().flush(timeout=timeout, callback=callback)
 
@@ -659,7 +659,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.get_traceparent` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.get_traceparent` instead.
 
         Returns the traceparent either from the active span or from the scope.
         """
@@ -677,7 +677,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.get_baggage` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.get_baggage` instead.
 
         Returns Baggage either from the active span or from the scope.
         """
@@ -698,7 +698,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.iter_trace_propagation_headers` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.iter_trace_propagation_headers` instead.
 
         Return HTTP headers which allow propagation of trace data. Data taken
         from the span representing the request, if available, or the current
@@ -713,7 +713,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         """
         .. deprecated:: 2.0.0
             This function is deprecated and will be removed in a future release.
-            Please use :py:meth:`sentry_sdk.Scope.trace_propagation_meta` instead.
+            Please use :py:meth:`debugg_ai_sdk.Scope.trace_propagation_meta` instead.
 
         Return meta tags which should be injected into HTML templates
         to allow propagation of trace information.

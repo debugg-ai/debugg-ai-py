@@ -589,7 +589,7 @@ async def test_active_thread_id(
     sentry_init, capture_envelopes, teardown_profiling, endpoint
 ):
     with mock.patch(
-        "sentry_sdk.profiler.transaction_profiler.PROFILE_MINIMUM_SAMPLES", 0
+        "debugg_ai_sdk.profiler.transaction_profiler.PROFILE_MINIMUM_SAMPLES", 0
     ):
         sentry_init(
             traces_sample_rate=1.0,

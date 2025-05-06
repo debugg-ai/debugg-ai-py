@@ -28,7 +28,7 @@ def trace_sampler(sampling_context):
 
 
 debugg_ai_sdk.init(
-    dsn=os.environ.get("SENTRY_DSN"),
+    dsn=os.environ.get("DEBUGGAI_INGEST_URL"),
     traces_sample_rate=1.0,
     traces_sampler=trace_sampler,
     integrations=[AwsLambdaIntegration()],

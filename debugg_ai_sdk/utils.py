@@ -68,7 +68,7 @@ if TYPE_CHECKING:
 epoch = datetime(1970, 1, 1)
 
 # The logger is created here but initialized in the debug support module
-logger = logging.getLogger("sentry_sdk.errors")
+logger = logging.getLogger("debugg_ai_sdk.errors")
 
 _installed_modules = None
 
@@ -165,7 +165,7 @@ def get_sdk_name(installed_integrations):
     # type: (List[str]) -> str
     """Return the SDK name including the name of the used web framework."""
 
-    # Note: I can not use for example sentry_sdk.integrations.django.DjangoIntegration.identifier
+    # Note: I can not use for example debugg_ai_sdk.integrations.django.DjangoIntegration.identifier
     # here because if django is not installed the integration is not accessible.
     framework_integrations = [
         "django",
@@ -229,7 +229,7 @@ def capture_internal_exception(exc_info):
     These exceptions do not end up in Sentry and are just logged instead.
     """
     if debugg_ai_sdk.get_client().is_active():
-        logger.error("Internal error in sentry_sdk", exc_info=exc_info)
+        logger.error("Internal error in debugg_ai_sdk", exc_info=exc_info)
 
 
 def to_timestamp(value):
@@ -314,21 +314,27 @@ class Dsn:
             self.port = self.scheme == "https" and 443 or 80  # type: int
         else:
             self.port = parts.port
+            
+            
+        # format: https://<hostname>/api/v1/ingest/company_key/project_key/
+        company_key = parts.path.rsplit("/", 4)[2]
+        project_key = parts.path.rsplit("/", 4)[1]
+        
+        if not company_key or not project_key:
+            raise BadDsn("Missing company key or project key")
 
-        if not parts.username:
-            raise BadDsn("Missing public key")
-
-        self.public_key = parts.username
-        self.secret_key = parts.password
+        self.public_key = company_key
+        self.secret_key = project_key
 
         path = parts.path.rsplit("/", 1)
 
         try:
-            self.project_id = str(int(path.pop()))
+            self.project_id = project_key
         except (ValueError, TypeError):
             raise BadDsn("Invalid project in DSN (%r)" % (parts.path or "")[1:])
 
-        self.path = "/".join(path) + "/"
+        self.path = "/".join(path)
+        self.path = self.path + "/" if self.path[-1] != "/" else self.path
 
     @property
     def netloc(self):
@@ -393,12 +399,10 @@ class Auth:
     ):
         # type: (...) -> str
         """Returns the API url for storing events."""
-        return "%s://%s%sapi/%s/%s/" % (
+        return "%s://%s%s" % (
             self.scheme,
             self.host,
-            self.path,
-            self.project_id,
-            type.value,
+            self.path
         )
 
     def to_header(self):
@@ -429,7 +433,7 @@ def should_hide_frame(frame):
     # type: (FrameType) -> bool
     try:
         mod = frame.f_globals["__name__"]
-        if mod.startswith("sentry_sdk."):
+        if mod.startswith("debugg_ai_sdk."):
             return True
     except (AttributeError, KeyError):
         pass
@@ -1792,7 +1796,7 @@ def ensure_integration_enabled(
     ```python
     @ensure_integration_enabled(MyIntegration, my_function)
     def patch_my_function():
-        with sentry_sdk.start_transaction(...):
+        with debugg_ai_sdk.start_transaction(...):
             return my_function()
     ```
     """

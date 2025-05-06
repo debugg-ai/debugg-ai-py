@@ -2,7 +2,7 @@
 Instrumentation for Django 3.0
 
 Since this file contains `async def` it is conditionally imported in
-`sentry_sdk.integrations.django` (depending on the existence of
+`debugg_ai_sdk.integrations.django` (depending on the existence of
 `django.core.handlers.asgi`.
 """
 

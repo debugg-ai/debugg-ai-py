@@ -673,9 +673,9 @@ def test_installed_modules():
 def test_installed_modules_caching():
     mock_generate_installed_modules = mock.Mock()
     mock_generate_installed_modules.return_value = {"package": "1.0.0"}
-    with mock.patch("sentry_sdk.utils._installed_modules", None):
+    with mock.patch("debugg_ai_sdk.utils._installed_modules", None):
         with mock.patch(
-            "sentry_sdk.utils._generate_installed_modules",
+            "debugg_ai_sdk.utils._generate_installed_modules",
             mock_generate_installed_modules,
         ):
             _get_installed_modules()
@@ -687,14 +687,14 @@ def test_installed_modules_caching():
 
 
 def test_devnull_inaccessible():
-    with mock.patch("sentry_sdk.utils.open", side_effect=OSError("oh no")):
+    with mock.patch("debugg_ai_sdk.utils.open", side_effect=OSError("oh no")):
         revision = get_git_revision()
 
     assert revision is None
 
 
 def test_devnull_not_found():
-    with mock.patch("sentry_sdk.utils.open", side_effect=FileNotFoundError("oh no")):
+    with mock.patch("debugg_ai_sdk.utils.open", side_effect=FileNotFoundError("oh no")):
         revision = get_git_revision()
 
     assert revision is None
@@ -706,7 +706,7 @@ def test_default_release():
 
 
 def test_default_release_empty_string():
-    with mock.patch("sentry_sdk.utils.get_git_revision", return_value=""):
+    with mock.patch("debugg_ai_sdk.utils.get_git_revision", return_value=""):
         release = get_default_release()
 
     assert release is None
@@ -829,7 +829,7 @@ def test_get_current_thread_meta_gevent_in_thread():
     results = Queue(maxsize=1)
 
     def target():
-        with mock.patch("sentry_sdk.utils.is_gevent", side_effect=[True]):
+        with mock.patch("debugg_ai_sdk.utils.is_gevent", side_effect=[True]):
             job = gevent.spawn(get_current_thread_meta)
             job.join()
             results.put(job.value)
@@ -845,9 +845,9 @@ def test_get_current_thread_meta_gevent_in_thread_failed_to_get_hub():
     results = Queue(maxsize=1)
 
     def target():
-        with mock.patch("sentry_sdk.utils.is_gevent", side_effect=[True]):
+        with mock.patch("debugg_ai_sdk.utils.is_gevent", side_effect=[True]):
             with mock.patch(
-                "sentry_sdk.utils.get_gevent_hub", side_effect=["fake gevent hub"]
+                "debugg_ai_sdk.utils.get_gevent_hub", side_effect=["fake gevent hub"]
             ):
                 job = gevent.spawn(get_current_thread_meta)
                 job.join()

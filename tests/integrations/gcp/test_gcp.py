@@ -42,12 +42,12 @@ gcp_functions.worker_v1.FunctionHandler = Mock()
 gcp_functions.worker_v1.FunctionHandler.invoke_user_function = log_return_value(cloud_function)
 
 
-import sentry_sdk
-from sentry_sdk.integrations.gcp import GcpIntegration
+import debugg_ai_sdk
+from debugg_ai_sdk.integrations.gcp import GcpIntegration
 import json
 import time
 
-from sentry_sdk.transport import HttpTransport
+from debugg_ai_sdk.transport import HttpTransport
 
 def event_processor(event):
     # Adding delay which would allow us to capture events.
@@ -65,7 +65,7 @@ class TestTransport(HttpTransport):
 
 
 def init_sdk(timeout_warning=False, **extra_init_args):
-    sentry_sdk.init(
+    debugg_ai_sdk.init(
         dsn="https://123abc@example.com/123",
         transport=TestTransport,
         integrations=[GcpIntegration(timeout_warning=timeout_warning)],
@@ -368,7 +368,7 @@ def test_error_has_new_trace_context_performance_enabled(run_cloud_function):
         functionhandler = None
         event = {}
         def cloud_function(functionhandler, event):
-            sentry_sdk.capture_message("hi")
+            debugg_ai_sdk.capture_message("hi")
             x = 3/0
             return "3"
         """
@@ -409,7 +409,7 @@ def test_error_has_new_trace_context_performance_disabled(run_cloud_function):
         functionhandler = None
         event = {}
         def cloud_function(functionhandler, event):
-            sentry_sdk.capture_message("hi")
+            debugg_ai_sdk.capture_message("hi")
             x = 3/0
             return "3"
         """
@@ -457,7 +457,7 @@ def test_error_has_existing_trace_context_performance_enabled(run_cloud_function
         event = GCPEvent(headers={"sentry-trace": "%s"})
 
         def cloud_function(functionhandler, event):
-            sentry_sdk.capture_message("hi")
+            debugg_ai_sdk.capture_message("hi")
             x = 3/0
             return "3"
         """
@@ -510,7 +510,7 @@ def test_error_has_existing_trace_context_performance_disabled(run_cloud_functio
         event = GCPEvent(headers={"sentry-trace": "%s"})
 
         def cloud_function(functionhandler, event):
-            sentry_sdk.capture_message("hi")
+            debugg_ai_sdk.capture_message("hi")
             x = 3/0
             return "3"
         """

@@ -10,7 +10,7 @@ Resources:
       Timeout: 30
       Environment:
         Variables:
-          SENTRY_DSN: !Ref SentryDsn
+          DEBUGGAI_INGEST_URL: !Ref SentryDsn
       Events:
         ApiEventGet:
           Type: Api

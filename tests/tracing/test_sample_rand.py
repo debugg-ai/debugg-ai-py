@@ -20,7 +20,7 @@ def test_deterministic_sampled(sentry_init, capture_events, sample_rate, sample_
     events = capture_events()
 
     with mock.patch(
-        "sentry_sdk.tracing_utils.Random.uniform", return_value=sample_rand
+        "debugg_ai_sdk.tracing_utils.Random.uniform", return_value=sample_rand
     ):
         with debugg_ai_sdk.start_transaction() as transaction:
             assert (
@@ -75,7 +75,7 @@ def test_decimal_context(sentry_init, capture_events):
 
     try:
         with mock.patch(
-            "sentry_sdk.tracing_utils.Random.uniform", return_value=0.123456789
+            "debugg_ai_sdk.tracing_utils.Random.uniform", return_value=0.123456789
         ):
             with debugg_ai_sdk.start_transaction() as transaction:
                 assert (

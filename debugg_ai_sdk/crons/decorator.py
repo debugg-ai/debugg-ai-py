@@ -32,25 +32,25 @@ class monitor:  # noqa: N801
 
     Usage (as decorator):
     ```
-    import sentry_sdk
+    import debugg_ai_sdk
 
     app = Celery()
 
     @app.task
-    @sentry_sdk.monitor(monitor_slug='my-fancy-slug')
+    @debugg_ai_sdk.monitor(monitor_slug='my-fancy-slug')
     def test(arg):
         print(arg)
     ```
 
     This does not have to be used with Celery, but if you do use it with celery,
-    put the `@sentry_sdk.monitor` decorator below Celery's `@app.task` decorator.
+    put the `@debugg_ai_sdk.monitor` decorator below Celery's `@app.task` decorator.
 
     Usage (as context manager):
     ```
-    import sentry_sdk
+    import debugg_ai_sdk
 
     def test(arg):
-        with sentry_sdk.monitor(monitor_slug='my-fancy-slug'):
+        with debugg_ai_sdk.monitor(monitor_slug='my-fancy-slug'):
             print(arg)
     ```
     """

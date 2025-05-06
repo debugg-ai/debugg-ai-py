@@ -7,7 +7,7 @@ TBD
 Logging
 =======
 
-.. module:: sentry_sdk.integrations.logging
+.. module:: debugg_ai_sdk.integrations.logging
 
 .. autofunction:: ignore_logger
 

@@ -7,7 +7,7 @@ from debugg_ai_sdk.integrations.logging import LoggingIntegration
 
 def lambda_handler(event, context):
     debugg_ai_sdk.init(
-        dsn=os.environ.get("SENTRY_DSN"),
+        dsn=os.environ.get("DEBUGGAI_INGEST_URL"),
         attach_stacktrace=True,
         integrations=[
             LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),

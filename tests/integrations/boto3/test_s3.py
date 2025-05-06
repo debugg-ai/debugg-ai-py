@@ -108,7 +108,7 @@ def test_omit_url_data_if_parsing_fails(sentry_init, capture_events):
     s3 = session.resource("s3")
 
     with mock.patch(
-        "sentry_sdk.integrations.boto3.parse_url",
+        "debugg_ai_sdk.integrations.boto3.parse_url",
         side_effect=ValueError,
     ):
         with debugg_ai_sdk.start_transaction() as transaction, MockResponse(

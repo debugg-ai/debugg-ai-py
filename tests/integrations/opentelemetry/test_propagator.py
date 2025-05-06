@@ -145,7 +145,7 @@ def test_inject_empty_otel_span_map():
     span.get_span_context.return_value = span_context
 
     with mock.patch(
-        "sentry_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
+        "debugg_ai_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
         return_value=span,
     ):
         full_context = set_span_in_context(span, context)
@@ -186,7 +186,7 @@ def test_inject_sentry_span_no_baggage():
     span_processor.otel_span_map[span_id] = sentry_span
 
     with mock.patch(
-        "sentry_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
+        "debugg_ai_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
         return_value=span,
     ):
         full_context = set_span_in_context(span, context)
@@ -230,7 +230,7 @@ def test_inject_sentry_span_empty_baggage():
     span_processor.otel_span_map[span_id] = sentry_span
 
     with mock.patch(
-        "sentry_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
+        "debugg_ai_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
         return_value=span,
     ):
         full_context = set_span_in_context(span, context)
@@ -281,7 +281,7 @@ def test_inject_sentry_span_baggage():
     span_processor.otel_span_map[span_id] = sentry_span
 
     with mock.patch(
-        "sentry_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
+        "debugg_ai_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
         return_value=span,
     ):
         full_context = set_span_in_context(span, context)

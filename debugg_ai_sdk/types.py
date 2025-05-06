@@ -1,6 +1,6 @@
 """
 This module contains type definitions for the Sentry SDK's public API.
-The types are re-exported from the internal module `sentry_sdk._types`.
+The types are re-exported from the internal module `debugg_ai_sdk._types`.
 
 Disclaimer: Since types are a form of documentation, type definitions
 may change in minor releases. Removing a type would be considered a

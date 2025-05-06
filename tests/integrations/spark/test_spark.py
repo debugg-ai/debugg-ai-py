@@ -56,7 +56,7 @@ def test_start_sentry_listener(create_spark_context):
     assert gateway._callback_server is not None
 
 
-@patch("sentry_sdk.integrations.spark.spark_driver._patch_spark_context_init")
+@patch("debugg_ai_sdk.integrations.spark.spark_driver._patch_spark_context_init")
 def test_initialize_spark_integration_before_spark_context_init(
     mock_patch_spark_context_init,
     sentry_init_with_reset,
@@ -68,7 +68,7 @@ def test_initialize_spark_integration_before_spark_context_init(
     mock_patch_spark_context_init.assert_called_once()
 
 
-@patch("sentry_sdk.integrations.spark.spark_driver._activate_integration")
+@patch("debugg_ai_sdk.integrations.spark.spark_driver._activate_integration")
 def test_initialize_spark_integration_after_spark_context_init(
     mock_activate_integration,
     create_spark_context,

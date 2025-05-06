@@ -771,7 +771,7 @@ def test_request_body_already_read(sentry_init, client, capture_events):
         def raw_data(self):
             raise RawPostDataException
 
-    with patch("sentry_sdk.integrations.django.DjangoRequestExtractor", MockExtractor):
+    with patch("debugg_ai_sdk.integrations.django.DjangoRequestExtractor", MockExtractor):
         client.post(
             reverse("post_echo"), data=b'{"hey": 42}', content_type="application/json"
         )
@@ -1258,7 +1258,7 @@ def test_ensures_spotlight_middleware_when_spotlight_is_enabled(sentry_init, set
 
     added = frozenset(settings.MIDDLEWARE) ^ original_middleware
 
-    assert "sentry_sdk.spotlight.SpotlightMiddleware" in added
+    assert "debugg_ai_sdk.spotlight.SpotlightMiddleware" in added
 
 
 def test_ensures_no_spotlight_middleware_when_env_killswitch_is_false(
@@ -1277,7 +1277,7 @@ def test_ensures_no_spotlight_middleware_when_env_killswitch_is_false(
 
     added = frozenset(settings.MIDDLEWARE) ^ original_middleware
 
-    assert "sentry_sdk.spotlight.SpotlightMiddleware" not in added
+    assert "debugg_ai_sdk.spotlight.SpotlightMiddleware" not in added
 
 
 def test_ensures_no_spotlight_middleware_when_no_spotlight(
@@ -1298,7 +1298,7 @@ def test_ensures_no_spotlight_middleware_when_no_spotlight(
 
     added = frozenset(settings.MIDDLEWARE) ^ original_middleware
 
-    assert "sentry_sdk.spotlight.SpotlightMiddleware" not in added
+    assert "debugg_ai_sdk.spotlight.SpotlightMiddleware" not in added
 
 
 def test_get_frame_name_when_in_lazy_object():

@@ -757,7 +757,7 @@ def test_calculate_chat_completion_usage_a():
     streaming_message_responses = []
 
     with mock.patch(
-        "sentry_sdk.integrations.openai.record_token_usage"
+        "debugg_ai_sdk.integrations.openai.record_token_usage"
     ) as mock_record_token_usage:
         _calculate_chat_completion_usage(
             messages, response, span, streaming_message_responses, count_tokens
@@ -783,7 +783,7 @@ def test_calculate_chat_completion_usage_b():
     streaming_message_responses = []
 
     with mock.patch(
-        "sentry_sdk.integrations.openai.record_token_usage"
+        "debugg_ai_sdk.integrations.openai.record_token_usage"
     ) as mock_record_token_usage:
         _calculate_chat_completion_usage(
             messages, response, span, streaming_message_responses, count_tokens
@@ -809,7 +809,7 @@ def test_calculate_chat_completion_usage_c():
     ]
 
     with mock.patch(
-        "sentry_sdk.integrations.openai.record_token_usage"
+        "debugg_ai_sdk.integrations.openai.record_token_usage"
     ) as mock_record_token_usage:
         _calculate_chat_completion_usage(
             messages, response, span, streaming_message_responses, count_tokens
@@ -836,7 +836,7 @@ def test_calculate_chat_completion_usage_d():
     streaming_message_responses = []
 
     with mock.patch(
-        "sentry_sdk.integrations.openai.record_token_usage"
+        "debugg_ai_sdk.integrations.openai.record_token_usage"
     ) as mock_record_token_usage:
         _calculate_chat_completion_usage(
             messages, response, span, streaming_message_responses, count_tokens
@@ -855,7 +855,7 @@ def test_calculate_chat_completion_usage_e():
     streaming_message_responses = None
 
     with mock.patch(
-        "sentry_sdk.integrations.openai.record_token_usage"
+        "debugg_ai_sdk.integrations.openai.record_token_usage"
     ) as mock_record_token_usage:
         _calculate_chat_completion_usage(
             messages, response, span, streaming_message_responses, count_tokens

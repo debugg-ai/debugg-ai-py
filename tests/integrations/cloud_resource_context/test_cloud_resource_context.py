@@ -380,10 +380,10 @@ def test_setup_once(
     )
 
     with mock.patch(
-        "sentry_sdk.integrations.cloud_resource_context.set_context"
+        "debugg_ai_sdk.integrations.cloud_resource_context.set_context"
     ) as fake_set_context:
         with mock.patch(
-            "sentry_sdk.integrations.cloud_resource_context.logger.warning"
+            "debugg_ai_sdk.integrations.cloud_resource_context.logger.warning"
         ) as fake_warning:
             CloudResourceContextIntegration.setup_once()
 

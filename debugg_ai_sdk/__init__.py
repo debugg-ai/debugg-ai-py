@@ -13,7 +13,7 @@ __all__ = [  # noqa
     "Transport",
     "HttpTransport",
     "integrations",
-    # From sentry_sdk.api
+    # From debugg_ai_sdk.api
     "init",
     "add_attachment",
     "add_breadcrumb",

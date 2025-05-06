@@ -463,7 +463,7 @@ class Span:
         the ``sentry-trace`` and ``baggage`` headers from the environ (if any)
         before returning the Transaction.
 
-        This is different from :py:meth:`~sentry_sdk.tracing.Span.continue_from_headers`
+        This is different from :py:meth:`~debugg_ai_sdk.tracing.Span.continue_from_headers`
         in that it assumes header names in the form ``HTTP_HEADER_NAME`` -
         such as you would get from a WSGI/ASGI environ -
         rather than the form ``header-name``.
@@ -553,7 +553,7 @@ class Span:
     ):
         # type: (...) -> Optional[Transaction]
         """
-        DEPRECATED: Use :py:meth:`sentry_sdk.tracing.Span.continue_from_headers`.
+        DEPRECATED: Use :py:meth:`debugg_ai_sdk.tracing.Span.continue_from_headers`.
 
         Create a ``Transaction`` with the given params, then add in data pulled from
         the given ``sentry-trace`` header value before returning the ``Transaction``.
@@ -587,7 +587,7 @@ class Span:
 
     def to_baggage(self):
         # type: () -> Optional[Baggage]
-        """Returns the :py:class:`~sentry_sdk.tracing_utils.Baggage`
+        """Returns the :py:class:`~debugg_ai_sdk.tracing_utils.Baggage`
         associated with this ``Span``, if any. (Taken from the root of the span tree.)
         """
         if self.containing_transaction:
@@ -665,7 +665,7 @@ class Span:
             be used as timestamp instead of the current time.
 
         :return: Always ``None``. The type is ``Optional[str]`` to match
-            the return value of :py:meth:`sentry_sdk.tracing.Transaction.finish`.
+            the return value of :py:meth:`debugg_ai_sdk.tracing.Transaction.finish`.
         """
         if self.timestamp is not None:
             # This span is already finished, ignore.
@@ -792,7 +792,7 @@ class Transaction(Span):
         See https://develop.sentry.dev/sdk/event-payloads/transaction/#transaction-annotations
         for more information. Default "custom".
     :param kwargs: Additional arguments to be passed to the Span constructor.
-        See :py:class:`sentry_sdk.tracing.Span` for available arguments.
+        See :py:class:`debugg_ai_sdk.tracing.Span` for available arguments.
     """
 
     __slots__ = (
@@ -861,7 +861,7 @@ class Transaction(Span):
         """Returns whether the transaction might have been started.
 
         If this returns False, we know that the transaction was not started
-        with sentry_sdk.start_transaction, and therefore the transaction will
+        with debugg_ai_sdk.start_transaction, and therefore the transaction will
         be discarded.
         """
 
@@ -872,9 +872,9 @@ class Transaction(Span):
         # type: () -> Transaction
         if not self._possibly_started():
             logger.debug(
-                "Transaction was entered without being started with sentry_sdk.start_transaction."
+                "Transaction was entered without being started with debugg_ai_sdk.start_transaction."
                 "The transaction will not be sent to Sentry. To fix, start the transaction by"
-                "passing it to sentry_sdk.start_transaction."
+                "passing it to debugg_ai_sdk.start_transaction."
             )
 
         super().__enter__()
@@ -984,7 +984,7 @@ class Transaction(Span):
                 logger.debug("Discarding transaction because sampled = False")
             else:
                 logger.debug(
-                    "Discarding transaction because it was not started with sentry_sdk.start_transaction"
+                    "Discarding transaction because it was not started with debugg_ai_sdk.start_transaction"
                 )
 
             # This is not entirely accurate because discards here are not
@@ -1124,7 +1124,7 @@ class Transaction(Span):
 
     def get_baggage(self):
         # type: () -> Baggage
-        """Returns the :py:class:`~sentry_sdk.tracing_utils.Baggage`
+        """Returns the :py:class:`~debugg_ai_sdk.tracing_utils.Baggage`
         associated with the Transaction.
 
         The first time a new baggage with Sentry items is made,
@@ -1351,13 +1351,13 @@ def trace(func=None):
     .. code-block::
         :caption: Usage
 
-        import sentry_sdk
+        import debugg_ai_sdk
 
-        @sentry_sdk.trace
+        @debugg_ai_sdk.trace
         def my_function():
             ...
 
-        @sentry_sdk.trace
+        @debugg_ai_sdk.trace
         async def my_async_function():
             ...
     """

@@ -462,12 +462,12 @@ def test_transaction_dropped_debug_not_started(sentry_init, sampled):
 
     tx = Transaction(sampled=sampled)
 
-    with mock.patch("sentry_sdk.tracing.logger") as mock_logger:
+    with mock.patch("debugg_ai_sdk.tracing.logger") as mock_logger:
         with tx:
             pass
 
     mock_logger.debug.assert_any_call(
-        "Discarding transaction because it was not started with sentry_sdk.start_transaction"
+        "Discarding transaction because it was not started with debugg_ai_sdk.start_transaction"
     )
 
     with pytest.raises(AssertionError):
@@ -482,7 +482,7 @@ def test_transaction_dropeed_sampled_false(sentry_init):
 
     tx = Transaction(sampled=False)
 
-    with mock.patch("sentry_sdk.tracing.logger") as mock_logger:
+    with mock.patch("debugg_ai_sdk.tracing.logger") as mock_logger:
         with debugg_ai_sdk.start_transaction(tx):
             pass
 
@@ -491,7 +491,7 @@ def test_transaction_dropeed_sampled_false(sentry_init):
     with pytest.raises(AssertionError):
         # We should not see the "not started" message here
         mock_logger.debug.assert_any_call(
-            "Discarding transaction because it was not started with sentry_sdk.start_transaction"
+            "Discarding transaction because it was not started with debugg_ai_sdk.start_transaction"
         )
 
 
@@ -500,12 +500,12 @@ def test_transaction_not_started_warning(sentry_init):
 
     tx = Transaction()
 
-    with mock.patch("sentry_sdk.tracing.logger") as mock_logger:
+    with mock.patch("debugg_ai_sdk.tracing.logger") as mock_logger:
         with tx:
             pass
 
     mock_logger.debug.assert_any_call(
-        "Transaction was entered without being started with sentry_sdk.start_transaction."
+        "Transaction was entered without being started with debugg_ai_sdk.start_transaction."
         "The transaction will not be sent to Sentry. To fix, start the transaction by"
-        "passing it to sentry_sdk.start_transaction."
+        "passing it to debugg_ai_sdk.start_transaction."
     )

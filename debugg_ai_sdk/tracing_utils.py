@@ -199,7 +199,7 @@ def _get_frame_module_abs_path(frame):
 
 
 def _should_be_included(
-    is_sentry_sdk_frame,  # type: bool
+    is_debugg_ai_sdk_frame,  # type: bool
     namespace,  # type: Optional[str]
     in_app_include,  # type: Optional[list[str]]
     in_app_exclude,  # type: Optional[list[str]]
@@ -212,7 +212,7 @@ def _should_be_included(
     should_be_excluded = _is_external_source(abs_path) or _module_in_list(
         namespace, in_app_exclude
     )
-    return not is_sentry_sdk_frame and (
+    return not is_debugg_ai_sdk_frame and (
         should_be_included
         or (_is_in_project_root(abs_path, project_root) and not should_be_excluded)
     )
@@ -255,12 +255,12 @@ def add_query_source(span):
         except Exception:
             namespace = None
 
-        is_sentry_sdk_frame = namespace is not None and namespace.startswith(
-            "sentry_sdk."
+        is_debugg_ai_sdk_frame = namespace is not None and namespace.startswith(
+            "debugg_ai_sdk."
         )
 
         should_be_included = _should_be_included(
-            is_sentry_sdk_frame=is_sentry_sdk_frame,
+            is_debugg_ai_sdk_frame=is_debugg_ai_sdk_frame,
             namespace=namespace,
             in_app_include=in_app_include,
             in_app_exclude=in_app_exclude,
@@ -775,7 +775,7 @@ def start_child_span_decorator(func):
     """
     Decorator to add child spans for functions.
 
-    See also ``sentry_sdk.tracing.trace()``.
+    See also ``debugg_ai_sdk.tracing.trace()``.
     """
     # Asynchronous case
     if inspect.iscoroutinefunction(func):

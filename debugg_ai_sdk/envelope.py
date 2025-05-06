@@ -141,6 +141,13 @@ class Envelope:
         for item in self.items:
             item.serialize_into(f)
 
+    def serialize_simple(self):
+        # type: (...) -> Dict[str, Any]
+        return {
+            "headers": self.headers,
+            "items": [item.serialize_simple() for item in self.items],
+        }
+
     def serialize(self):
         # type: (...) -> bytes
         out = io.BytesIO()
@@ -317,6 +324,13 @@ class Item:
         f.write(b"\n")
         f.write(bytes)
         f.write(b"\n")
+
+    def serialize_simple(self):
+        # type: (...) -> Dict[str, Any]
+        return {
+            "headers": self.headers,
+            "payload": self.payload.json,
+        }
 
     def serialize(self):
         # type: (...) -> bytes

@@ -294,7 +294,7 @@ def _patch_drf():
 
     This function is not called directly on SDK setup, because importing almost
     any part of Django Rest Framework will try to access Django settings (where
-    `sentry_sdk.init()` might be called from in the first place). Instead we
+    `debugg_ai_sdk.init()` might be called from in the first place). Instead we
     run this function on every request and do the patching on the first
     request.
     """

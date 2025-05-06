@@ -17,8 +17,8 @@ def test_catch_exceptions(tmpdir):
     import typer
     from unittest import mock
 
-    from sentry_sdk import init, transport
-    from sentry_sdk.integrations.typer import TyperIntegration
+    from debugg_ai_sdk import init, transport
+    from debugg_ai_sdk.integrations.typer import TyperIntegration
 
     def capture_envelope(self, envelope):
         print("capture_envelope was called")

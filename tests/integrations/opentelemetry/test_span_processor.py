@@ -111,7 +111,7 @@ def test_get_trace_data_with_sentry_trace():
     parent_context = {}
 
     with mock.patch(
-        "sentry_sdk.integrations.opentelemetry.span_processor.get_value",
+        "debugg_ai_sdk.integrations.opentelemetry.span_processor.get_value",
         side_effect=[
             extract_sentrytrace_data(
                 "1234567890abcdef1234567890abcdef-1234567890abcdef-1"
@@ -128,7 +128,7 @@ def test_get_trace_data_with_sentry_trace():
         assert sentry_trace_data["baggage"] is None
 
     with mock.patch(
-        "sentry_sdk.integrations.opentelemetry.span_processor.get_value",
+        "debugg_ai_sdk.integrations.opentelemetry.span_processor.get_value",
         side_effect=[
             extract_sentrytrace_data(
                 "1234567890abcdef1234567890abcdef-1234567890abcdef-0"
@@ -165,7 +165,7 @@ def test_get_trace_data_with_sentry_trace_and_baggage():
     )
 
     with mock.patch(
-        "sentry_sdk.integrations.opentelemetry.span_processor.get_value",
+        "debugg_ai_sdk.integrations.opentelemetry.span_processor.get_value",
         side_effect=[
             extract_sentrytrace_data(
                 "1234567890abcdef1234567890abcdef-1234567890abcdef-1"
@@ -310,7 +310,7 @@ def test_on_start_transaction():
     debugg_ai_sdk.get_global_scope().set_client(fake_client)
 
     with mock.patch(
-        "sentry_sdk.integrations.opentelemetry.span_processor.start_transaction",
+        "debugg_ai_sdk.integrations.opentelemetry.span_processor.start_transaction",
         fake_start_transaction,
     ):
         span_processor = SentrySpanProcessor()
@@ -508,7 +508,7 @@ def test_link_trace_context_to_error_event():
     fake_event = {"event_id": "1234567890abcdef1234567890abcdef"}
 
     with mock.patch(
-        "sentry_sdk.integrations.opentelemetry.span_processor.get_current_span",
+        "debugg_ai_sdk.integrations.opentelemetry.span_processor.get_current_span",
         return_value=otel_span,
     ):
         event = link_trace_context_to_error_event(fake_event, otel_span_map)

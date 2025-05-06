@@ -660,7 +660,7 @@ async def test_no_query_source_if_duration_too_short(sentry_init, capture_events
             yield span
 
         with mock.patch(
-            "sentry_sdk.integrations.asyncpg.record_sql_queries",
+            "debugg_ai_sdk.integrations.asyncpg.record_sql_queries",
             fake_record_sql_queries,
         ):
             await conn.execute(
@@ -705,7 +705,7 @@ async def test_query_source_if_duration_over_threshold(sentry_init, capture_even
             yield span
 
         with mock.patch(
-            "sentry_sdk.integrations.asyncpg.record_sql_queries",
+            "debugg_ai_sdk.integrations.asyncpg.record_sql_queries",
             fake_record_sql_queries,
         ):
             await conn.execute(

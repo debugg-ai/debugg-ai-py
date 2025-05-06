@@ -78,7 +78,7 @@ def test_filename():
 
     import debugg_ai_sdk.utils
 
-    assert x("sentry_sdk.utils", debugg_ai_sdk.utils.__file__) == "sentry_sdk/utils.py"
+    assert x("debugg_ai_sdk.utils", debugg_ai_sdk.utils.__file__) == "debugg_ai_sdk/utils.py"
 
 
 @pytest.mark.parametrize(

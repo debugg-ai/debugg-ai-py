@@ -17,7 +17,7 @@ class Attachment:
     all non-transaction events (or all events including transactions if ``add_to_transactions`` is ``True``) that are
     captured within the ``Scope``.
 
-    To add an attachment to a ``Scope``, use :py:meth:`sentry_sdk.Scope.add_attachment`. The parameters for
+    To add an attachment to a ``Scope``, use :py:meth:`debugg_ai_sdk.Scope.add_attachment`. The parameters for
     ``add_attachment`` are the same as the parameters for this class's constructor.
 
     :param bytes: Raw bytes of the attachment, or a function that returns the raw bytes. Must be provided unless

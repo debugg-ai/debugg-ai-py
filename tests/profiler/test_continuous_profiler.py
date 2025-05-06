@@ -236,7 +236,7 @@ def assert_single_transaction_without_profile_chunks(envelopes):
         pytest.param(get_client_options(False), id="experiment"),
     ],
 )
-@mock.patch("sentry_sdk.profiler.continuous_profiler.PROFILE_BUFFER_SECONDS", 0.01)
+@mock.patch("debugg_ai_sdk.profiler.continuous_profiler.PROFILE_BUFFER_SECONDS", 0.01)
 def test_continuous_profiler_auto_start_and_manual_stop(
     sentry_init,
     capture_envelopes,
@@ -313,7 +313,7 @@ def test_continuous_profiler_auto_start_and_manual_stop(
         pytest.param(get_client_options(False), id="experiment"),
     ],
 )
-@mock.patch("sentry_sdk.profiler.continuous_profiler.PROFILE_BUFFER_SECONDS", 0.01)
+@mock.patch("debugg_ai_sdk.profiler.continuous_profiler.PROFILE_BUFFER_SECONDS", 0.01)
 def test_continuous_profiler_manual_start_and_stop_sampled(
     sentry_init,
     capture_envelopes,
@@ -439,7 +439,7 @@ def test_continuous_profiler_manual_start_and_stop_unsampled(
         pytest.param(get_client_options(False), id="experiment"),
     ],
 )
-@mock.patch("sentry_sdk.profiler.continuous_profiler.DEFAULT_SAMPLING_FREQUENCY", 21)
+@mock.patch("debugg_ai_sdk.profiler.continuous_profiler.DEFAULT_SAMPLING_FREQUENCY", 21)
 def test_continuous_profiler_auto_start_and_stop_sampled(
     sentry_init,
     capture_envelopes,
@@ -501,7 +501,7 @@ def test_continuous_profiler_auto_start_and_stop_sampled(
         pytest.param(get_client_options(False), id="experiment"),
     ],
 )
-@mock.patch("sentry_sdk.profiler.continuous_profiler.PROFILE_BUFFER_SECONDS", 0.01)
+@mock.patch("debugg_ai_sdk.profiler.continuous_profiler.PROFILE_BUFFER_SECONDS", 0.01)
 def test_continuous_profiler_auto_start_and_stop_unsampled(
     sentry_init,
     capture_envelopes,
@@ -583,13 +583,13 @@ def test_continuous_profiler_manual_start_and_stop_noop_when_using_trace_lifecyl
     )
 
     with mock.patch(
-        f"sentry_sdk.profiler.continuous_profiler.{class_name}.ensure_running"
+        f"debugg_ai_sdk.profiler.continuous_profiler.{class_name}.ensure_running"
     ) as mock_ensure_running:
         start_profiler_func()
         mock_ensure_running.assert_not_called()
 
     with mock.patch(
-        f"sentry_sdk.profiler.continuous_profiler.{class_name}.teardown"
+        f"debugg_ai_sdk.profiler.continuous_profiler.{class_name}.teardown"
     ) as mock_teardown:
         stop_profiler_func()
         mock_teardown.assert_not_called()

@@ -30,7 +30,7 @@ __all__ = [
     "stop_profile_session",  # TODO: Deprecate this in favor of `stop_profiler`
     "stop_profiler",
     # DEPRECATED: The following was re-exported for backwards compatibility. It
-    # will be removed from sentry_sdk.profiler in a future release.
+    # will be removed from debugg_ai_sdk.profiler in a future release.
     "MAX_PROFILE_DURATION_NS",
     "PROFILE_MINIMUM_SAMPLES",
     "Profile",

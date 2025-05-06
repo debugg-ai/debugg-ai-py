@@ -3,7 +3,7 @@ For manual instrumentation,
 The Handler function string of an aws lambda function should be added as an
 environment variable with a key of 'SENTRY_INITIAL_HANDLER' along with the 'DSN'
 Then the Handler function sstring should be replaced with
-'sentry_sdk.integrations.init_serverless_sdk.sentry_lambda_handler'
+'debugg_ai_sdk.integrations.init_serverless_sdk.sentry_lambda_handler'
 """
 
 import os
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 # Configure Sentry SDK
 debugg_ai_sdk.init(
-    dsn=os.environ["SENTRY_DSN"],
+    dsn=os.environ["DEBUGGAI_INGEST_URL"],
     integrations=[AwsLambdaIntegration(timeout_warning=True)],
     traces_sample_rate=float(os.environ["SENTRY_TRACES_SAMPLE_RATE"]),
 )

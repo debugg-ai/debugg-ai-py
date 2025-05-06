@@ -111,7 +111,7 @@ def _capture_internal_warnings():
         except NameError:
             pass
 
-        if "sentry_sdk" not in str(warning.filename) and "sentry-sdk" not in str(
+        if "debugg_ai_sdk" not in str(warning.filename) and "sentry-sdk" not in str(
             warning.filename
         ):
             continue
@@ -177,7 +177,7 @@ def reset_integrations():
     global _DEFAULT_INTEGRATIONS, _processed_integrations
     try:
         _DEFAULT_INTEGRATIONS.remove(
-            "sentry_sdk.integrations.opentelemetry.integration.OpenTelemetryIntegration"
+            "debugg_ai_sdk.integrations.opentelemetry.integration.OpenTelemetryIntegration"
         )
     except ValueError:
         pass
@@ -648,7 +648,7 @@ def patch_start_tracing_child(fake_transaction_is_none=False):
         fake_start_child = None
 
     with mock.patch(
-        "sentry_sdk.tracing_utils.get_current_span", return_value=fake_transaction
+        "debugg_ai_sdk.tracing_utils.get_current_span", return_value=fake_transaction
     ):
         yield fake_start_child
 

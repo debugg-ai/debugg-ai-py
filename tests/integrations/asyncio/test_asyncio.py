@@ -234,7 +234,7 @@ def test_patch_asyncio(mock_get_running_loop):
 
 @minimum_python_38
 @patch("asyncio.get_running_loop")
-@patch("sentry_sdk.integrations.asyncio.Task")
+@patch("debugg_ai_sdk.integrations.asyncio.Task")
 def test_sentry_task_factory_no_factory(MockTask, mock_get_running_loop):  # noqa: N803
     mock_loop = mock_get_running_loop.return_value
     mock_coro = MagicMock()
@@ -289,7 +289,7 @@ def test_sentry_task_factory_with_factory(mock_get_running_loop):
 
 @minimum_python_311
 @patch("asyncio.get_running_loop")
-@patch("sentry_sdk.integrations.asyncio.Task")
+@patch("debugg_ai_sdk.integrations.asyncio.Task")
 def test_sentry_task_factory_context_no_factory(
     MockTask, mock_get_running_loop  # noqa: N803
 ):

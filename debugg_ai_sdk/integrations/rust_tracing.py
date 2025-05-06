@@ -15,8 +15,8 @@ pub fn initialize_tracing(py_impl: Bound<'_, PyAny>) {
 
 Usage in Python would then look like:
 ```
-sentry_sdk.init(
-    dsn=sentry_dsn,
+debugg_ai_sdk.init(
+    dsn=debuggai_ingest_url,
     integrations=[
         RustTracingIntegration(
             "demo_rust_extension",

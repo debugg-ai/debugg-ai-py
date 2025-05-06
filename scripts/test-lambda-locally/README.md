@@ -10,7 +10,7 @@ is supported. Adding the SDK as Lambda Layer is not possible at the moment.
 
 ## Prerequisites
 
-- Set `SENTRY_DSN` environment variable. The Lambda function will use this DSN.
+- Set `DEBUGGAI_INGEST_URL` environment variable. The Lambda function will use this DSN.
 - You need to have Docker installed and running. 
 
 ## Run Lambda function

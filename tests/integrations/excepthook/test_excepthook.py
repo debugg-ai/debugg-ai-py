@@ -17,7 +17,7 @@ def test_excepthook(tmpdir, options, transport):
     app.write(
         dedent(
             """
-    from sentry_sdk import init, transport
+    from debugg_ai_sdk import init, transport
 
     def capture_envelope(self, envelope):
         print("capture_envelope was called")
@@ -56,8 +56,8 @@ def test_always_value_excepthook(tmpdir, options, transport):
         dedent(
             """
     import sys
-    from sentry_sdk import init, transport
-    from sentry_sdk.integrations.excepthook import ExcepthookIntegration
+    from debugg_ai_sdk import init, transport
+    from debugg_ai_sdk.integrations.excepthook import ExcepthookIntegration
 
     def capture_envelope(self, envelope):
         print("capture_envelope was called")

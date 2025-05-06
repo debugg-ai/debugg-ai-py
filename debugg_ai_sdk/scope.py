@@ -388,9 +388,9 @@ class Scope:
         """
         .. versionadded:: 2.0.0
 
-        Returns the currently used :py:class:`sentry_sdk.Client`.
+        Returns the currently used :py:class:`debugg_ai_sdk.Client`.
         This checks the current scope, the isolation scope and the global scope for a client.
-        If no client is available a :py:class:`sentry_sdk.client.NonRecordingClient` is returned.
+        If no client is available a :py:class:`debugg_ai_sdk.client.NonRecordingClient` is returned.
         """
         current_scope = _current_scope.get()
         try:
@@ -428,7 +428,7 @@ class Scope:
         Sets the client for this scope.
 
         :param client: The client to use in this scope.
-            If `None` the client of the scope will be replaced by a :py:class:`sentry_sdk.NonRecordingClient`.
+            If `None` the client of the scope will be replaced by a :py:class:`debugg_ai_sdk.NonRecordingClient`.
 
         """
         self.client = client if client is not None else NonRecordingClient()
@@ -933,7 +933,7 @@ class Scope:
         # type: (...) -> None
         """Adds an attachment to future events sent from this scope.
 
-        The parameters are the same as for the :py:class:`sentry_sdk.attachments.Attachment` constructor.
+        The parameters are the same as for the :py:class:`debugg_ai_sdk.attachments.Attachment` constructor.
         """
         self._attachments.append(
             Attachment(
@@ -1026,7 +1026,7 @@ class Scope:
             will be removed in the next major version.
         :param custom_sampling_context: The transaction's custom sampling context.
         :param kwargs: Optional keyword arguments to be passed to the Transaction
-            constructor. See :py:class:`sentry_sdk.tracing.Transaction` for
+            constructor. See :py:class:`debugg_ai_sdk.tracing.Transaction` for
             available arguments.
         """
         kwargs.setdefault("scope", self)
@@ -1099,17 +1099,17 @@ class Scope:
         """
         Start a span whose parent is the currently active span or transaction, if any.
 
-        The return value is a :py:class:`sentry_sdk.tracing.Span` instance,
+        The return value is a :py:class:`debugg_ai_sdk.tracing.Span` instance,
         typically used as a context manager to start and stop timing in a `with`
         block.
 
         Only spans contained in a transaction are sent to Sentry. Most
         integrations start a transaction at the appropriate time, for example
         for every incoming HTTP request. Use
-        :py:meth:`sentry_sdk.start_transaction` to start a new transaction when
+        :py:meth:`debugg_ai_sdk.start_transaction` to start a new transaction when
         one is not already in progress.
 
-        For supported `**kwargs` see :py:class:`sentry_sdk.tracing.Span`.
+        For supported `**kwargs` see :py:class:`debugg_ai_sdk.tracing.Span`.
 
         The instrumenter parameter is deprecated for user code, and it will
         be removed in the next major version. Going forward, it should only
@@ -1185,20 +1185,20 @@ class Scope:
         """
         Captures an event.
 
-        Merges given scope data and calls :py:meth:`sentry_sdk.client._Client.capture_event`.
+        Merges given scope data and calls :py:meth:`debugg_ai_sdk.client._Client.capture_event`.
 
         :param event: A ready-made event that can be directly sent to Sentry.
 
         :param hint: Contains metadata about the event that can be read from `before_send`, such as the original exception object or a HTTP request object.
 
-        :param scope: An optional :py:class:`sentry_sdk.Scope` to apply to events.
+        :param scope: An optional :py:class:`debugg_ai_sdk.Scope` to apply to events.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
         :param scope_kwargs: Optional data to apply to event.
-            For supported `**scope_kwargs` see :py:meth:`sentry_sdk.Scope.update_from_kwargs`.
+            For supported `**scope_kwargs` see :py:meth:`debugg_ai_sdk.Scope.update_from_kwargs`.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
-        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`sentry_sdk.client._Client.capture_event`).
+        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`debugg_ai_sdk.client._Client.capture_event`).
         """
         if disable_capture_event.get(False):
             return None
@@ -1221,14 +1221,14 @@ class Scope:
 
         :param level: If no level is provided, the default level is `info`.
 
-        :param scope: An optional :py:class:`sentry_sdk.Scope` to apply to events.
+        :param scope: An optional :py:class:`debugg_ai_sdk.Scope` to apply to events.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
         :param scope_kwargs: Optional data to apply to event.
-            For supported `**scope_kwargs` see :py:meth:`sentry_sdk.Scope.update_from_kwargs`.
+            For supported `**scope_kwargs` see :py:meth:`debugg_ai_sdk.Scope.update_from_kwargs`.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
-        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`sentry_sdk.client._Client.capture_event`).
+        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`debugg_ai_sdk.client._Client.capture_event`).
         """
         if disable_capture_event.get(False):
             return None
@@ -1249,14 +1249,14 @@ class Scope:
 
         :param error: An exception to capture. If `None`, `sys.exc_info()` will be used.
 
-        :param scope: An optional :py:class:`sentry_sdk.Scope` to apply to events.
+        :param scope: An optional :py:class:`debugg_ai_sdk.Scope` to apply to events.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
         :param scope_kwargs: Optional data to apply to event.
-            For supported `**scope_kwargs` see :py:meth:`sentry_sdk.Scope.update_from_kwargs`.
+            For supported `**scope_kwargs` see :py:meth:`debugg_ai_sdk.Scope.update_from_kwargs`.
             The `scope` and `scope_kwargs` parameters are mutually exclusive.
 
-        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`sentry_sdk.client._Client.capture_event`).
+        :returns: An `event_id` if the SDK decided to send the event (see :py:meth:`debugg_ai_sdk.client._Client.capture_event`).
         """
         if disable_capture_event.get(False):
             return None
@@ -1655,13 +1655,13 @@ def new_scope():
 
     .. code-block:: python
 
-        import sentry_sdk
+        import debugg_ai_sdk
 
-        with sentry_sdk.new_scope() as scope:
+        with debugg_ai_sdk.new_scope() as scope:
             scope.set_tag("color", "green")
-            sentry_sdk.capture_message("hello") # will include `color` tag.
+            debugg_ai_sdk.capture_message("hello") # will include `color` tag.
 
-        sentry_sdk.capture_message("hello, again") # will NOT include `color` tag.
+        debugg_ai_sdk.capture_message("hello, again") # will NOT include `color` tag.
 
     """
     # fork current scope
@@ -1692,13 +1692,13 @@ def use_scope(scope):
 
     .. code-block:: python
 
-        import sentry_sdk
+        import debugg_ai_sdk
 
-        with sentry_sdk.use_scope(scope):
+        with debugg_ai_sdk.use_scope(scope):
             scope.set_tag("color", "green")
-            sentry_sdk.capture_message("hello") # will include `color` tag.
+            debugg_ai_sdk.capture_message("hello") # will include `color` tag.
 
-        sentry_sdk.capture_message("hello, again") # will NOT include `color` tag.
+        debugg_ai_sdk.capture_message("hello, again") # will NOT include `color` tag.
 
     """
     # set given scope as current scope
@@ -1726,13 +1726,13 @@ def isolation_scope():
 
     .. code-block:: python
 
-        import sentry_sdk
+        import debugg_ai_sdk
 
-        with sentry_sdk.isolation_scope() as scope:
+        with debugg_ai_sdk.isolation_scope() as scope:
             scope.set_tag("color", "green")
-            sentry_sdk.capture_message("hello") # will include `color` tag.
+            debugg_ai_sdk.capture_message("hello") # will include `color` tag.
 
-        sentry_sdk.capture_message("hello, again") # will NOT include `color` tag.
+        debugg_ai_sdk.capture_message("hello, again") # will NOT include `color` tag.
 
     """
     # fork current scope
@@ -1768,13 +1768,13 @@ def use_isolation_scope(isolation_scope):
 
     .. code-block:: python
 
-        import sentry_sdk
+        import debugg_ai_sdk
 
-        with sentry_sdk.isolation_scope() as scope:
+        with debugg_ai_sdk.isolation_scope() as scope:
             scope.set_tag("color", "green")
-            sentry_sdk.capture_message("hello") # will include `color` tag.
+            debugg_ai_sdk.capture_message("hello") # will include `color` tag.
 
-        sentry_sdk.capture_message("hello, again") # will NOT include `color` tag.
+        debugg_ai_sdk.capture_message("hello, again") # will NOT include `color` tag.
 
     """
     # fork current scope

@@ -139,7 +139,7 @@ def _prefilter_releases(
         min_supported = Version(".".join(map(str, min_supported)))
     else:
         print(
-            f"  {integration} doesn't have a minimum version defined in sentry_sdk/integrations/__init__.py. Consider defining one"
+            f"  {integration} doesn't have a minimum version defined in debugg_ai_sdk/integrations/__init__.py. Consider defining one"
         )
 
     include_versions = None

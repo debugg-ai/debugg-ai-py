@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 
 
 warnings.warn(
-    "The sentry_sdk.metrics module is deprecated and will be removed in the next major release. "
+    "The debugg_ai_sdk.metrics module is deprecated and will be removed in the next major release. "
     "Sentry will reject all metrics sent after October 7, 2024. "
     "Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics",
     DeprecationWarning,

@@ -22,5 +22,5 @@ function replace() {
 }
 
 replace "version=\"$OLD_VERSION\"" "version=\"$NEW_VERSION\"" ./setup.py
-replace "VERSION = \"$OLD_VERSION\"" "VERSION = \"$NEW_VERSION\"" ./sentry_sdk/consts.py
+replace "VERSION = \"$OLD_VERSION\"" "VERSION = \"$NEW_VERSION\"" ./debugg_ai_sdk/consts.py
 replace "release = \"$OLD_VERSION\"" "release = \"$NEW_VERSION\"" ./docs/conf.py

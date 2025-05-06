@@ -30,7 +30,7 @@ logger = logging.getLogger("spotlight")
 
 
 DEFAULT_SPOTLIGHT_URL = "http://localhost:8969/stream"
-DJANGO_SPOTLIGHT_MIDDLEWARE_PATH = "sentry_sdk.spotlight.SpotlightMiddleware"
+DJANGO_SPOTLIGHT_MIDDLEWARE_PATH = "debugg_ai_sdk.spotlight.SpotlightMiddleware"
 
 
 class SpotlightClient:
@@ -99,9 +99,9 @@ try:
 
             import debugg_ai_sdk.api
 
-            self.sentry_sdk = debugg_ai_sdk.api
+            self.debugg_ai_sdk = debugg_ai_sdk.api
 
-            spotlight_client = self.sentry_sdk.get_client().spotlight
+            spotlight_client = self.debugg_ai_sdk.get_client().spotlight
             if spotlight_client is None:
                 sentry_logger.warning(
                     "Cannot find Spotlight client from SpotlightMiddleware, disabling the middleware."
@@ -193,7 +193,7 @@ try:
             except urllib.error.URLError:
                 return None
             else:
-                event_id = self.sentry_sdk.capture_exception(exception)
+                event_id = self.debugg_ai_sdk.capture_exception(exception)
                 return HttpResponseServerError(
                     spotlight.replace(
                         "<html>",

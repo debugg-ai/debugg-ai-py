@@ -503,6 +503,7 @@ class ClientConstructor:
         release=None,  # type: Optional[str]
         environment=None,  # type: Optional[str]
         server_name=None,  # type: Optional[str]
+        host_name=None,  # type: Optional[str]
         shutdown_timeout=2,  # type: float
         integrations=[],  # type: Sequence[debugg_ai_sdk.integrations.Integration]  # noqa: B006
         in_app_include=[],  # type: List[str]  # noqa: B006
@@ -562,7 +563,7 @@ class ClientConstructor:
         max_stack_frames=DEFAULT_MAX_STACK_FRAMES,  # type: Optional[int]
     ):
         # type: (...) -> None
-        """Initialize the Sentry SDK with the given parameters. All parameters described here can be used in a call to `sentry_sdk.init()`.
+        """Initialize the Sentry SDK with the given parameters. All parameters described here can be used in a call to `debugg_ai_sdk.init()`.
 
         :param dsn: The DSN tells the SDK where to send the events.
 
@@ -682,6 +683,9 @@ class ClientConstructor:
         :param max_stack_frames: This option limits the number of stack frames that will be captured when
             `add_full_stack` is enabled.
 
+        :param host_name: This option can be used to supply a user-sepecific, human-readable name for the host. Eg.
+            quinn-macbook-pro or john-desktop.
+        
         :param server_name: This option can be used to supply a server name.
 
             When provided, the name of the server is sent along and persisted in the event.

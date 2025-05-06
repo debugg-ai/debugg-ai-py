@@ -292,7 +292,7 @@ def test_default_timeout_http2(make_client):
     client = make_client(_experiments={"transport_http2": True})
 
     with mock.patch(
-        "sentry_sdk.transport.httpcore.ConnectionPool.request",
+        "debugg_ai_sdk.transport.httpcore.ConnectionPool.request",
         return_value=httpcore.Response(200),
     ) as request_mock:
         debugg_ai_sdk.get_global_scope().set_client(client)

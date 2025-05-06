@@ -78,7 +78,7 @@ def test_decorator(sentry_init):
     sentry_init()
 
     with mock.patch(
-        "sentry_sdk.crons.decorator.capture_checkin"
+        "debugg_ai_sdk.crons.decorator.capture_checkin"
     ) as fake_capture_checkin:
         result = _hello_world("Grace")
         assert result == "Hello, Grace"
@@ -103,7 +103,7 @@ def test_decorator_error(sentry_init):
     sentry_init()
 
     with mock.patch(
-        "sentry_sdk.crons.decorator.capture_checkin"
+        "debugg_ai_sdk.crons.decorator.capture_checkin"
     ) as fake_capture_checkin:
         with pytest.raises(ZeroDivisionError):
             result = _break_world("Grace")
@@ -130,7 +130,7 @@ def test_contextmanager(sentry_init):
     sentry_init()
 
     with mock.patch(
-        "sentry_sdk.crons.decorator.capture_checkin"
+        "debugg_ai_sdk.crons.decorator.capture_checkin"
     ) as fake_capture_checkin:
         result = _hello_world_contextmanager("Grace")
         assert result == "Hello, Grace"
@@ -155,7 +155,7 @@ def test_contextmanager_error(sentry_init):
     sentry_init()
 
     with mock.patch(
-        "sentry_sdk.crons.decorator.capture_checkin"
+        "debugg_ai_sdk.crons.decorator.capture_checkin"
     ) as fake_capture_checkin:
         with pytest.raises(ZeroDivisionError):
             result = _break_world_contextmanager("Grace")
@@ -322,6 +322,7 @@ def test_scope_data_in_checkin(sentry_init, capture_envelopes):
         # Optional event keys
         "release",
         "environment",
+        "host_name",
         "server_name",
         "sdk",
         # Mandatory check-in specific keys
@@ -366,7 +367,7 @@ async def test_decorator_async(sentry_init):
     sentry_init()
 
     with mock.patch(
-        "sentry_sdk.crons.decorator.capture_checkin"
+        "debugg_ai_sdk.crons.decorator.capture_checkin"
     ) as fake_capture_checkin:
         result = await _hello_world_async("Grace")
         assert result == "Hello, Grace"
@@ -392,7 +393,7 @@ async def test_decorator_error_async(sentry_init):
     sentry_init()
 
     with mock.patch(
-        "sentry_sdk.crons.decorator.capture_checkin"
+        "debugg_ai_sdk.crons.decorator.capture_checkin"
     ) as fake_capture_checkin:
         with pytest.raises(ZeroDivisionError):
             result = await _break_world_async("Grace")
@@ -420,7 +421,7 @@ async def test_contextmanager_async(sentry_init):
     sentry_init()
 
     with mock.patch(
-        "sentry_sdk.crons.decorator.capture_checkin"
+        "debugg_ai_sdk.crons.decorator.capture_checkin"
     ) as fake_capture_checkin:
         result = await _hello_world_contextmanager_async("Grace")
         assert result == "Hello, Grace"
@@ -446,7 +447,7 @@ async def test_contextmanager_error_async(sentry_init):
     sentry_init()
 
     with mock.patch(
-        "sentry_sdk.crons.decorator.capture_checkin"
+        "debugg_ai_sdk.crons.decorator.capture_checkin"
     ) as fake_capture_checkin:
         with pytest.raises(ZeroDivisionError):
             result = await _break_world_contextmanager_async("Grace")
