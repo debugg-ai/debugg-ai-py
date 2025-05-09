@@ -41,7 +41,7 @@ def test_trace_decorator_no_trx():
             result2 = start_child_span_decorator(my_example_function)()
             fake_debug.assert_called_once_with(
                 "Cannot create a child span for %s. "
-                "Please start a Sentry transaction before calling this function.",
+                "Please start a DebuggAI transaction before calling this function.",
                 "test_decorator.my_example_function",
             )
             assert result2 == "return_of_sync_function"
@@ -74,14 +74,14 @@ async def test_trace_decorator_async_no_trx():
             result2 = await start_child_span_decorator(my_async_example_function)()
             fake_debug.assert_called_once_with(
                 "Cannot create a child span for %s. "
-                "Please start a Sentry transaction before calling this function.",
+                "Please start a DebuggAI transaction before calling this function.",
                 "test_decorator.my_async_example_function",
             )
             assert result2 == "return_of_async_function"
 
 
-def test_functions_to_trace_signature_unchanged_sync(sentry_init):
-    sentry_init(
+def test_functions_to_trace_signature_unchanged_sync(debugg_ai_init):
+    debugg_ai_init(
         traces_sample_rate=1.0,
     )
 
@@ -98,8 +98,8 @@ def test_functions_to_trace_signature_unchanged_sync(sentry_init):
 
 
 @pytest.mark.asyncio
-async def test_functions_to_trace_signature_unchanged_async(sentry_init):
-    sentry_init(
+async def test_functions_to_trace_signature_unchanged_async(debugg_ai_init):
+    debugg_ai_init(
         traces_sample_rate=1.0,
     )
 

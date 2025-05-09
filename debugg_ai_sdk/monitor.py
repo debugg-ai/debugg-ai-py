@@ -21,7 +21,7 @@ class Monitor:
     and act accordingly.
     """
 
-    name = "sentry.monitor"
+    name = "debugg-ai.monitor"
 
     def __init__(self, transport, interval=10):
         # type: (debugg_ai_sdk.transport.Transport, float) -> None

@@ -38,12 +38,12 @@ except ImportError:
 
 try:
     from strawberry.extensions.tracing import (
-        SentryTracingExtension as StrawberrySentryAsyncExtension,
-        SentryTracingExtensionSync as StrawberrySentrySyncExtension,
+        DebuggAITracingExtension as StrawberryDebuggAIAsyncExtension,
+        DebuggAITracingExtensionSync as StrawberryDebuggAISyncExtension,
     )
 except ImportError:
-    StrawberrySentryAsyncExtension = None
-    StrawberrySentrySyncExtension = None
+    StrawberryDebuggAIAsyncExtension = None
+    StrawberryDebuggAISyncExtension = None
 
 from typing import TYPE_CHECKING
 
@@ -87,7 +87,7 @@ def _patch_schema_init():
     old_schema_init = Schema.__init__
 
     @functools.wraps(old_schema_init)
-    def _sentry_patched_schema_init(self, *args, **kwargs):
+    def _debugg_ai_patched_schema_init(self, *args, **kwargs):
         # type: (Schema, Any, Any) -> None
         integration = debugg_ai_sdk.get_client().get_integration(StrawberryIntegration)
         if integration is None:
@@ -107,27 +107,27 @@ def _patch_schema_init():
                 "False" if should_use_async_extension else "True",
             )
 
-        # remove the built in strawberry sentry extension, if present
+        # remove the built in strawberry debugg-ai extension, if present
         extensions = [
             extension
             for extension in extensions
             if extension
-            not in (StrawberrySentryAsyncExtension, StrawberrySentrySyncExtension)
+            not in (StrawberryDebuggAIAsyncExtension, StrawberryDebuggAISyncExtension)
         ]
 
         # add our extension
         extensions.append(
-            SentryAsyncExtension if should_use_async_extension else SentrySyncExtension
+            DebuggAIAsyncExtension if should_use_async_extension else DebuggAISyncExtension
         )
 
         kwargs["extensions"] = extensions
 
         return old_schema_init(self, *args, **kwargs)
 
-    Schema.__init__ = _sentry_patched_schema_init  # type: ignore[method-assign]
+    Schema.__init__ = _debugg_ai_patched_schema_init  # type: ignore[method-assign]
 
 
-class SentryAsyncExtension(SchemaExtension):
+class DebuggAIAsyncExtension(SchemaExtension):
     def __init__(
         self,
         *,
@@ -270,7 +270,7 @@ class SentryAsyncExtension(SchemaExtension):
             return await self._resolve(_next, root, info, *args, **kwargs)
 
 
-class SentrySyncExtension(SentryAsyncExtension):
+class DebuggAISyncExtension(DebuggAIAsyncExtension):
     def resolve(self, _next, root, info, *args, **kwargs):
         # type: (Callable[[Any, Any, Any, Any], Any], Any, GraphQLResolveInfo, str, Any) -> Any
         if self.should_skip_tracing(_next, info):
@@ -296,18 +296,18 @@ def _patch_views():
     old_async_view_handle_errors = async_base_view.AsyncBaseHTTPView._handle_errors
     old_sync_view_handle_errors = sync_base_view.SyncBaseHTTPView._handle_errors
 
-    def _sentry_patched_async_view_handle_errors(self, errors, response_data):
+    def _debugg_ai_patched_async_view_handle_errors(self, errors, response_data):
         # type: (Any, List[GraphQLError], GraphQLHTTPResponse) -> None
         old_async_view_handle_errors(self, errors, response_data)
-        _sentry_patched_handle_errors(self, errors, response_data)
+        _debugg_ai_patched_handle_errors(self, errors, response_data)
 
-    def _sentry_patched_sync_view_handle_errors(self, errors, response_data):
+    def _debugg_ai_patched_sync_view_handle_errors(self, errors, response_data):
         # type: (Any, List[GraphQLError], GraphQLHTTPResponse) -> None
         old_sync_view_handle_errors(self, errors, response_data)
-        _sentry_patched_handle_errors(self, errors, response_data)
+        _debugg_ai_patched_handle_errors(self, errors, response_data)
 
     @ensure_integration_enabled(StrawberryIntegration)
-    def _sentry_patched_handle_errors(self, errors, response_data):
+    def _debugg_ai_patched_handle_errors(self, errors, response_data):
         # type: (Any, List[GraphQLError], GraphQLHTTPResponse) -> None
         if not errors:
             return
@@ -329,10 +329,10 @@ def _patch_views():
                 debugg_ai_sdk.capture_event(event, hint=hint)
 
     async_base_view.AsyncBaseHTTPView._handle_errors = (  # type: ignore[method-assign]
-        _sentry_patched_async_view_handle_errors
+        _debugg_ai_patched_async_view_handle_errors
     )
     sync_base_view.SyncBaseHTTPView._handle_errors = (  # type: ignore[method-assign]
-        _sentry_patched_sync_view_handle_errors
+        _debugg_ai_patched_sync_view_handle_errors
     )
 
 
@@ -383,9 +383,9 @@ def _make_response_event_processor(response_data):
 
 def _guess_if_using_async(extensions):
     # type: (List[SchemaExtension]) -> bool
-    if StrawberrySentryAsyncExtension in extensions:
+    if StrawberryDebuggAIAsyncExtension in extensions:
         return True
-    elif StrawberrySentrySyncExtension in extensions:
+    elif StrawberryDebuggAISyncExtension in extensions:
         return False
 
     return bool(

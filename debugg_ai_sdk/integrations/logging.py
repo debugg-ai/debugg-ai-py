@@ -68,18 +68,18 @@ class LoggingIntegration(Integration):
         self,
         level=DEFAULT_LEVEL,
         event_level=DEFAULT_EVENT_LEVEL,
-        sentry_logs_level=DEFAULT_LEVEL,
+        debugg_ai_logs_level=DEFAULT_LEVEL,
     ):
         # type: (Optional[int], Optional[int], Optional[int]) -> None
         self._handler = None
         self._breadcrumb_handler = None
-        self._sentry_logs_handler = None
+        self._debugg_ai_logs_handler = None
 
         if level is not None:
             self._breadcrumb_handler = BreadcrumbHandler(level=level)
 
-        if sentry_logs_level is not None:
-            self._sentry_logs_handler = SentryLogsHandler(level=sentry_logs_level)
+        if debugg_ai_logs_level is not None:
+            self._debugg_ai_logs_handler = DebuggAILogsHandler(level=debugg_ai_logs_level)
 
         if event_level is not None:
             self._handler = EventHandler(level=event_level)
@@ -96,17 +96,17 @@ class LoggingIntegration(Integration):
             self._breadcrumb_handler.handle(record)
 
         if (
-            self._sentry_logs_handler is not None
-            and record.levelno >= self._sentry_logs_handler.level
+            self._debugg_ai_logs_handler is not None
+            and record.levelno >= self._debugg_ai_logs_handler.level
         ):
-            self._sentry_logs_handler.handle(record)
+            self._debugg_ai_logs_handler.handle(record)
 
     @staticmethod
     def setup_once():
         # type: () -> None
         old_callhandlers = logging.Logger.callHandlers
 
-        def sentry_patched_callhandlers(self, record):
+        def debugg_ai_patched_callhandlers(self, record):
             # type: (Any, LogRecord) -> Any
             # keeping a local reference because the
             # global might be discarded on shutdown
@@ -126,7 +126,7 @@ class LoggingIntegration(Integration):
                     if integration is not None:
                         integration._handle_record(record)
 
-        logging.Logger.callHandlers = sentry_patched_callhandlers  # type: ignore
+        logging.Logger.callHandlers = debugg_ai_patched_callhandlers  # type: ignore
 
 
 class _BaseHandler(logging.Handler):
@@ -186,7 +186,7 @@ class _BaseHandler(logging.Handler):
 
 class EventHandler(_BaseHandler):
     """
-    A logging handler that emits Sentry events for each log record
+    A logging handler that emits DebuggAI events for each log record
 
     Note that you do not have to use this class if the logging integration is enabled, which it is by default.
     """
@@ -213,7 +213,7 @@ class EventHandler(_BaseHandler):
         # exc_info may also be any falsy value due to Python stdlib being
         # liberal with what it receives and Celery's billiard being "liberal"
         # with what it sends. See
-        # https://github.com/getsentry/sentry-python/issues/904
+        # https://github.com/debugg-ai/debugg-ai-py/issues/904
         if record.exc_info and record.exc_info[0] is not None:
             event, hint = event_from_exception(
                 record.exc_info,
@@ -275,7 +275,7 @@ class EventHandler(_BaseHandler):
 
 
 # Legacy name
-SentryHandler = EventHandler
+DebuggAIHandler = EventHandler
 
 
 class BreadcrumbHandler(_BaseHandler):
@@ -327,9 +327,9 @@ def _python_level_to_otel(record_level):
     return 0, "default"
 
 
-class SentryLogsHandler(_BaseHandler):
+class DebuggAILogsHandler(_BaseHandler):
     """
-    A logging handler that records Sentry logs for each Python log record.
+    A logging handler that records DebuggAI logs for each Python log record.
 
     Note that you do not have to use this class if the logging integration is enabled, which it is by default.
     """
@@ -348,7 +348,7 @@ class SentryLogsHandler(_BaseHandler):
             if not client.options["_experiments"].get("enable_logs", False):
                 return
 
-            SentryLogsHandler._capture_log_from_record(client, record)
+            DebuggAILogsHandler._capture_log_from_record(client, record)
 
     @staticmethod
     def _capture_log_from_record(client, record):
@@ -357,14 +357,14 @@ class SentryLogsHandler(_BaseHandler):
         otel_severity_number, otel_severity_text = _python_level_to_otel(record.levelno)
         project_root = client.options["project_root"]
         attrs = {
-            "sentry.origin": "auto.logger.log",
+            "debugg-ai.origin": "auto.logger.log",
         }  # type: dict[str, str | bool | float | int]
         if isinstance(record.msg, str):
-            attrs["sentry.message.template"] = record.msg
+            attrs["debugg-ai.message.template"] = record.msg
         if record.args is not None:
             if isinstance(record.args, tuple):
                 for i, arg in enumerate(record.args):
-                    attrs[f"sentry.message.parameters.{i}"] = (
+                    attrs[f"debugg-ai.message.parameters.{i}"] = (
                         arg
                         if isinstance(arg, str)
                         or isinstance(arg, float)

@@ -8,7 +8,7 @@ logger.remove(0)  # don't print to console
 
 
 @pytest.mark.parametrize(
-    "level,created_event,expected_sentry_level",
+    "level,created_event,expected_debugg_ai_level",
     [
         # None - no breadcrumb
         # False - no event
@@ -25,15 +25,15 @@ logger.remove(0)  # don't print to console
 @pytest.mark.parametrize("disable_breadcrumbs", [True, False])
 @pytest.mark.parametrize("disable_events", [True, False])
 def test_just_log(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     level,
     created_event,
-    expected_sentry_level,
+    expected_debugg_ai_level,
     disable_breadcrumbs,
     disable_events,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             LoguruIntegration(
                 level=None if disable_breadcrumbs else LoggingLevels.INFO.value,
@@ -60,7 +60,7 @@ def test_just_log(
             not disable_breadcrumbs and created_event is not None
         ):  # not None == not TRACE or DEBUG level
             (breadcrumb,) = breadcrumbs
-            assert breadcrumb["level"] == expected_sentry_level
+            assert breadcrumb["level"] == expected_debugg_ai_level
             assert breadcrumb["category"] == "tests.integrations.loguru.test_loguru"
             assert breadcrumb["message"][23:] == formatted_message
         else:
@@ -73,13 +73,13 @@ def test_just_log(
         return
 
     (event,) = events
-    assert event["level"] == expected_sentry_level
+    assert event["level"] == expected_debugg_ai_level
     assert event["logger"] == "tests.integrations.loguru.test_loguru"
     assert event["logentry"]["message"][23:] == formatted_message
 
 
-def test_breadcrumb_format(sentry_init, capture_events):
-    sentry_init(
+def test_breadcrumb_format(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             LoguruIntegration(
                 level=LoggingLevels.INFO.value,
@@ -98,8 +98,8 @@ def test_breadcrumb_format(sentry_init, capture_events):
     assert breadcrumb["message"] == formatted_message
 
 
-def test_event_format(sentry_init, capture_events):
-    sentry_init(
+def test_event_format(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             LoguruIntegration(
                 level=None,

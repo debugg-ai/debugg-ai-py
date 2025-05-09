@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from debugg_ai_sdk.tracing import Transaction
-from debugg_ai_sdk.tracing_utils import extract_sentrytrace_data
+from debugg_ai_sdk.tracing_utils import extract_debugg_ai_trace_data
 
 
 @pytest.mark.parametrize("sampled", [True, False, None])
@@ -27,11 +27,11 @@ def test_to_traceparent(sampled):
 
 
 @pytest.mark.parametrize("sampling_decision", [True, False])
-def test_sentrytrace_extraction(sampling_decision):
-    sentrytrace_header = "12312012123120121231201212312012-0415201309082013-{}".format(
+def test_debugg_ai_trace_extraction(sampling_decision):
+    debugg_ai_trace_header = "12312012123120121231201212312012-0415201309082013-{}".format(
         1 if sampling_decision is True else 0
     )
-    assert extract_sentrytrace_data(sentrytrace_header) == {
+    assert extract_debugg_ai_trace_data(debugg_ai_trace_header) == {
         "trace_id": "12312012123120121231201212312012",
         "parent_span_id": "0415201309082013",
         "parent_sampled": sampling_decision,
@@ -52,5 +52,5 @@ def test_iter_headers(monkeypatch):
 
     headers = dict(transaction.iter_headers())
     assert (
-        headers["sentry-trace"] == "12312012123120121231201212312012-0415201309082013-0"
+        headers["debugg-ai-trace"] == "12312012123120121231201212312012-0415201309082013-0"
     )

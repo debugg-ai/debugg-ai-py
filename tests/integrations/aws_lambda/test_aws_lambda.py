@@ -11,7 +11,7 @@ from unittest import mock
 
 from aws_cdk import App
 
-from .utils import LocalLambdaStack, SentryServerForTesting, SAM_PORT
+from .utils import LocalLambdaStack, DebuggAIServerForTesting, SAM_PORT
 
 
 DOCKER_NETWORK_NAME = "lambda-test-network"
@@ -27,8 +27,8 @@ def test_environment():
     docker_client.networks.prune()
     docker_client.networks.create(DOCKER_NETWORK_NAME, driver="bridge")
 
-    # Start Sentry server
-    server = SentryServerForTesting()
+    # Start DebuggAI server
+    server = DebuggAIServerForTesting()
     server.start()
     time.sleep(1)  # Give it a moment to start up
 
@@ -42,7 +42,7 @@ def test_environment():
         yaml.dump(template, f)
 
     # Write SAM debug log to file
-    debug_log_file = tempfile.gettempdir() + "/sentry_aws_lambda_tests_sam_debug.log"
+    debug_log_file = tempfile.gettempdir() + "/debugg_ai_aws_lambda_tests_sam_debug.log"
     debug_log = open(debug_log_file, "w")
     print("[test_environment fixture] Writing SAM debug log to: %s" % debug_log_file)
 
@@ -119,7 +119,7 @@ def test_basic_no_exception(lambda_client, test_environment):
 
     assert transaction_event["type"] == "transaction"
     assert transaction_event["transaction"] == "BasicOk"
-    assert transaction_event["sdk"]["name"] == "sentry.python.aws_lambda"
+    assert transaction_event["sdk"]["name"] == "debugg-ai.python.aws_lambda"
     assert transaction_event["tags"] == {"aws_region": "us-east-1"}
 
     assert transaction_event["extra"]["cloudwatch logs"] == {
@@ -160,7 +160,7 @@ def test_basic_exception(lambda_client, test_environment):
     assert error_event["level"] == "error"
     assert error_event["exception"]["values"][0]["type"] == "RuntimeError"
     assert error_event["exception"]["values"][0]["value"] == "Oh!"
-    assert error_event["sdk"]["name"] == "sentry.python.aws_lambda"
+    assert error_event["sdk"]["name"] == "debugg-ai.python.aws_lambda"
 
     assert error_event["tags"] == {"aws_region": "us-east-1"}
     assert error_event["extra"]["cloudwatch logs"] == {
@@ -299,12 +299,12 @@ def test_non_dict_event(
 
     assert transaction_event["type"] == "transaction"
     assert transaction_event["transaction"] == "BasicException"
-    assert transaction_event["sdk"]["name"] == "sentry.python.aws_lambda"
+    assert transaction_event["sdk"]["name"] == "debugg-ai.python.aws_lambda"
     assert transaction_event["contexts"]["trace"]["status"] == "internal_error"
 
     assert error_event["level"] == "error"
     assert error_event["transaction"] == "BasicException"
-    assert error_event["sdk"]["name"] == "sentry.python.aws_lambda"
+    assert error_event["sdk"]["name"] == "debugg-ai.python.aws_lambda"
     assert error_event["exception"]["values"][0]["type"] == "RuntimeError"
     assert error_event["exception"]["values"][0]["value"] == "Oh!"
     assert error_event["exception"]["values"][0]["mechanism"]["type"] == "aws_lambda"
@@ -382,13 +382,13 @@ def test_trace_continuation(lambda_client, test_environment):
     trace_id = "471a43a4192642f0b136d5159a501701"
     parent_span_id = "6e8f22c393e68f19"
     parent_sampled = 1
-    sentry_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
 
     # We simulate here AWS Api Gateway's behavior of passing HTTP headers
     # as the `headers` dict in the event passed to the Lambda function.
     payload = {
         "headers": {
-            "sentry-trace": sentry_trace_header,
+            "debugg-ai-trace": debugg_ai_trace_header,
         }
     }
 
@@ -512,13 +512,13 @@ def test_error_has_existing_trace_context(
     trace_id = "471a43a4192642f0b136d5159a501701"
     parent_span_id = "6e8f22c393e68f19"
     parent_sampled = 1
-    sentry_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
 
     # We simulate here AWS Api Gateway's behavior of passing HTTP headers
     # as the `headers` dict in the event passed to the Lambda function.
     payload = {
         "headers": {
-            "sentry-trace": sentry_trace_header,
+            "debugg-ai-trace": debugg_ai_trace_header,
         }
     }
 

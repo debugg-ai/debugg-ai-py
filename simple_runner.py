@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 company_key = 'a9179c1c-94fc-4c9b-9bcf-3a442407426e'
 project_key = 'acefe594-49d0-4d43-ab4b-b38515fef8fe'
 
+
 debugg_ai_sdk.init(
     dsn=f"https://debuggai-backend.ngrok.app/api/v1/ingest/{company_key}/{project_key}/",
     environment="local",

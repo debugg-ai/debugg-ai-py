@@ -14,7 +14,7 @@ uv sync
 
 # Create a deployment package of the lambda function in `lambda_function.py`.
 rm -rf package && mkdir -p package              
-pip install ../../../sentry-python -t package/ --upgrade
+pip install ../../../debugg-ai-py -t package/ --upgrade
 cp lambda_function.py package/ 
 cd package && zip -r ../lambda_deployment_package.zip . && cd ..
 
@@ -22,4 +22,4 @@ cd package && zip -r ../lambda_deployment_package.zip . && cd ..
 uv run sam local start-api \
     --skip-pull-image \
     --force-image-build \
-    --parameter-overrides SentryDsn=$DEBUGGAI_INGEST_URL
+    --parameter-overrides DebuggAIDsn=$DEBUGGAI_INGEST_URL

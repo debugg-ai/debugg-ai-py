@@ -17,8 +17,8 @@ if clickhouse_driver.VERSION < (0, 2, 6):
     EXPECT_PARAMS_IN_SELECT = False
 
 
-def test_clickhouse_client_breadcrumbs(sentry_init, capture_events) -> None:
-    sentry_init(
+def test_clickhouse_client_breadcrumbs(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[ClickhouseDriverIntegration()],
         _experiments={"record_sql_params": True},
     )
@@ -118,8 +118,8 @@ def test_clickhouse_client_breadcrumbs(sentry_init, capture_events) -> None:
     assert actual_query_breadcrumbs == expected_breadcrumbs
 
 
-def test_clickhouse_client_breadcrumbs_with_pii(sentry_init, capture_events) -> None:
-    sentry_init(
+def test_clickhouse_client_breadcrumbs_with_pii(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[ClickhouseDriverIntegration()],
         send_default_pii=True,
         _experiments={"record_sql_params": True},
@@ -221,9 +221,9 @@ def test_clickhouse_client_breadcrumbs_with_pii(sentry_init, capture_events) -> 
 
 
 def test_clickhouse_client_spans(
-    sentry_init, capture_events, capture_envelopes
+    debugg_ai_init, capture_events, capture_envelopes
 ) -> None:
-    sentry_init(
+    debugg_ai_init(
         integrations=[ClickhouseDriverIntegration()],
         _experiments={"record_sql_params": True},
         traces_sample_rate=1.0,
@@ -343,9 +343,9 @@ def test_clickhouse_client_spans(
 
 
 def test_clickhouse_client_spans_with_pii(
-    sentry_init, capture_events, capture_envelopes
+    debugg_ai_init, capture_events, capture_envelopes
 ) -> None:
-    sentry_init(
+    debugg_ai_init(
         integrations=[ClickhouseDriverIntegration()],
         _experiments={"record_sql_params": True},
         traces_sample_rate=1.0,
@@ -471,8 +471,8 @@ def test_clickhouse_client_spans_with_pii(
     assert event["spans"] == expected_spans
 
 
-def test_clickhouse_dbapi_breadcrumbs(sentry_init, capture_events) -> None:
-    sentry_init(
+def test_clickhouse_dbapi_breadcrumbs(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[ClickhouseDriverIntegration()],
     )
     events = capture_events()
@@ -567,8 +567,8 @@ def test_clickhouse_dbapi_breadcrumbs(sentry_init, capture_events) -> None:
     assert event["breadcrumbs"]["values"] == expected_breadcrumbs
 
 
-def test_clickhouse_dbapi_breadcrumbs_with_pii(sentry_init, capture_events) -> None:
-    sentry_init(
+def test_clickhouse_dbapi_breadcrumbs_with_pii(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[ClickhouseDriverIntegration()],
         send_default_pii=True,
     )
@@ -670,8 +670,8 @@ def test_clickhouse_dbapi_breadcrumbs_with_pii(sentry_init, capture_events) -> N
     assert event["breadcrumbs"]["values"] == expected_breadcrumbs
 
 
-def test_clickhouse_dbapi_spans(sentry_init, capture_events, capture_envelopes) -> None:
-    sentry_init(
+def test_clickhouse_dbapi_spans(debugg_ai_init, capture_events, capture_envelopes) -> None:
+    debugg_ai_init(
         integrations=[ClickhouseDriverIntegration()],
         _experiments={"record_sql_params": True},
         traces_sample_rate=1.0,
@@ -791,9 +791,9 @@ def test_clickhouse_dbapi_spans(sentry_init, capture_events, capture_envelopes) 
 
 
 def test_clickhouse_dbapi_spans_with_pii(
-    sentry_init, capture_events, capture_envelopes
+    debugg_ai_init, capture_events, capture_envelopes
 ) -> None:
-    sentry_init(
+    debugg_ai_init(
         integrations=[ClickhouseDriverIntegration()],
         _experiments={"record_sql_params": True},
         traces_sample_rate=1.0,
@@ -919,8 +919,8 @@ def test_clickhouse_dbapi_spans_with_pii(
     assert event["spans"] == expected_spans
 
 
-def test_span_origin(sentry_init, capture_events, capture_envelopes) -> None:
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events, capture_envelopes) -> None:
+    debugg_ai_init(
         integrations=[ClickhouseDriverIntegration()],
         traces_sample_rate=1.0,
     )

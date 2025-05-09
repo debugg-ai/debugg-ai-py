@@ -28,7 +28,7 @@ from debugg_ai_sdk.tracing_utils import (
 )
 from debugg_ai_sdk.tracing import (
     BAGGAGE_HEADER_NAME,
-    SENTRY_TRACE_HEADER_NAME,
+    DEBUGG_AI_TRACE_HEADER_NAME,
     NoOpSpan,
     Span,
     Transaction,
@@ -341,9 +341,9 @@ class Scope:
         has been captured. We do not consider events that are dropped, e.g. by a before_send hook.
         Transactions also are not considered events in this context.
 
-        The event corresponding to the returned event ID is NOT guaranteed to actually be sent to Sentry;
+        The event corresponding to the returned event ID is NOT guaranteed to actually be sent to DebuggAI;
         whether the event is sent depends on the transport. The event could be sent later or not at all.
-        Even a sent event could fail to arrive in Sentry due to network issues, exhausted quotas, or
+        Even a sent event could fail to arrive in DebuggAI due to network issues, exhausted quotas, or
         various other reasons.
         """
         return cls.get_isolation_scope()._last_event_id
@@ -446,26 +446,26 @@ class Scope:
     def _load_trace_data_from_env(self):
         # type: () -> Optional[Dict[str, str]]
         """
-        Load Sentry trace id and baggage from environment variables.
-        Can be disabled by setting SENTRY_USE_ENVIRONMENT to "false".
+        Load DebuggAI trace id and baggage from environment variables.
+        Can be disabled by setting DEBUGG_AI_USE_ENVIRONMENT to "false".
         """
         incoming_trace_information = None
 
-        sentry_use_environment = (
-            os.environ.get("SENTRY_USE_ENVIRONMENT") or ""
+        debugg_ai_use_environment = (
+            os.environ.get("DEBUGG_AI_USE_ENVIRONMENT") or ""
         ).lower()
-        use_environment = sentry_use_environment not in FALSE_VALUES
+        use_environment = debugg_ai_use_environment not in FALSE_VALUES
         if use_environment:
             incoming_trace_information = {}
 
-            if os.environ.get("SENTRY_TRACE"):
-                incoming_trace_information[SENTRY_TRACE_HEADER_NAME] = (
-                    os.environ.get("SENTRY_TRACE") or ""
+            if os.environ.get("DEBUGG_AI_TRACE"):
+                incoming_trace_information[DEBUGG_AI_TRACE_HEADER_NAME] = (
+                    os.environ.get("DEBUGG_AI_TRACE") or ""
                 )
 
-            if os.environ.get("SENTRY_BAGGAGE"):
+            if os.environ.get("DEBUGG_AI_BAGGAGE"):
                 incoming_trace_information[BAGGAGE_HEADER_NAME] = (
-                    os.environ.get("SENTRY_BAGGAGE") or ""
+                    os.environ.get("DEBUGG_AI_BAGGAGE") or ""
                 )
 
         return incoming_trace_information or None
@@ -513,7 +513,7 @@ class Scope:
     def get_traceparent(self, *args, **kwargs):
         # type: (Any, Any) -> Optional[str]
         """
-        Returns the Sentry "sentry-trace" header (aka the traceparent) from the
+        Returns the DebuggAI "debugg-ai-trace" header (aka the traceparent) from the
         currently active span or the scopes Propagation Context.
         """
         client = self.get_client()
@@ -536,7 +536,7 @@ class Scope:
     def get_baggage(self, *args, **kwargs):
         # type: (Any, Any) -> Optional[Baggage]
         """
-        Returns the Sentry "baggage" header containing trace information from the
+        Returns the DebuggAI "baggage" header containing trace information from the
         currently active span or the scopes Propagation Context.
         """
         client = self.get_client()
@@ -561,7 +561,7 @@ class Scope:
     def get_trace_context(self):
         # type: () -> Any
         """
-        Returns the Sentry "trace" context from the Propagation Context.
+        Returns the DebuggAI "trace" context from the Propagation Context.
         """
         if self._propagation_context is None:
             return None
@@ -589,11 +589,11 @@ class Scope:
 
         meta = ""
 
-        sentry_trace = self.get_traceparent()
-        if sentry_trace is not None:
+        debugg_ai_trace = self.get_traceparent()
+        if debugg_ai_trace is not None:
             meta += '<meta name="%s" content="%s">' % (
-                SENTRY_TRACE_HEADER_NAME,
-                sentry_trace,
+                DEBUGG_AI_TRACE_HEADER_NAME,
+                debugg_ai_trace,
             )
 
         baggage = self.get_baggage()
@@ -608,12 +608,12 @@ class Scope:
     def iter_headers(self):
         # type: () -> Iterator[Tuple[str, str]]
         """
-        Creates a generator which returns the `sentry-trace` and `baggage` headers from the Propagation Context.
+        Creates a generator which returns the `debugg-ai-trace` and `baggage` headers from the Propagation Context.
         """
         if self._propagation_context is not None:
             traceparent = self.get_traceparent()
             if traceparent is not None:
-                yield SENTRY_TRACE_HEADER_NAME, traceparent
+                yield DEBUGG_AI_TRACE_HEADER_NAME, traceparent
 
             dsc = self.get_dynamic_sampling_context()
             if dsc is not None:
@@ -950,7 +950,7 @@ class Scope:
         """
         Adds a breadcrumb.
 
-        :param crumb: Dictionary with the data as the sentry v7/v8 protocol expects.
+        :param crumb: Dictionary with the data as the debugg-ai v7/v8 protocol expects.
 
         :param hint: An optional value that can be used by `before_breadcrumb`
             to customize the breadcrumbs that are emitted.
@@ -993,7 +993,7 @@ class Scope:
     def start_transaction(
         self,
         transaction=None,
-        instrumenter=INSTRUMENTER.SENTRY,
+        instrumenter=INSTRUMENTER.DEBUGG_AI,
         custom_sampling_context=None,
         **kwargs,
     ):
@@ -1017,7 +1017,7 @@ class Scope:
         finished at the end of the `with` block. If not using context managers,
         call the `.finish()` method.
 
-        When the transaction is finished, it will be sent to Sentry with all its
+        When the transaction is finished, it will be sent to DebuggAI with all its
         finished child spans.
 
         :param transaction: The transaction to start. If omitted, we create and
@@ -1067,7 +1067,7 @@ class Scope:
                 if dsc is not None:
                     dsc["sample_rate"] = str(transaction.sample_rate)
             if transaction._baggage:
-                transaction._baggage.sentry_items["sample_rate"] = str(
+                transaction._baggage.debugg_ai_items["sample_rate"] = str(
                     transaction.sample_rate
                 )
 
@@ -1094,7 +1094,7 @@ class Scope:
 
         return transaction
 
-    def start_span(self, instrumenter=INSTRUMENTER.SENTRY, **kwargs):
+    def start_span(self, instrumenter=INSTRUMENTER.DEBUGG_AI, **kwargs):
         # type: (str, Any) -> Span
         """
         Start a span whose parent is the currently active span or transaction, if any.
@@ -1103,7 +1103,7 @@ class Scope:
         typically used as a context manager to start and stop timing in a `with`
         block.
 
-        Only spans contained in a transaction are sent to Sentry. Most
+        Only spans contained in a transaction are sent to DebuggAI. Most
         integrations start a transaction at the appropriate time, for example
         for every incoming HTTP request. Use
         :py:meth:`debugg_ai_sdk.start_transaction` to start a new transaction when
@@ -1187,7 +1187,7 @@ class Scope:
 
         Merges given scope data and calls :py:meth:`debugg_ai_sdk.client._Client.capture_event`.
 
-        :param event: A ready-made event that can be directly sent to Sentry.
+        :param event: A ready-made event that can be directly sent to DebuggAI.
 
         :param hint: Contains metadata about the event that can be read from `before_send`, such as the original exception object or a HTTP request object.
 

@@ -584,7 +584,7 @@ def main(fail_on_changes: bool = False) -> None:
 
     global MIN_PYTHON_VERSION, MAX_PYTHON_VERSION
     sdk_python_versions = _parse_python_versions_from_classifiers(
-        metadata("sentry-sdk").get_all("Classifier")
+        metadata("debugg-ai-sdk").get_all("Classifier")
     )
     MIN_PYTHON_VERSION = sdk_python_versions[0]
     MAX_PYTHON_VERSION = sdk_python_versions[-1]

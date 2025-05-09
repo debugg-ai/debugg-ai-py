@@ -16,8 +16,8 @@ session = boto3.Session(
 )
 
 
-def test_basic(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
+def test_basic(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
     events = capture_events()
 
     s3 = session.resource("s3")
@@ -39,8 +39,8 @@ def test_basic(sentry_init, capture_events):
     assert span["description"] == "aws.s3.ListObjects"
 
 
-def test_streaming(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
+def test_streaming(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
     events = capture_events()
 
     s3 = session.resource("s3")
@@ -77,8 +77,8 @@ def test_streaming(sentry_init, capture_events):
     assert span2["parent_span_id"] == span1["span_id"]
 
 
-def test_streaming_close(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
+def test_streaming_close(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
     events = capture_events()
 
     s3 = session.resource("s3")
@@ -101,8 +101,8 @@ def test_streaming_close(sentry_init, capture_events):
 
 
 @pytest.mark.tests_internal_exceptions
-def test_omit_url_data_if_parsing_fails(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
+def test_omit_url_data_if_parsing_fails(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
     events = capture_events()
 
     s3 = session.resource("s3")
@@ -134,8 +134,8 @@ def test_omit_url_data_if_parsing_fails(sentry_init, capture_events):
     assert "http.query" not in event["spans"][0]["data"]
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[Boto3Integration()])
     events = capture_events()
 
     s3 = session.resource("s3")

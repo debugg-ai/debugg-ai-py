@@ -3,7 +3,7 @@ SHELL = /bin/bash
 VENV_PATH = .venv
 
 help:
-	@echo "Thanks for your interest in the Sentry Python SDK!"
+	@echo "Thanks for your interest in the DebuggAI Python SDK!"
 	@echo
 	@echo "make apidocs: Build the API documentation"
 	@echo "make aws-lambda-layer: Build AWS Lambda layer directory for serverless integration"

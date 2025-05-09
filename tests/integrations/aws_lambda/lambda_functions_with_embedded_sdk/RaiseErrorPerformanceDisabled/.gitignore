@@ -1,5 +1,5 @@
-# Need to add some ignore rules in this directory, because the unit tests will add the Sentry SDK and its dependencies 
-# into this directory to create a Lambda function package that contains everything needed to instrument a Lambda function using Sentry.
+# Need to add some ignore rules in this directory, because the unit tests will add the DebuggAI SDK and its dependencies 
+# into this directory to create a Lambda function package that contains everything needed to instrument a Lambda function using DebuggAI.
 
 # Ignore everything
 *

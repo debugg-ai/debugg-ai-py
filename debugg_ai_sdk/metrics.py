@@ -52,8 +52,8 @@ if TYPE_CHECKING:
 
 warnings.warn(
     "The debugg_ai_sdk.metrics module is deprecated and will be removed in the next major release. "
-    "Sentry will reject all metrics sent after October 7, 2024. "
-    "Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics",
+    "DebuggAI will reject all metrics sent after October 7, 2024. "
+    "Learn more: https://debugg-ai.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics",
     DeprecationWarning,
     stacklevel=2,
 )
@@ -589,7 +589,7 @@ class MetricsAggregator:
         self._consider_force_flush()
 
         # For sets, we only record that a value has been added to the set but not which one.
-        # See develop docs: https://develop.sentry.dev/sdk/metrics/#sets
+        # See develop docs: https://develop.debugg-ai.dev/sdk/metrics/#sets
         if local_aggregator is not None:
             local_value = float(added if ty == "s" else value)
             local_aggregator.add(ty, key, local_value, unit, serialized_tags)

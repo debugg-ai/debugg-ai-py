@@ -440,12 +440,12 @@ def test_error_has_new_trace_context_performance_disabled(run_cloud_function):
 def test_error_has_existing_trace_context_performance_enabled(run_cloud_function):
     """
     Check if an 'trace' context is added to errros and transactions
-    from the incoming 'sentry-trace' header when performance monitoring is enabled.
+    from the incoming 'debugg-ai-trace' header when performance monitoring is enabled.
     """
     trace_id = "471a43a4192642f0b136d5159a501701"
     parent_span_id = "6e8f22c393e68f19"
     parent_sampled = 1
-    sentry_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
 
     envelope_items, _ = run_cloud_function(
         dedent(
@@ -454,14 +454,14 @@ def test_error_has_existing_trace_context_performance_enabled(run_cloud_function
 
         from collections import namedtuple
         GCPEvent = namedtuple("GCPEvent", ["headers"])
-        event = GCPEvent(headers={"sentry-trace": "%s"})
+        event = GCPEvent(headers={"debugg-ai-trace": "%s"})
 
         def cloud_function(functionhandler, event):
             debugg_ai_sdk.capture_message("hi")
             x = 3/0
             return "3"
         """
-            % sentry_trace_header
+            % debugg_ai_trace_header
         )
         + FUNCTIONS_PRELUDE
         + dedent(
@@ -493,12 +493,12 @@ def test_error_has_existing_trace_context_performance_enabled(run_cloud_function
 def test_error_has_existing_trace_context_performance_disabled(run_cloud_function):
     """
     Check if an 'trace' context is added to errros and transactions
-    from the incoming 'sentry-trace' header when performance monitoring is disabled.
+    from the incoming 'debugg-ai-trace' header when performance monitoring is disabled.
     """
     trace_id = "471a43a4192642f0b136d5159a501701"
     parent_span_id = "6e8f22c393e68f19"
     parent_sampled = 1
-    sentry_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
 
     envelope_items, _ = run_cloud_function(
         dedent(
@@ -507,14 +507,14 @@ def test_error_has_existing_trace_context_performance_disabled(run_cloud_functio
 
         from collections import namedtuple
         GCPEvent = namedtuple("GCPEvent", ["headers"])
-        event = GCPEvent(headers={"sentry-trace": "%s"})
+        event = GCPEvent(headers={"debugg-ai-trace": "%s"})
 
         def cloud_function(functionhandler, event):
             debugg_ai_sdk.capture_message("hi")
             x = 3/0
             return "3"
         """
-            % sentry_trace_header
+            % debugg_ai_trace_header
         )
         + FUNCTIONS_PRELUDE
         + dedent(

@@ -18,11 +18,11 @@ from opentelemetry.trace.span import (
 from debugg_ai_sdk import get_client, start_transaction
 from debugg_ai_sdk.consts import INSTRUMENTER, SPANSTATUS
 from debugg_ai_sdk.integrations.opentelemetry.consts import (
-    SENTRY_BAGGAGE_KEY,
-    SENTRY_TRACE_KEY,
+    DEBUGG_AI_BAGGAGE_KEY,
+    DEBUGG_AI_TRACE_KEY,
 )
 from debugg_ai_sdk.scope import add_global_event_processor
-from debugg_ai_sdk.tracing import Transaction, Span as SentrySpan
+from debugg_ai_sdk.tracing import Transaction, Span as DebuggAISpan
 from debugg_ai_sdk.utils import Dsn
 
 from urllib3.util import parse_url as urlparse
@@ -38,7 +38,7 @@ SPAN_ORIGIN = "auto.otel"
 
 
 def link_trace_context_to_error_event(event, otel_span_map):
-    # type: (Event, dict[str, Union[Transaction, SentrySpan]]) -> Event
+    # type: (Event, dict[str, Union[Transaction, DebuggAISpan]]) -> Event
     client = get_client()
 
     if client.options["instrumenter"] != INSTRUMENTER.OTEL:
@@ -56,29 +56,29 @@ def link_trace_context_to_error_event(event, otel_span_map):
     if ctx.trace_id == INVALID_TRACE_ID or ctx.span_id == INVALID_SPAN_ID:
         return event
 
-    sentry_span = otel_span_map.get(format_span_id(ctx.span_id), None)
-    if not sentry_span:
+    debugg_ai_span = otel_span_map.get(format_span_id(ctx.span_id), None)
+    if not debugg_ai_span:
         return event
 
     contexts = event.setdefault("contexts", {})
-    contexts.setdefault("trace", {}).update(sentry_span.get_trace_context())
+    contexts.setdefault("trace", {}).update(debugg_ai_span.get_trace_context())
 
     return event
 
 
-class SentrySpanProcessor(SpanProcessor):
+class DebuggAISpanProcessor(SpanProcessor):
     """
-    Converts OTel spans into Sentry spans so they can be sent to the Sentry backend.
+    Converts OTel spans into DebuggAI spans so they can be sent to the DebuggAI backend.
     """
 
-    # The mapping from otel span ids to sentry spans
-    otel_span_map = {}  # type: dict[str, Union[Transaction, SentrySpan]]
+    # The mapping from otel span ids to debugg-ai spans
+    otel_span_map = {}  # type: dict[str, Union[Transaction, DebuggAISpan]]
 
     # The currently open spans. Elements will be discarded after SPAN_MAX_TIME_OPEN_MINUTES
     open_spans = {}  # type: dict[int, set[str]]
 
     def __new__(cls):
-        # type: () -> SentrySpanProcessor
+        # type: () -> DebuggAISpanProcessor
         if not hasattr(cls, "instance"):
             cls.instance = super().__new__(cls)
 
@@ -92,7 +92,7 @@ class SentrySpanProcessor(SpanProcessor):
             return link_trace_context_to_error_event(event, self.otel_span_map)
 
     def _prune_old_spans(self):
-        # type: (SentrySpanProcessor) -> None
+        # type: (DebuggAISpanProcessor) -> None
         """
         Prune spans that have been open for too long.
         """
@@ -127,13 +127,13 @@ class SentrySpanProcessor(SpanProcessor):
         if not otel_span.get_span_context().is_valid:
             return
 
-        if self._is_sentry_span(otel_span):
+        if self._is_debugg_ai_span(otel_span):
             return
 
         trace_data = self._get_trace_data(otel_span, parent_context)
 
         parent_span_id = trace_data["parent_span_id"]
-        sentry_parent_span = (
+        debugg_ai_parent_span = (
             self.otel_span_map.get(parent_span_id) if parent_span_id else None
         )
 
@@ -143,9 +143,9 @@ class SentrySpanProcessor(SpanProcessor):
                 otel_span.start_time / 1e9, timezone.utc
             )  # OTel spans have nanosecond precision
 
-        sentry_span = None
-        if sentry_parent_span:
-            sentry_span = sentry_parent_span.start_child(
+        debugg_ai_span = None
+        if debugg_ai_parent_span:
+            debugg_ai_span = debugg_ai_parent_span.start_child(
                 span_id=trace_data["span_id"],
                 name=otel_span.name,
                 start_timestamp=start_timestamp,
@@ -153,7 +153,7 @@ class SentrySpanProcessor(SpanProcessor):
                 origin=SPAN_ORIGIN,
             )
         else:
-            sentry_span = start_transaction(
+            debugg_ai_span = start_transaction(
                 name=otel_span.name,
                 span_id=trace_data["span_id"],
                 parent_span_id=parent_span_id,
@@ -164,7 +164,7 @@ class SentrySpanProcessor(SpanProcessor):
                 origin=SPAN_ORIGIN,
             )
 
-        self.otel_span_map[trace_data["span_id"]] = sentry_span
+        self.otel_span_map[trace_data["span_id"]] = debugg_ai_span
 
         if otel_span.start_time is not None:
             span_start_in_minutes = int(
@@ -188,23 +188,23 @@ class SentrySpanProcessor(SpanProcessor):
             return
 
         span_id = format_span_id(span_context.span_id)
-        sentry_span = self.otel_span_map.pop(span_id, None)
-        if not sentry_span:
+        debugg_ai_span = self.otel_span_map.pop(span_id, None)
+        if not debugg_ai_span:
             return
 
-        sentry_span.op = otel_span.name
+        debugg_ai_span.op = otel_span.name
 
-        self._update_span_with_otel_status(sentry_span, otel_span)
+        self._update_span_with_otel_status(debugg_ai_span, otel_span)
 
-        if isinstance(sentry_span, Transaction):
-            sentry_span.name = otel_span.name
-            sentry_span.set_context(
+        if isinstance(debugg_ai_span, Transaction):
+            debugg_ai_span.name = otel_span.name
+            debugg_ai_span.set_context(
                 OPEN_TELEMETRY_CONTEXT, self._get_otel_context(otel_span)
             )
-            self._update_transaction_with_otel_data(sentry_span, otel_span)
+            self._update_transaction_with_otel_data(debugg_ai_span, otel_span)
 
         else:
-            self._update_span_with_otel_data(sentry_span, otel_span)
+            self._update_span_with_otel_data(debugg_ai_span, otel_span)
 
         end_timestamp = None
         if otel_span.end_time is not None:
@@ -212,7 +212,7 @@ class SentrySpanProcessor(SpanProcessor):
                 otel_span.end_time / 1e9, timezone.utc
             )  # OTel spans have nanosecond precision
 
-        sentry_span.finish(end_timestamp=end_timestamp)
+        debugg_ai_span.finish(end_timestamp=end_timestamp)
 
         if otel_span.start_time is not None:
             span_start_in_minutes = int(
@@ -222,11 +222,11 @@ class SentrySpanProcessor(SpanProcessor):
 
         self._prune_old_spans()
 
-    def _is_sentry_span(self, otel_span):
+    def _is_debugg_ai_span(self, otel_span):
         # type: (OTelSpan) -> bool
         """
         Break infinite loop:
-        HTTP requests to Sentry are caught by OTel and send again to Sentry.
+        HTTP requests to DebuggAI are caught by OTel and send again to DebuggAI.
         """
         otel_span_url = None
         if otel_span.attributes is not None:
@@ -246,8 +246,8 @@ class SentrySpanProcessor(SpanProcessor):
     def _get_otel_context(self, otel_span):
         # type: (OTelSpan) -> dict[str, Any]
         """
-        Returns the OTel context for Sentry.
-        See: https://develop.sentry.dev/sdk/performance/opentelemetry/#step-5-add-opentelemetry-context
+        Returns the OTel context for DebuggAI.
+        See: https://develop.debugg-ai.dev/sdk/performance/opentelemetry/#step-5-add-opentelemetry-context
         """
         ctx = {}
 
@@ -278,45 +278,45 @@ class SentrySpanProcessor(SpanProcessor):
         )
         trace_data["parent_span_id"] = parent_span_id
 
-        sentry_trace_data = get_value(SENTRY_TRACE_KEY, parent_context)
-        sentry_trace_data = cast("dict[str, Union[str, bool, None]]", sentry_trace_data)
+        debugg_ai_trace_data = get_value(DEBUGG_AI_TRACE_KEY, parent_context)
+        debugg_ai_trace_data = cast("dict[str, Union[str, bool, None]]", debugg_ai_trace_data)
         trace_data["parent_sampled"] = (
-            sentry_trace_data["parent_sampled"] if sentry_trace_data else None
+            debugg_ai_trace_data["parent_sampled"] if debugg_ai_trace_data else None
         )
 
-        baggage = get_value(SENTRY_BAGGAGE_KEY, parent_context)
+        baggage = get_value(DEBUGG_AI_BAGGAGE_KEY, parent_context)
         trace_data["baggage"] = baggage
 
         return trace_data
 
-    def _update_span_with_otel_status(self, sentry_span, otel_span):
-        # type: (SentrySpan, OTelSpan) -> None
+    def _update_span_with_otel_status(self, debugg_ai_span, otel_span):
+        # type: (DebuggAISpan, OTelSpan) -> None
         """
-        Set the Sentry span status from the OTel span
+        Set the DebuggAI span status from the OTel span
         """
         if otel_span.status.is_unset:
             return
 
         if otel_span.status.is_ok:
-            sentry_span.set_status(SPANSTATUS.OK)
+            debugg_ai_span.set_status(SPANSTATUS.OK)
             return
 
-        sentry_span.set_status(SPANSTATUS.INTERNAL_ERROR)
+        debugg_ai_span.set_status(SPANSTATUS.INTERNAL_ERROR)
 
-    def _update_span_with_otel_data(self, sentry_span, otel_span):
-        # type: (SentrySpan, OTelSpan) -> None
+    def _update_span_with_otel_data(self, debugg_ai_span, otel_span):
+        # type: (DebuggAISpan, OTelSpan) -> None
         """
-        Convert OTel span data and update the Sentry span with it.
+        Convert OTel span data and update the DebuggAI span with it.
         This should eventually happen on the server when ingesting the spans.
         """
-        sentry_span.set_data("otel.kind", otel_span.kind)
+        debugg_ai_span.set_data("otel.kind", otel_span.kind)
 
         op = otel_span.name
         description = otel_span.name
 
         if otel_span.attributes is not None:
             for key, val in otel_span.attributes.items():
-                sentry_span.set_data(key, val)
+                debugg_ai_span.set_data(key, val)
 
             http_method = otel_span.attributes.get(SpanAttributes.HTTP_METHOD)
             http_method = cast("Optional[str]", http_method)
@@ -356,7 +356,7 @@ class SentrySpanProcessor(SpanProcessor):
                 )
                 status_code = cast("Optional[int]", status_code)
                 if status_code:
-                    sentry_span.set_http_status(status_code)
+                    debugg_ai_span.set_http_status(status_code)
 
             elif db_query:
                 op = "db"
@@ -365,11 +365,11 @@ class SentrySpanProcessor(SpanProcessor):
                 if statement:
                     description = statement
 
-        sentry_span.op = op
-        sentry_span.description = description
+        debugg_ai_span.op = op
+        debugg_ai_span.description = description
 
-    def _update_transaction_with_otel_data(self, sentry_span, otel_span):
-        # type: (SentrySpan, OTelSpan) -> None
+    def _update_transaction_with_otel_data(self, debugg_ai_span, otel_span):
+        # type: (DebuggAISpan, OTelSpan) -> None
         if otel_span.attributes is None:
             return
 
@@ -379,7 +379,7 @@ class SentrySpanProcessor(SpanProcessor):
             status_code = otel_span.attributes.get(SpanAttributes.HTTP_STATUS_CODE)
             status_code = cast("Optional[int]", status_code)
             if status_code:
-                sentry_span.set_http_status(status_code)
+                debugg_ai_span.set_http_status(status_code)
 
             op = "http"
 
@@ -388,4 +388,4 @@ class SentrySpanProcessor(SpanProcessor):
             elif otel_span.kind == SpanKind.CLIENT:
                 op += ".client"
 
-            sentry_span.op = op
+            debugg_ai_span.op = op

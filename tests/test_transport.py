@@ -483,7 +483,7 @@ def test_data_category_limits(
 
     capturing_server.respond_with(
         code=response_code,
-        headers={"X-Sentry-Rate-Limits": "4711:transaction:organization"},
+        headers={"X-DebuggAI-Rate-Limits": "4711:transaction:organization"},
     )
 
     client.capture_event({"type": "transaction"})
@@ -522,7 +522,7 @@ def test_data_category_limits_reporting(
     capturing_server.respond_with(
         code=response_code,
         headers={
-            "X-Sentry-Rate-Limits": "4711:transaction:organization, 4711:attachment:organization"
+            "X-DebuggAI-Rate-Limits": "4711:transaction:organization, 4711:attachment:organization"
         },
     )
 
@@ -630,7 +630,7 @@ def test_complex_limits_without_data_category(
     client = make_client()
     capturing_server.respond_with(
         code=response_code,
-        headers={"X-Sentry-Rate-Limits": "4711::organization"},
+        headers={"X-DebuggAI-Rate-Limits": "4711::organization"},
     )
 
     client.capture_event({"type": "transaction"})
@@ -656,7 +656,7 @@ def test_metric_bucket_limits(capturing_server, response_code, make_client):
     capturing_server.respond_with(
         code=response_code,
         headers={
-            "X-Sentry-Rate-Limits": "4711:metric_bucket:organization:quota_exceeded:custom"
+            "X-DebuggAI-Rate-Limits": "4711:metric_bucket:organization:quota_exceeded:custom"
         },
     )
 
@@ -695,7 +695,7 @@ def test_metric_bucket_limits_with_namespace(
     capturing_server.respond_with(
         code=response_code,
         headers={
-            "X-Sentry-Rate-Limits": "4711:metric_bucket:organization:quota_exceeded:foo"
+            "X-DebuggAI-Rate-Limits": "4711:metric_bucket:organization:quota_exceeded:foo"
         },
     )
 
@@ -730,7 +730,7 @@ def test_metric_bucket_limits_with_all_namespaces(
     capturing_server.respond_with(
         code=response_code,
         headers={
-            "X-Sentry-Rate-Limits": "4711:metric_bucket:organization:quota_exceeded"
+            "X-DebuggAI-Rate-Limits": "4711:metric_bucket:organization:quota_exceeded"
         },
     )
 

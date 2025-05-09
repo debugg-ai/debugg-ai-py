@@ -69,7 +69,7 @@ def patch_enqueue_job():
     old_enqueue_job = ArqRedis.enqueue_job
     original_kwdefaults = old_enqueue_job.__kwdefaults__
 
-    async def _sentry_enqueue_job(self, function, *args, **kwargs):
+    async def _debugg_ai_enqueue_job(self, function, *args, **kwargs):
         # type: (ArqRedis, str, *Any, **Any) -> Optional[Job]
         integration = debugg_ai_sdk.get_client().get_integration(ArqIntegration)
         if integration is None:
@@ -80,15 +80,15 @@ def patch_enqueue_job():
         ):
             return await old_enqueue_job(self, function, *args, **kwargs)
 
-    _sentry_enqueue_job.__kwdefaults__ = original_kwdefaults
-    ArqRedis.enqueue_job = _sentry_enqueue_job
+    _debugg_ai_enqueue_job.__kwdefaults__ = original_kwdefaults
+    ArqRedis.enqueue_job = _debugg_ai_enqueue_job
 
 
 def patch_run_job():
     # type: () -> None
     old_run_job = Worker.run_job
 
-    async def _sentry_run_job(self, job_id, score):
+    async def _debugg_ai_run_job(self, job_id, score):
         # type: (Worker, str, int) -> None
         integration = debugg_ai_sdk.get_client().get_integration(ArqIntegration)
         if integration is None:
@@ -109,7 +109,7 @@ def patch_run_job():
             with debugg_ai_sdk.start_transaction(transaction):
                 return await old_run_job(self, job_id, score)
 
-    Worker.run_job = _sentry_run_job
+    Worker.run_job = _debugg_ai_run_job
 
 
 def _capture_exception(exc_info):
@@ -165,7 +165,7 @@ def _make_event_processor(ctx, *args, **kwargs):
 def _wrap_coroutine(name, coroutine):
     # type: (str, WorkerCoroutine) -> WorkerCoroutine
 
-    async def _sentry_coroutine(ctx, *args, **kwargs):
+    async def _debugg_ai_coroutine(ctx, *args, **kwargs):
         # type: (Dict[Any, Any], *Any, **Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(ArqIntegration)
         if integration is None:
@@ -184,7 +184,7 @@ def _wrap_coroutine(name, coroutine):
 
         return result
 
-    return _sentry_coroutine
+    return _debugg_ai_coroutine
 
 
 def patch_create_worker():
@@ -192,7 +192,7 @@ def patch_create_worker():
     old_create_worker = arq.worker.create_worker
 
     @ensure_integration_enabled(ArqIntegration, old_create_worker)
-    def _sentry_create_worker(*args, **kwargs):
+    def _debugg_ai_create_worker(*args, **kwargs):
         # type: (*Any, **Any) -> Worker
         settings_cls = args[0]
 
@@ -228,7 +228,7 @@ def patch_create_worker():
 
         return old_create_worker(*args, **kwargs)
 
-    arq.worker.create_worker = _sentry_create_worker
+    arq.worker.create_worker = _debugg_ai_create_worker
 
 
 def _get_arq_function(func):

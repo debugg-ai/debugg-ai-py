@@ -90,21 +90,21 @@ def _patch_cache_method(cache, method_name, address, port):
             return value
 
     @functools.wraps(original_method)
-    def sentry_method(*args, **kwargs):
+    def debugg_ai_method(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         return _instrument_call(
             cache, method_name, original_method, args, kwargs, address, port
         )
 
-    setattr(cache, method_name, sentry_method)
+    setattr(cache, method_name, debugg_ai_method)
 
 
 def _patch_cache(cache, address=None, port=None):
     # type: (CacheHandler, Optional[str], Optional[int]) -> None
-    if not hasattr(cache, "_sentry_patched"):
+    if not hasattr(cache, "_debugg_ai_patched"):
         for method_name in METHODS_TO_INSTRUMENT:
             _patch_cache_method(cache, method_name, address, port)
-        cache._sentry_patched = True
+        cache._debugg_ai_patched = True
 
 
 def _get_address_port(settings):
@@ -113,7 +113,7 @@ def _get_address_port(settings):
 
     # TODO: location can also be an array of locations
     #       see: https://docs.djangoproject.com/en/5.0/topics/cache/#redis
-    #       GitHub issue: https://github.com/getsentry/sentry-python/issues/3062
+    #       GitHub issue: https://github.com/debugg-ai/debugg-ai-py/issues/3062
     if not isinstance(location, str):
         return None, None
 
@@ -149,12 +149,12 @@ def should_enable_cache_spans():
 
 def patch_caching():
     # type: () -> None
-    if not hasattr(CacheHandler, "_sentry_patched"):
+    if not hasattr(CacheHandler, "_debugg_ai_patched"):
         if DJANGO_VERSION < (3, 2):
             original_get_item = CacheHandler.__getitem__
 
             @functools.wraps(original_get_item)
-            def sentry_get_item(self, alias):
+            def debugg_ai_get_item(self, alias):
                 # type: (CacheHandler, str) -> Any
                 cache = original_get_item(self, alias)
 
@@ -169,14 +169,14 @@ def patch_caching():
 
                 return cache
 
-            CacheHandler.__getitem__ = sentry_get_item
-            CacheHandler._sentry_patched = True
+            CacheHandler.__getitem__ = debugg_ai_get_item
+            CacheHandler._debugg_ai_patched = True
 
         else:
             original_create_connection = CacheHandler.create_connection
 
             @functools.wraps(original_create_connection)
-            def sentry_create_connection(self, alias):
+            def debugg_ai_create_connection(self, alias):
                 # type: (CacheHandler, str) -> Any
                 cache = original_create_connection(self, alias)
 
@@ -187,5 +187,5 @@ def patch_caching():
 
                 return cache
 
-            CacheHandler.create_connection = sentry_create_connection
-            CacheHandler._sentry_patched = True
+            CacheHandler.create_connection = debugg_ai_create_connection
+            CacheHandler._debugg_ai_patched = True

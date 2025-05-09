@@ -1,5 +1,5 @@
 """
-This module contains type definitions for the Sentry SDK's public API.
+This module contains type definitions for the DebuggAI SDK's public API.
 The types are re-exported from the internal module `debugg_ai_sdk._types`.
 
 Disclaimer: Since types are a form of documentation, type definitions

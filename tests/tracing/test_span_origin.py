@@ -1,8 +1,8 @@
 from debugg_ai_sdk import start_transaction, start_span
 
 
-def test_span_origin_manual(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_span_origin_manual(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction(name="hi"):
@@ -16,8 +16,8 @@ def test_span_origin_manual(sentry_init, capture_events):
     assert event["contexts"]["trace"]["origin"] == "manual"
 
 
-def test_span_origin_custom(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_span_origin_custom(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction(name="hi"):

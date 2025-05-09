@@ -50,8 +50,8 @@ def _tear_down(server: grpc.Server):
 
 
 @pytest.mark.forked
-def test_grpc_server_starts_transaction(sentry_init, capture_events_forksafe):
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+def test_grpc_server_starts_transaction(debugg_ai_init, capture_events_forksafe):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     events = capture_events_forksafe()
 
     server, channel = _set_up()
@@ -75,9 +75,9 @@ def test_grpc_server_starts_transaction(sentry_init, capture_events_forksafe):
 
 
 @pytest.mark.forked
-def test_grpc_server_other_interceptors(sentry_init, capture_events_forksafe):
+def test_grpc_server_other_interceptors(debugg_ai_init, capture_events_forksafe):
     """Ensure compatibility with additional server interceptors."""
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     events = capture_events_forksafe()
     mock_intercept = lambda continuation, handler_call_details: continuation(
         handler_call_details
@@ -108,8 +108,8 @@ def test_grpc_server_other_interceptors(sentry_init, capture_events_forksafe):
 
 
 @pytest.mark.forked
-def test_grpc_server_continues_transaction(sentry_init, capture_events_forksafe):
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+def test_grpc_server_continues_transaction(debugg_ai_init, capture_events_forksafe):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     events = capture_events_forksafe()
 
     server, channel = _set_up()
@@ -121,13 +121,13 @@ def test_grpc_server_continues_transaction(sentry_init, capture_events_forksafe)
         metadata = (
             (
                 "baggage",
-                "sentry-trace_id={trace_id},sentry-environment=test,"
-                "sentry-transaction=test-transaction,sentry-sample_rate=1.0".format(
+                "debugg-ai-trace_id={trace_id},debugg-ai-environment=test,"
+                "debugg-ai-transaction=test-transaction,debugg-ai-sample_rate=1.0".format(
                     trace_id=transaction.trace_id
                 ),
             ),
             (
-                "sentry-trace",
+                "debugg-ai-trace",
                 "{trace_id}-{parent_span_id}-{sampled}".format(
                     trace_id=transaction.trace_id,
                     parent_span_id=transaction.span_id,
@@ -153,8 +153,8 @@ def test_grpc_server_continues_transaction(sentry_init, capture_events_forksafe)
 
 
 @pytest.mark.forked
-def test_grpc_client_starts_span(sentry_init, capture_events_forksafe):
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+def test_grpc_client_starts_span(debugg_ai_init, capture_events_forksafe):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     events = capture_events_forksafe()
 
     server, channel = _set_up()
@@ -188,8 +188,8 @@ def test_grpc_client_starts_span(sentry_init, capture_events_forksafe):
 
 
 @pytest.mark.forked
-def test_grpc_client_unary_stream_starts_span(sentry_init, capture_events_forksafe):
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+def test_grpc_client_unary_stream_starts_span(debugg_ai_init, capture_events_forksafe):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     events = capture_events_forksafe()
 
     server, channel = _set_up()
@@ -231,9 +231,9 @@ class MockClientInterceptor(grpc.UnaryUnaryClientInterceptor):
 
 
 @pytest.mark.forked
-def test_grpc_client_other_interceptor(sentry_init, capture_events_forksafe):
+def test_grpc_client_other_interceptor(debugg_ai_init, capture_events_forksafe):
     """Ensure compatibility with additional client interceptors."""
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     events = capture_events_forksafe()
 
     server, channel = _set_up()
@@ -271,9 +271,9 @@ def test_grpc_client_other_interceptor(sentry_init, capture_events_forksafe):
 
 @pytest.mark.forked
 def test_grpc_client_and_servers_interceptors_integration(
-    sentry_init, capture_events_forksafe
+    debugg_ai_init, capture_events_forksafe
 ):
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     events = capture_events_forksafe()
 
     server, channel = _set_up()
@@ -297,8 +297,8 @@ def test_grpc_client_and_servers_interceptors_integration(
 
 
 @pytest.mark.forked
-def test_stream_stream(sentry_init):
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+def test_stream_stream(debugg_ai_init):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     server, channel = _set_up()
 
     # Use the provided channel
@@ -311,12 +311,12 @@ def test_stream_stream(sentry_init):
 
 
 @pytest.mark.forked
-def test_stream_unary(sentry_init):
+def test_stream_unary(debugg_ai_init):
     """
     Test to verify stream-stream works.
     Tracing not supported for it yet.
     """
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     server, channel = _set_up()
 
     # Use the provided channel
@@ -328,8 +328,8 @@ def test_stream_unary(sentry_init):
 
 
 @pytest.mark.forked
-def test_span_origin(sentry_init, capture_events_forksafe):
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+def test_span_origin(debugg_ai_init, capture_events_forksafe):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
     events = capture_events_forksafe()
 
     server, channel = _set_up()

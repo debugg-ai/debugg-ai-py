@@ -16,8 +16,8 @@ def reset_level():
 
 
 @pytest.mark.parametrize("logger", [logger, other_logger])
-def test_logging_works_with_many_loggers(sentry_init, capture_events, logger):
-    sentry_init(integrations=[LoggingIntegration(event_level="ERROR")])
+def test_logging_works_with_many_loggers(debugg_ai_init, capture_events, logger):
+    debugg_ai_init(integrations=[LoggingIntegration(event_level="ERROR")])
     events = capture_events()
 
     logger.info("bread")
@@ -34,8 +34,8 @@ def test_logging_works_with_many_loggers(sentry_init, capture_events, logger):
 @pytest.mark.parametrize(
     "kwargs", [{"exc_info": None}, {}, {"exc_info": 0}, {"exc_info": False}]
 )
-def test_logging_defaults(integrations, sentry_init, capture_events, kwargs):
-    sentry_init(integrations=integrations)
+def test_logging_defaults(integrations, debugg_ai_init, capture_events, kwargs):
+    debugg_ai_init(integrations=integrations)
     events = capture_events()
 
     logger.info("bread")
@@ -50,8 +50,8 @@ def test_logging_defaults(integrations, sentry_init, capture_events, kwargs):
     assert "threads" not in event
 
 
-def test_logging_extra_data(sentry_init, capture_events):
-    sentry_init(integrations=[LoggingIntegration()], default_integrations=False)
+def test_logging_extra_data(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[LoggingIntegration()], default_integrations=False)
     events = capture_events()
 
     logger.info("bread", extra=dict(foo=42))
@@ -67,8 +67,8 @@ def test_logging_extra_data(sentry_init, capture_events):
     )
 
 
-def test_logging_extra_data_integer_keys(sentry_init, capture_events):
-    sentry_init(integrations=[LoggingIntegration()], default_integrations=False)
+def test_logging_extra_data_integer_keys(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[LoggingIntegration()], default_integrations=False)
     events = capture_events()
 
     logger.critical("integer in extra keys", extra={1: 1})
@@ -85,8 +85,8 @@ def test_logging_extra_data_integer_keys(sentry_init, capture_events):
         pytest.param({"stack_info": True}, id="stack_info"),
     ),
 )
-def test_logging_stack_trace(sentry_init, capture_events, enable_stack_trace_kwarg):
-    sentry_init(integrations=[LoggingIntegration()], default_integrations=False)
+def test_logging_stack_trace(debugg_ai_init, capture_events, enable_stack_trace_kwarg):
+    debugg_ai_init(integrations=[LoggingIntegration()], default_integrations=False)
     events = capture_events()
 
     logger.error("first", **enable_stack_trace_kwarg)
@@ -104,8 +104,8 @@ def test_logging_stack_trace(sentry_init, capture_events, enable_stack_trace_kwa
     assert "threads" not in event_without
 
 
-def test_logging_level(sentry_init, capture_events):
-    sentry_init(integrations=[LoggingIntegration()], default_integrations=False)
+def test_logging_level(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[LoggingIntegration()], default_integrations=False)
     events = capture_events()
 
     logger.setLevel(logging.WARNING)
@@ -122,7 +122,7 @@ def test_logging_level(sentry_init, capture_events):
     assert not events
 
 
-def test_custom_log_level_names(sentry_init, capture_events):
+def test_custom_log_level_names(debugg_ai_init, capture_events):
     levels = {
         logging.DEBUG: "debug",
         logging.INFO: "info",
@@ -142,9 +142,9 @@ def test_custom_log_level_names(sentry_init, capture_events):
     logging.addLevelName(logging.CRITICAL, "custom level critical: ")
     logging.addLevelName(logging.FATAL, "custom level 🔥: ")
 
-    for logging_level, sentry_level in levels.items():
+    for logging_level, debugg_ai_level in levels.items():
         logger.setLevel(logging_level)
-        sentry_init(
+        debugg_ai_init(
             integrations=[LoggingIntegration(event_level=logging_level)],
             default_integrations=False,
         )
@@ -152,7 +152,7 @@ def test_custom_log_level_names(sentry_init, capture_events):
 
         logger.log(logging_level, "Trying level %s", logging_level)
         assert events
-        assert events[0]["level"] == sentry_level
+        assert events[0]["level"] == debugg_ai_level
         assert events[0]["logentry"]["message"] == "Trying level %s"
         assert events[0]["logentry"]["formatted"] == f"Trying level {logging_level}"
         assert events[0]["logentry"]["params"] == [logging_level]
@@ -160,8 +160,8 @@ def test_custom_log_level_names(sentry_init, capture_events):
         del events[:]
 
 
-def test_logging_filters(sentry_init, capture_events):
-    sentry_init(integrations=[LoggingIntegration()], default_integrations=False)
+def test_logging_filters(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[LoggingIntegration()], default_integrations=False)
     events = capture_events()
 
     should_log = False
@@ -183,8 +183,8 @@ def test_logging_filters(sentry_init, capture_events):
     assert event["logentry"]["formatted"] == "hi"
 
 
-def test_logging_captured_warnings(sentry_init, capture_events, recwarn):
-    sentry_init(
+def test_logging_captured_warnings(debugg_ai_init, capture_events, recwarn):
+    debugg_ai_init(
         integrations=[LoggingIntegration(event_level="WARNING")],
         default_integrations=False,
     )
@@ -219,8 +219,8 @@ def test_logging_captured_warnings(sentry_init, capture_events, recwarn):
     assert str(recwarn[0].message) == "third"
 
 
-def test_ignore_logger(sentry_init, capture_events):
-    sentry_init(integrations=[LoggingIntegration()], default_integrations=False)
+def test_ignore_logger(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[LoggingIntegration()], default_integrations=False)
     events = capture_events()
 
     ignore_logger("testfoo")
@@ -230,8 +230,8 @@ def test_ignore_logger(sentry_init, capture_events):
     assert not events
 
 
-def test_ignore_logger_wildcard(sentry_init, capture_events):
-    sentry_init(integrations=[LoggingIntegration()], default_integrations=False)
+def test_ignore_logger_wildcard(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[LoggingIntegration()], default_integrations=False)
     events = capture_events()
 
     ignore_logger("testfoo.*")
@@ -247,9 +247,9 @@ def test_ignore_logger_wildcard(sentry_init, capture_events):
     assert event["logentry"]["formatted"] == "hi"
 
 
-def test_logging_dictionary_interpolation(sentry_init, capture_events):
+def test_logging_dictionary_interpolation(debugg_ai_init, capture_events):
     """Here we test an entire dictionary being interpolated into the log message."""
-    sentry_init(integrations=[LoggingIntegration()], default_integrations=False)
+    debugg_ai_init(integrations=[LoggingIntegration()], default_integrations=False)
     events = capture_events()
 
     logger.error("this is a log with a dictionary %s", {"foo": "bar"})
@@ -263,9 +263,9 @@ def test_logging_dictionary_interpolation(sentry_init, capture_events):
     assert event["logentry"]["params"] == {"foo": "bar"}
 
 
-def test_logging_dictionary_args(sentry_init, capture_events):
+def test_logging_dictionary_args(debugg_ai_init, capture_events):
     """Here we test items from a dictionary being interpolated into the log message."""
-    sentry_init(integrations=[LoggingIntegration()], default_integrations=False)
+    debugg_ai_init(integrations=[LoggingIntegration()], default_integrations=False)
     events = capture_events()
 
     logger.error(

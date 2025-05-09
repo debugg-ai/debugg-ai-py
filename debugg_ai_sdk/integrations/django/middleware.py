@@ -44,7 +44,7 @@ def patch_django_middlewares():
 
     old_import_string = base.import_string
 
-    def sentry_patched_import_string(dotted_path):
+    def debugg_ai_patched_import_string(dotted_path):
         # type: (str) -> Any
         rv = old_import_string(dotted_path)
 
@@ -53,11 +53,11 @@ def patch_django_middlewares():
 
         return rv
 
-    base.import_string = sentry_patched_import_string
+    base.import_string = debugg_ai_patched_import_string
 
     old_load_middleware = base.BaseHandler.load_middleware
 
-    def sentry_patched_load_middleware(*args, **kwargs):
+    def debugg_ai_patched_load_middleware(*args, **kwargs):
         # type: (Any, Any) -> Any
         _import_string_should_wrap_middleware.set(True)
         try:
@@ -65,7 +65,7 @@ def patch_django_middlewares():
         finally:
             _import_string_should_wrap_middleware.set(False)
 
-    base.BaseHandler.load_middleware = sentry_patched_load_middleware
+    base.BaseHandler.load_middleware = debugg_ai_patched_load_middleware
 
 
 def _wrap_middleware(middleware, middleware_name):
@@ -99,7 +99,7 @@ def _wrap_middleware(middleware, middleware_name):
         # type: (F) -> F
         with capture_internal_exceptions():
 
-            def sentry_wrapped_method(*args, **kwargs):
+            def debugg_ai_wrapped_method(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
                 middleware_span = _check_middleware_span(old_method)
 
@@ -111,18 +111,18 @@ def _wrap_middleware(middleware, middleware_name):
 
             try:
                 # fails for __call__ of function on Python 2 (see py2.7-django-1.11)
-                sentry_wrapped_method = wraps(old_method)(sentry_wrapped_method)
+                debugg_ai_wrapped_method = wraps(old_method)(debugg_ai_wrapped_method)
 
                 # Necessary for Django 3.1
-                sentry_wrapped_method.__self__ = old_method.__self__  # type: ignore
+                debugg_ai_wrapped_method.__self__ = old_method.__self__  # type: ignore
             except Exception:
                 pass
 
-            return sentry_wrapped_method  # type: ignore
+            return debugg_ai_wrapped_method  # type: ignore
 
         return old_method
 
-    class SentryWrappingMiddleware(
+    class DebuggAIWrappingMiddleware(
         _asgi_middleware_mixin_factory(_check_middleware_span)  # type: ignore
     ):
         sync_capable = getattr(middleware, "sync_capable", True)
@@ -182,6 +182,6 @@ def _wrap_middleware(middleware, middleware_name):
         "__qualname__",
     ):
         if hasattr(middleware, attr):
-            setattr(SentryWrappingMiddleware, attr, getattr(middleware, attr))
+            setattr(DebuggAIWrappingMiddleware, attr, getattr(middleware, attr))
 
-    return SentryWrappingMiddleware
+    return DebuggAIWrappingMiddleware

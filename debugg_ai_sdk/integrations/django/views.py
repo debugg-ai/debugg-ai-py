@@ -31,7 +31,7 @@ def patch_views():
     old_make_view_atomic = BaseHandler.make_view_atomic
     old_render = SimpleTemplateResponse.render
 
-    def sentry_patched_render(self):
+    def debugg_ai_patched_render(self):
         # type: (SimpleTemplateResponse) -> Any
         with debugg_ai_sdk.start_span(
             op=OP.VIEW_RESPONSE_RENDER,
@@ -41,7 +41,7 @@ def patch_views():
             return old_render(self)
 
     @functools.wraps(old_make_view_atomic)
-    def sentry_patched_make_view_atomic(self, *args, **kwargs):
+    def debugg_ai_patched_make_view_atomic(self, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Any
         callback = old_make_view_atomic(self, *args, **kwargs)
 
@@ -56,17 +56,17 @@ def patch_views():
                 and iscoroutinefunction(callback)
             )
             if is_async_view:
-                sentry_wrapped_callback = wrap_async_view(callback)
+                debugg_ai_wrapped_callback = wrap_async_view(callback)
             else:
-                sentry_wrapped_callback = _wrap_sync_view(callback)
+                debugg_ai_wrapped_callback = _wrap_sync_view(callback)
 
         else:
-            sentry_wrapped_callback = callback
+            debugg_ai_wrapped_callback = callback
 
-        return sentry_wrapped_callback
+        return debugg_ai_wrapped_callback
 
-    SimpleTemplateResponse.render = sentry_patched_render
-    BaseHandler.make_view_atomic = sentry_patched_make_view_atomic
+    SimpleTemplateResponse.render = debugg_ai_patched_render
+    BaseHandler.make_view_atomic = debugg_ai_patched_make_view_atomic
 
 
 def _wrap_sync_view(callback):
@@ -74,17 +74,17 @@ def _wrap_sync_view(callback):
     from debugg_ai_sdk.integrations.django import DjangoIntegration
 
     @functools.wraps(callback)
-    def sentry_wrapped_callback(request, *args, **kwargs):
+    def debugg_ai_wrapped_callback(request, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Any
         current_scope = debugg_ai_sdk.get_current_scope()
         if current_scope.transaction is not None:
             current_scope.transaction.update_active_thread()
 
-        sentry_scope = debugg_ai_sdk.get_isolation_scope()
+        debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
         # set the active thread id to the handler thread for sync views
         # this isn't necessary for async views since that runs on main
-        if sentry_scope.profile is not None:
-            sentry_scope.profile.update_active_thread_id()
+        if debugg_ai_scope.profile is not None:
+            debugg_ai_scope.profile.update_active_thread_id()
 
         with debugg_ai_sdk.start_span(
             op=OP.VIEW_RENDER,
@@ -93,4 +93,4 @@ def _wrap_sync_view(callback):
         ):
             return callback(request, *args, **kwargs)
 
-    return sentry_wrapped_callback
+    return debugg_ai_wrapped_callback

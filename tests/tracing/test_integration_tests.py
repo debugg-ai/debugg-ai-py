@@ -18,8 +18,8 @@ from debugg_ai_sdk.tracing import Transaction
 
 
 @pytest.mark.parametrize("sample_rate", [0.0, 1.0])
-def test_basic(sentry_init, capture_events, sample_rate):
-    sentry_init(traces_sample_rate=sample_rate)
+def test_basic(debugg_ai_init, capture_events, sample_rate):
+    debugg_ai_init(traces_sample_rate=sample_rate)
     events = capture_events()
 
     with start_transaction(name="hi") as transaction:
@@ -56,13 +56,13 @@ def test_basic(sentry_init, capture_events, sample_rate):
 @pytest.mark.parametrize("parent_sampled", [True, False, None])
 @pytest.mark.parametrize("sample_rate", [0.0, 1.0])
 def test_continue_from_headers(
-    sentry_init, capture_envelopes, parent_sampled, sample_rate
+    debugg_ai_init, capture_envelopes, parent_sampled, sample_rate
 ):
     """
     Ensure data is actually passed along via headers, and that they are read
     correctly.
     """
-    sentry_init(traces_sample_rate=sample_rate)
+    debugg_ai_init(traces_sample_rate=sample_rate)
     envelopes = capture_envelopes()
 
     # make a parent transaction (normally this would be in a different service)
@@ -74,13 +74,13 @@ def test_continue_from_headers(
             )
             headers["baggage"] = (
                 "other-vendor-value-1=foo;bar;baz, "
-                "sentry-trace_id=771a43a4192642f0b136d5159a501700, "
-                "sentry-public_key=49d0f7386ad645858ae85020e393bef3, "
-                "sentry-sample_rate=0.01337, sentry-user_id=Amelie, "
+                "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700, "
+                "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3, "
+                "debugg-ai-sample_rate=0.01337, debugg-ai-user_id=Amelie, "
                 "other-vendor-value-2=foo;bar;"
             )
 
-    # child transaction, to prove that we can read 'sentry-trace' header data correctly
+    # child transaction, to prove that we can read 'debugg-ai-trace' header data correctly
     child_transaction = Transaction.continue_from_headers(headers, name="WRONG")
     assert child_transaction is not None
     assert child_transaction.parent_sampled == parent_sampled
@@ -92,7 +92,7 @@ def test_continue_from_headers(
     baggage = child_transaction._baggage
     assert baggage
     assert not baggage.mutable
-    assert baggage.sentry_items == {
+    assert baggage.debugg_ai_items == {
         "public_key": "49d0f7386ad645858ae85020e393bef3",
         "trace_id": "771a43a4192642f0b136d5159a501700",
         "user_id": "Amelie",
@@ -148,8 +148,8 @@ def test_continue_from_headers(
 
 
 @pytest.mark.parametrize("sample_rate", [0.0, 1.0])
-def test_propagate_traces_deprecation_warning(sentry_init, sample_rate):
-    sentry_init(traces_sample_rate=sample_rate, propagate_traces=False)
+def test_propagate_traces_deprecation_warning(debugg_ai_init, sample_rate):
+    debugg_ai_init(traces_sample_rate=sample_rate, propagate_traces=False)
 
     with start_transaction(name="hi"):
         with start_span() as old_span:
@@ -163,9 +163,9 @@ def test_propagate_traces_deprecation_warning(sentry_init, sample_rate):
 
 @pytest.mark.parametrize("sample_rate", [0.5, 1.0])
 def test_dynamic_sampling_head_sdk_creates_dsc(
-    sentry_init, capture_envelopes, sample_rate, monkeypatch
+    debugg_ai_init, capture_envelopes, sample_rate, monkeypatch
 ):
-    sentry_init(traces_sample_rate=sample_rate, release="foo")
+    debugg_ai_init(traces_sample_rate=sample_rate, release="foo")
     envelopes = capture_envelopes()
 
     # make sure transaction is sampled for both cases
@@ -176,7 +176,7 @@ def test_dynamic_sampling_head_sdk_creates_dsc(
     baggage = transaction._baggage
     assert baggage
     assert baggage.mutable
-    assert baggage.sentry_items == {}
+    assert baggage.debugg_ai_items == {}
     assert baggage.third_party_items == ""
 
     with start_transaction(transaction):
@@ -190,7 +190,7 @@ def test_dynamic_sampling_head_sdk_creates_dsc(
     assert baggage
     assert not baggage.mutable
     assert baggage.third_party_items == ""
-    assert baggage.sentry_items == {
+    assert baggage.debugg_ai_items == {
         "environment": "production",
         "release": "foo",
         "sample_rate": str(sample_rate),
@@ -201,13 +201,13 @@ def test_dynamic_sampling_head_sdk_creates_dsc(
     }
 
     expected_baggage = (
-        "sentry-trace_id=%s,"
-        "sentry-sample_rand=0.250000,"
-        "sentry-environment=production,"
-        "sentry-release=foo,"
-        "sentry-transaction=Head%%20SDK%%20tx,"
-        "sentry-sample_rate=%s,"
-        "sentry-sampled=%s"
+        "debugg-ai-trace_id=%s,"
+        "debugg-ai-sample_rand=0.250000,"
+        "debugg-ai-environment=production,"
+        "debugg-ai-release=foo,"
+        "debugg-ai-transaction=Head%%20SDK%%20tx,"
+        "debugg-ai-sample_rate=%s,"
+        "debugg-ai-sampled=%s"
         % (trace_id, sample_rate, "true" if transaction.sampled else "false")
     )
     assert baggage.serialize() == expected_baggage
@@ -229,8 +229,8 @@ def test_dynamic_sampling_head_sdk_creates_dsc(
     "args,expected_refcount",
     [({"traces_sample_rate": 1.0}, 100), ({"traces_sample_rate": 0.0}, 0)],
 )
-def test_memory_usage(sentry_init, capture_events, args, expected_refcount):
-    sentry_init(**args)
+def test_memory_usage(debugg_ai_init, capture_events, args, expected_refcount):
+    debugg_ai_init(**args)
 
     references = weakref.WeakSet()
 
@@ -254,11 +254,11 @@ def test_memory_usage(sentry_init, capture_events, args, expected_refcount):
         assert len(references) == expected_refcount
 
 
-def test_transactions_do_not_go_through_before_send(sentry_init, capture_events):
+def test_transactions_do_not_go_through_before_send(debugg_ai_init, capture_events):
     def before_send(event, hint):
         raise RuntimeError("should not be called")
 
-    sentry_init(traces_sample_rate=1.0, before_send=before_send)
+    debugg_ai_init(traces_sample_rate=1.0, before_send=before_send)
     events = capture_events()
 
     with start_transaction(name="/"):
@@ -267,7 +267,7 @@ def test_transactions_do_not_go_through_before_send(sentry_init, capture_events)
     assert len(events) == 1
 
 
-def test_start_span_after_finish(sentry_init, capture_events):
+def test_start_span_after_finish(debugg_ai_init, capture_events):
     class CustomTransport(Transport):
         def capture_envelope(self, envelope):
             pass
@@ -276,7 +276,7 @@ def test_start_span_after_finish(sentry_init, capture_events):
             start_span(op="toolate", name="justdont")
             pass
 
-    sentry_init(traces_sample_rate=1, transport=CustomTransport())
+    debugg_ai_init(traces_sample_rate=1, transport=CustomTransport())
     events = capture_events()
 
     with start_transaction(name="hi"):
@@ -286,8 +286,8 @@ def test_start_span_after_finish(sentry_init, capture_events):
     assert len(events) == 1
 
 
-def test_trace_propagation_meta_head_sdk(sentry_init):
-    sentry_init(traces_sample_rate=1.0, release="foo")
+def test_trace_propagation_meta_head_sdk(debugg_ai_init):
+    debugg_ai_init(traces_sample_rate=1.0, release="foo")
 
     transaction = Transaction.continue_from_headers({}, name="Head SDK tx")
     meta = None
@@ -299,11 +299,11 @@ def test_trace_propagation_meta_head_sdk(sentry_init):
             meta = debugg_ai_sdk.get_current_scope().trace_propagation_meta()
 
     ind = meta.find(">") + 1
-    sentry_trace, baggage = meta[:ind], meta[ind:]
+    debugg_ai_trace, baggage = meta[:ind], meta[ind:]
 
-    assert 'meta name="sentry-trace"' in sentry_trace
-    sentry_trace_content = re.findall('content="([^"]*)"', sentry_trace)[0]
-    assert sentry_trace_content == span.to_traceparent()
+    assert 'meta name="debugg-ai-trace"' in debugg_ai_trace
+    debugg_ai_trace_content = re.findall('content="([^"]*)"', debugg_ai_trace)[0]
+    assert debugg_ai_trace_content == span.to_traceparent()
 
     assert 'meta name="baggage"' in baggage
     baggage_content = re.findall('content="([^"]*)"', baggage)[0]
@@ -317,9 +317,9 @@ def test_trace_propagation_meta_head_sdk(sentry_init):
     ],
 )
 def test_non_error_exceptions(
-    sentry_init, capture_events, exception_cls, exception_value
+    debugg_ai_init, capture_events, exception_cls, exception_value
 ):
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction(name="hi") as transaction:
@@ -339,9 +339,9 @@ def test_non_error_exceptions(
 
 @pytest.mark.parametrize("exception_value", [None, 0, False])
 def test_good_sysexit_doesnt_fail_transaction(
-    sentry_init, capture_events, exception_value
+    debugg_ai_init, capture_events, exception_value
 ):
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction(name="hi") as transaction:

@@ -45,7 +45,7 @@ def _patch_graphql():
     old_graphql_async = graphene_schema.graphql
 
     @ensure_integration_enabled(GrapheneIntegration, old_graphql_sync)
-    def _sentry_patched_graphql_sync(schema, source, *args, **kwargs):
+    def _debugg_ai_patched_graphql_sync(schema, source, *args, **kwargs):
         # type: (GraphQLSchema, Union[str, Source], Any, Any) -> ExecutionResult
         scope = debugg_ai_sdk.get_isolation_scope()
         scope.add_event_processor(_event_processor)
@@ -68,7 +68,7 @@ def _patch_graphql():
 
         return result
 
-    async def _sentry_patched_graphql_async(schema, source, *args, **kwargs):
+    async def _debugg_ai_patched_graphql_async(schema, source, *args, **kwargs):
         # type: (GraphQLSchema, Union[str, Source], Any, Any) -> ExecutionResult
         integration = debugg_ai_sdk.get_client().get_integration(GrapheneIntegration)
         if integration is None:
@@ -95,8 +95,8 @@ def _patch_graphql():
 
         return result
 
-    graphene_schema.graphql_sync = _sentry_patched_graphql_sync
-    graphene_schema.graphql = _sentry_patched_graphql_async
+    graphene_schema.graphql_sync = _debugg_ai_patched_graphql_sync
+    graphene_schema.graphql = _debugg_ai_patched_graphql_async
 
 
 def _event_processor(event, hint):

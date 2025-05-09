@@ -74,9 +74,9 @@ async def async_iterator(values):
     ],
 )
 def test_nonstreaming_create_message(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[AnthropicIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -142,9 +142,9 @@ def test_nonstreaming_create_message(
     ],
 )
 async def test_nonstreaming_create_message_async(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[AnthropicIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -209,7 +209,7 @@ async def test_nonstreaming_create_message_async(
     ],
 )
 def test_streaming_create_message(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
     client = Anthropic(api_key="z")
     returned_stream = Stream(cast_to=None, response=None, client=client)
@@ -246,7 +246,7 @@ def test_streaming_create_message(
         ),
     ]
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[AnthropicIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -310,7 +310,7 @@ def test_streaming_create_message(
     ],
 )
 async def test_streaming_create_message_async(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
     client = AsyncAnthropic(api_key="z")
     returned_stream = AsyncStream(cast_to=None, response=None, client=client)
@@ -349,7 +349,7 @@ async def test_streaming_create_message_async(
         ]
     )
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[AnthropicIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -416,7 +416,7 @@ async def test_streaming_create_message_async(
     ],
 )
 def test_streaming_create_message_with_input_json_delta(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
     client = Anthropic(api_key="z")
     returned_stream = Stream(cast_to=None, response=None, client=client)
@@ -479,7 +479,7 @@ def test_streaming_create_message_with_input_json_delta(
         ),
     ]
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[AnthropicIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -546,7 +546,7 @@ def test_streaming_create_message_with_input_json_delta(
     ],
 )
 async def test_streaming_create_message_with_input_json_delta_async(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
     client = AsyncAnthropic(api_key="z")
     returned_stream = AsyncStream(cast_to=None, response=None, client=client)
@@ -615,7 +615,7 @@ async def test_streaming_create_message_with_input_json_delta_async(
         ]
     )
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[AnthropicIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -668,8 +668,8 @@ async def test_streaming_create_message_with_input_json_delta_async(
     assert span["data"]["ai.streaming"] is True
 
 
-def test_exception_message_create(sentry_init, capture_events):
-    sentry_init(integrations=[AnthropicIntegration()], traces_sample_rate=1.0)
+def test_exception_message_create(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[AnthropicIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     client = Anthropic(api_key="z")
@@ -688,8 +688,8 @@ def test_exception_message_create(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_exception_message_create_async(sentry_init, capture_events):
-    sentry_init(integrations=[AnthropicIntegration()], traces_sample_rate=1.0)
+async def test_exception_message_create_async(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[AnthropicIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     client = AsyncAnthropic(api_key="z")
@@ -707,8 +707,8 @@ async def test_exception_message_create_async(sentry_init, capture_events):
     assert event["level"] == "error"
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[AnthropicIntegration()],
         traces_sample_rate=1.0,
     )
@@ -734,8 +734,8 @@ def test_span_origin(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_span_origin_async(sentry_init, capture_events):
-    sentry_init(
+async def test_span_origin_async(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[AnthropicIntegration()],
         traces_sample_rate=1.0,
     )
@@ -788,8 +788,8 @@ def test_collect_ai_data_with_input_json_delta():
     ANTHROPIC_VERSION < (0, 27),
     reason="Versions <0.27.0 do not include InputJSONDelta.",
 )
-def test_add_ai_data_to_span_with_input_json_delta(sentry_init):
-    sentry_init(
+def test_add_ai_data_to_span_with_input_json_delta(debugg_ai_init):
+    debugg_ai_init(
         integrations=[AnthropicIntegration(include_prompts=True)],
         traces_sample_rate=1.0,
         send_default_pii=True,

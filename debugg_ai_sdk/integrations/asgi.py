@@ -1,7 +1,7 @@
 """
 An ASGI middleware.
 
-Based on Tom Christie's `sentry-asgi <https://github.com/encode/sentry-asgi>`.
+Based on Tom Christie's `debugg-ai-asgi <https://github.com/encode/debugg-ai-asgi>`.
 """
 
 import asyncio
@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from debugg_ai_sdk._types import Event, Hint
 
 
-_asgi_middleware_applied = ContextVar("sentry_asgi_middleware_applied")
+_asgi_middleware_applied = ContextVar("debugg_ai_asgi_middleware_applied")
 
 _DEFAULT_TRANSACTION_NAME = "generic ASGI request"
 
@@ -84,7 +84,7 @@ def _looks_like_asgi3(app):
         return asyncio.iscoroutinefunction(call)
 
 
-class SentryAsgiMiddleware:
+class DebuggAIAsgiMiddleware:
     __slots__ = (
         "app",
         "__call__",
@@ -105,7 +105,7 @@ class SentryAsgiMiddleware:
     ):
         # type: (...) -> None
         """
-        Instrument an ASGI application with Sentry. Provides HTTP/websocket
+        Instrument an ASGI application with DebuggAI. Provides HTTP/websocket
         data to sent events and basic handling for exceptions bubbling up
         through the middleware.
 
@@ -115,7 +115,7 @@ class SentryAsgiMiddleware:
             # We better have contextvars or we're going to leak state between
             # requests.
             raise RuntimeError(
-                "The ASGI middleware for Sentry requires Python 3.7+ "
+                "The ASGI middleware for DebuggAI requires Python 3.7+ "
                 "or the aiocontextvars package." + CONTEXTVARS_ERROR_MESSAGE
             )
         if transaction_style not in TRANSACTION_STYLE_VALUES:
@@ -129,9 +129,9 @@ class SentryAsgiMiddleware:
         )
         if asgi_middleware_while_using_starlette_or_fastapi:
             logger.warning(
-                "The Sentry Python SDK can now automatically support ASGI frameworks like Starlette and FastAPI. "
-                "Please remove 'SentryAsgiMiddleware' from your project. "
-                "See https://docs.sentry.io/platforms/python/guides/asgi/ for more information."
+                "The DebuggAI Python SDK can now automatically support ASGI frameworks like Starlette and FastAPI. "
+                "Please remove 'DebuggAIAsgiMiddleware' from your project. "
+                "See https://docs.debugg.ai/platforms/python/guides/asgi/ for more information."
             )
 
         self.transaction_style = transaction_style
@@ -174,12 +174,12 @@ class SentryAsgiMiddleware:
 
         _asgi_middleware_applied.set(True)
         try:
-            with debugg_ai_sdk.isolation_scope() as sentry_scope:
-                with track_session(sentry_scope, session_mode="request"):
-                    sentry_scope.clear_breadcrumbs()
-                    sentry_scope._name = "asgi"
+            with debugg_ai_sdk.isolation_scope() as debugg_ai_scope:
+                with track_session(debugg_ai_scope, session_mode="request"):
+                    debugg_ai_scope.clear_breadcrumbs()
+                    debugg_ai_scope._name = "asgi"
                     processor = partial(self.event_processor, asgi_scope=scope)
-                    sentry_scope.add_event_processor(processor)
+                    debugg_ai_scope.add_event_processor(processor)
 
                     ty = scope["type"]
                     (
@@ -235,7 +235,7 @@ class SentryAsgiMiddleware:
                         logger.debug("[ASGI] Started transaction: %s", transaction)
                         try:
 
-                            async def _sentry_wrapped_send(event):
+                            async def _debugg_ai_wrapped_send(event):
                                 # type: (Dict[str, Any]) -> Any
                                 if transaction is not None:
                                     is_http_response = (
@@ -249,11 +249,11 @@ class SentryAsgiMiddleware:
 
                             if asgi_version == 2:
                                 return await self.app(scope)(
-                                    receive, _sentry_wrapped_send
+                                    receive, _debugg_ai_wrapped_send
                                 )
                             else:
                                 return await self.app(
-                                    scope, receive, _sentry_wrapped_send
+                                    scope, receive, _debugg_ai_wrapped_send
                                 )
                         except Exception as exc:
                             _capture_exception(exc, mechanism_type=self.mechanism_type)
@@ -302,7 +302,7 @@ class SentryAsgiMiddleware:
     # for that.
 
     def _get_transaction_name_and_source(self, transaction_style, asgi_scope):
-        # type: (SentryAsgiMiddleware, str, Any) -> Tuple[str, str]
+        # type: (DebuggAIAsgiMiddleware, str, Any) -> Tuple[str, str]
         name = None
         source = SOURCE_FOR_STYLE[transaction_style]
         ty = asgi_scope.get("type")
@@ -319,7 +319,7 @@ class SentryAsgiMiddleware:
                 source = TransactionSource.URL
 
         elif transaction_style == "url":
-            # FastAPI includes the route object in the scope to let Sentry extract the
+            # FastAPI includes the route object in the scope to let DebuggAI extract the
             # path from it for the transaction name
             route = asgi_scope.get("route")
             if route:

@@ -16,8 +16,8 @@ MOCK_CONNECTION_POOL.connection_kwargs = {
 }
 
 
-def test_basic(sentry_init, capture_events):
-    sentry_init(integrations=[RedisIntegration()])
+def test_basic(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[RedisIntegration()])
     events = capture_events()
 
     connection = FakeStrictRedis()
@@ -50,9 +50,9 @@ def test_basic(sentry_init, capture_events):
     ],
 )
 def test_redis_pipeline(
-    sentry_init, capture_events, is_transaction, send_default_pii, expected_first_ten
+    debugg_ai_init, capture_events, is_transaction, send_default_pii, expected_first_ten
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -82,13 +82,13 @@ def test_redis_pipeline(
     }
 
 
-def test_sensitive_data(sentry_init, capture_events):
+def test_sensitive_data(debugg_ai_init, capture_events):
     # fakeredis does not support the AUTH command, so we need to mock it
     with mock.patch(
         "debugg_ai_sdk.integrations.redis.utils._COMMANDS_INCLUDING_SENSITIVE_DATA",
         ["get"],
     ):
-        sentry_init(
+        debugg_ai_init(
             integrations=[RedisIntegration()],
             traces_sample_rate=1.0,
             send_default_pii=True,
@@ -107,8 +107,8 @@ def test_sensitive_data(sentry_init, capture_events):
         assert spans[0]["description"] == "GET [Filtered]"
 
 
-def test_pii_data_redacted(sentry_init, capture_events):
-    sentry_init(
+def test_pii_data_redacted(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
     )
@@ -130,8 +130,8 @@ def test_pii_data_redacted(sentry_init, capture_events):
     assert spans[3]["description"] == "DEL 'somekey1' [Filtered]"
 
 
-def test_pii_data_sent(sentry_init, capture_events):
-    sentry_init(
+def test_pii_data_sent(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=True,
@@ -154,8 +154,8 @@ def test_pii_data_sent(sentry_init, capture_events):
     assert spans[3]["description"] == "DEL 'somekey1' 'somekey2'"
 
 
-def test_data_truncation(sentry_init, capture_events):
-    sentry_init(
+def test_data_truncation(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=True,
@@ -178,8 +178,8 @@ def test_data_truncation(sentry_init, capture_events):
     assert spans[1]["description"] == "SET 'somekey2' '%s'" % (short_string,)
 
 
-def test_data_truncation_custom(sentry_init, capture_events):
-    sentry_init(
+def test_data_truncation_custom(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[RedisIntegration(max_data_size=30)],
         traces_sample_rate=1.0,
         send_default_pii=True,
@@ -202,8 +202,8 @@ def test_data_truncation_custom(sentry_init, capture_events):
     assert spans[1]["description"] == "SET 'somekey2' '%s'" % (short_string,)
 
 
-def test_breadcrumbs(sentry_init, capture_events):
-    sentry_init(
+def test_breadcrumbs(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[RedisIntegration(max_data_size=30)],
         send_default_pii=True,
     )
@@ -247,8 +247,8 @@ def test_breadcrumbs(sentry_init, capture_events):
     }
 
 
-def test_db_connection_attributes_client(sentry_init, capture_events):
-    sentry_init(
+def test_db_connection_attributes_client(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[RedisIntegration()],
     )
@@ -269,8 +269,8 @@ def test_db_connection_attributes_client(sentry_init, capture_events):
     assert span["data"][SPANDATA.SERVER_PORT] == 63791
 
 
-def test_db_connection_attributes_pipeline(sentry_init, capture_events):
-    sentry_init(
+def test_db_connection_attributes_pipeline(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[RedisIntegration()],
     )
@@ -295,8 +295,8 @@ def test_db_connection_attributes_pipeline(sentry_init, capture_events):
     assert span["data"][SPANDATA.SERVER_PORT] == 63791
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
     )

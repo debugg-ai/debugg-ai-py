@@ -18,7 +18,7 @@ class SparkIntegration(Integration):
     @staticmethod
     def setup_once():
         # type: () -> None
-        _setup_sentry_tracing()
+        _setup_debugg_ai_tracing()
 
 
 def _set_app_properties():
@@ -32,16 +32,16 @@ def _set_app_properties():
     spark_context = SparkContext._active_spark_context
     if spark_context:
         spark_context.setLocalProperty(
-            "sentry_app_name",
+            "debugg_ai_app_name",
             spark_context.appName,
         )
         spark_context.setLocalProperty(
-            "sentry_application_id",
+            "debugg_ai_application_id",
             spark_context.applicationId,
         )
 
 
-def _start_sentry_listener(sc):
+def _start_debugg_ai_listener(sc):
     # type: (SparkContext) -> None
     """
     Start java gateway server to add custom `SparkListener`
@@ -50,7 +50,7 @@ def _start_sentry_listener(sc):
 
     gw = sc._gateway
     ensure_callback_server_started(gw)
-    listener = SentryListener()
+    listener = DebuggAIListener()
     sc._jsc.sc().addSparkListener(listener)
 
 
@@ -93,7 +93,7 @@ def _add_event_processor(sc):
 def _activate_integration(sc):
     # type: (SparkContext) -> None
 
-    _start_sentry_listener(sc)
+    _start_debugg_ai_listener(sc)
     _set_app_properties()
     _add_event_processor(sc)
 
@@ -105,16 +105,16 @@ def _patch_spark_context_init():
     spark_context_init = SparkContext._do_init
 
     @ensure_integration_enabled(SparkIntegration, spark_context_init)
-    def _sentry_patched_spark_context_init(self, *args, **kwargs):
+    def _debugg_ai_patched_spark_context_init(self, *args, **kwargs):
         # type: (SparkContext, *Any, **Any) -> Optional[Any]
         rv = spark_context_init(self, *args, **kwargs)
         _activate_integration(self)
         return rv
 
-    SparkContext._do_init = _sentry_patched_spark_context_init
+    SparkContext._do_init = _debugg_ai_patched_spark_context_init
 
 
-def _setup_sentry_tracing():
+def _setup_debugg_ai_tracing():
     # type: () -> None
     from pyspark import SparkContext
 
@@ -227,7 +227,7 @@ class SparkListener:
         implements = ["org.apache.spark.scheduler.SparkListenerInterface"]
 
 
-class SentryListener(SparkListener):
+class DebuggAIListener(SparkListener):
     def _add_breadcrumb(
         self,
         level,  # type: str

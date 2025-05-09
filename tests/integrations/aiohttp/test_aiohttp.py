@@ -36,8 +36,8 @@ if pytest_asyncio is None:
 
 
 @pytest.mark.asyncio
-async def test_basic(sentry_init, aiohttp_client, capture_events):
-    sentry_init(integrations=[AioHttpIntegration()])
+async def test_basic(debugg_ai_init, aiohttp_client, capture_events):
+    debugg_ai_init(integrations=[AioHttpIntegration()])
 
     async def hello(request):
         1 / 0
@@ -74,15 +74,15 @@ async def test_basic(sentry_init, aiohttp_client, capture_events):
         "Host": host,
         "User-Agent": request["headers"]["User-Agent"],
         "baggage": mock.ANY,
-        "sentry-trace": mock.ANY,
+        "debugg-ai-trace": mock.ANY,
     }
 
 
 @pytest.mark.asyncio
-async def test_post_body_not_read(sentry_init, aiohttp_client, capture_events):
+async def test_post_body_not_read(debugg_ai_init, aiohttp_client, capture_events):
     from debugg_ai_sdk.integrations.aiohttp import BODY_NOT_READ_MESSAGE
 
-    sentry_init(integrations=[AioHttpIntegration()])
+    debugg_ai_init(integrations=[AioHttpIntegration()])
 
     body = {"some": "value"}
 
@@ -109,8 +109,8 @@ async def test_post_body_not_read(sentry_init, aiohttp_client, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_post_body_read(sentry_init, aiohttp_client, capture_events):
-    sentry_init(integrations=[AioHttpIntegration()])
+async def test_post_body_read(debugg_ai_init, aiohttp_client, capture_events):
+    debugg_ai_init(integrations=[AioHttpIntegration()])
 
     body = {"some": "value"}
 
@@ -138,8 +138,8 @@ async def test_post_body_read(sentry_init, aiohttp_client, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_403_not_captured(sentry_init, aiohttp_client, capture_events):
-    sentry_init(integrations=[AioHttpIntegration()])
+async def test_403_not_captured(debugg_ai_init, aiohttp_client, capture_events):
+    debugg_ai_init(integrations=[AioHttpIntegration()])
 
     async def hello(request):
         raise web.HTTPForbidden()
@@ -158,9 +158,9 @@ async def test_403_not_captured(sentry_init, aiohttp_client, capture_events):
 
 @pytest.mark.asyncio
 async def test_cancelled_error_not_captured(
-    sentry_init, aiohttp_client, capture_events
+    debugg_ai_init, aiohttp_client, capture_events
 ):
-    sentry_init(integrations=[AioHttpIntegration()])
+    debugg_ai_init(integrations=[AioHttpIntegration()])
 
     async def hello(request):
         raise asyncio.CancelledError()
@@ -180,9 +180,9 @@ async def test_cancelled_error_not_captured(
 
 
 @pytest.mark.asyncio
-async def test_half_initialized(sentry_init, aiohttp_client, capture_events):
-    sentry_init(integrations=[AioHttpIntegration()])
-    sentry_init()
+async def test_half_initialized(debugg_ai_init, aiohttp_client, capture_events):
+    debugg_ai_init(integrations=[AioHttpIntegration()])
+    debugg_ai_init()
 
     async def hello(request):
         return web.Response(text="hello")
@@ -200,8 +200,8 @@ async def test_half_initialized(sentry_init, aiohttp_client, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_tracing(sentry_init, aiohttp_client, capture_events):
-    sentry_init(integrations=[AioHttpIntegration()], traces_sample_rate=1.0)
+async def test_tracing(debugg_ai_init, aiohttp_client, capture_events):
+    debugg_ai_init(integrations=[AioHttpIntegration()], traces_sample_rate=1.0)
 
     async def hello(request):
         return web.Response(text="hello")
@@ -243,7 +243,7 @@ async def test_tracing(sentry_init, aiohttp_client, capture_events):
     ],
 )
 async def test_transaction_style(
-    sentry_init,
+    debugg_ai_init,
     aiohttp_client,
     capture_events,
     url,
@@ -251,7 +251,7 @@ async def test_transaction_style(
     expected_transaction,
     expected_source,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[AioHttpIntegration(transaction_style=transaction_style)],
         traces_sample_rate=1.0,
     )
@@ -277,8 +277,8 @@ async def test_transaction_style(
 
 @pytest.mark.tests_internal_exceptions
 @pytest.mark.asyncio
-async def test_tracing_unparseable_url(sentry_init, aiohttp_client, capture_events):
-    sentry_init(integrations=[AioHttpIntegration()], traces_sample_rate=1.0)
+async def test_tracing_unparseable_url(debugg_ai_init, aiohttp_client, capture_events):
+    debugg_ai_init(integrations=[AioHttpIntegration()], traces_sample_rate=1.0)
 
     async def hello(request):
         return web.Response(text="hello")
@@ -307,13 +307,13 @@ async def test_tracing_unparseable_url(sentry_init, aiohttp_client, capture_even
 
 @pytest.mark.asyncio
 async def test_traces_sampler_gets_request_object_in_sampling_context(
-    sentry_init,
+    debugg_ai_init,
     aiohttp_client,
     DictionaryContaining,  # noqa: N803
     ObjectDescribedBy,  # noqa: N803
 ):
     traces_sampler = mock.Mock()
-    sentry_init(
+    debugg_ai_init(
         integrations=[AioHttpIntegration()],
         traces_sampler=traces_sampler,
     )
@@ -340,9 +340,9 @@ async def test_traces_sampler_gets_request_object_in_sampling_context(
 
 @pytest.mark.asyncio
 async def test_has_trace_if_performance_enabled(
-    sentry_init, aiohttp_client, capture_events
+    debugg_ai_init, aiohttp_client, capture_events
 ):
-    sentry_init(integrations=[AioHttpIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[AioHttpIntegration()], traces_sample_rate=1.0)
 
     async def hello(request):
         capture_message("It's a good day to try dividing by 0")
@@ -377,9 +377,9 @@ async def test_has_trace_if_performance_enabled(
 
 @pytest.mark.asyncio
 async def test_has_trace_if_performance_disabled(
-    sentry_init, aiohttp_client, capture_events
+    debugg_ai_init, aiohttp_client, capture_events
 ):
-    sentry_init(integrations=[AioHttpIntegration()])
+    debugg_ai_init(integrations=[AioHttpIntegration()])
 
     async def hello(request):
         capture_message("It's a good day to try dividing by 0")
@@ -410,9 +410,9 @@ async def test_has_trace_if_performance_disabled(
 
 @pytest.mark.asyncio
 async def test_trace_from_headers_if_performance_enabled(
-    sentry_init, aiohttp_client, capture_events
+    debugg_ai_init, aiohttp_client, capture_events
 ):
-    sentry_init(integrations=[AioHttpIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[AioHttpIntegration()], traces_sample_rate=1.0)
 
     async def hello(request):
         capture_message("It's a good day to try dividing by 0")
@@ -423,15 +423,15 @@ async def test_trace_from_headers_if_performance_enabled(
 
     events = capture_events()
 
-    # The aiohttp_client is instrumented so will generate the sentry-trace header and add request.
-    # Get the sentry-trace header from the request so we can later compare with transaction events.
+    # The aiohttp_client is instrumented so will generate the debugg-ai-trace header and add request.
+    # Get the debugg-ai-trace header from the request so we can later compare with transaction events.
     client = await aiohttp_client(app)
     with start_transaction():
         # Headers are only added to the span if there is an active transaction
         resp = await client.get("/")
 
-    sentry_trace_header = resp.request_info.headers.get("sentry-trace")
-    trace_id = sentry_trace_header.split("-")[0]
+    debugg_ai_trace_header = resp.request_info.headers.get("debugg-ai-trace")
+    trace_id = debugg_ai_trace_header.split("-")[0]
 
     assert resp.status == 500
 
@@ -454,9 +454,9 @@ async def test_trace_from_headers_if_performance_enabled(
 
 @pytest.mark.asyncio
 async def test_trace_from_headers_if_performance_disabled(
-    sentry_init, aiohttp_client, capture_events
+    debugg_ai_init, aiohttp_client, capture_events
 ):
-    sentry_init(integrations=[AioHttpIntegration()])
+    debugg_ai_init(integrations=[AioHttpIntegration()])
 
     async def hello(request):
         capture_message("It's a good day to try dividing by 0")
@@ -467,12 +467,12 @@ async def test_trace_from_headers_if_performance_disabled(
 
     events = capture_events()
 
-    # The aiohttp_client is instrumented so will generate the sentry-trace header and add request.
-    # Get the sentry-trace header from the request so we can later compare with transaction events.
+    # The aiohttp_client is instrumented so will generate the debugg-ai-trace header and add request.
+    # Get the debugg-ai-trace header from the request so we can later compare with transaction events.
     client = await aiohttp_client(app)
     resp = await client.get("/")
-    sentry_trace_header = resp.request_info.headers.get("sentry-trace")
-    trace_id = sentry_trace_header.split("-")[0]
+    debugg_ai_trace_header = resp.request_info.headers.get("debugg-ai-trace")
+    trace_id = debugg_ai_trace_header.split("-")[0]
 
     assert resp.status == 500
 
@@ -490,13 +490,13 @@ async def test_trace_from_headers_if_performance_disabled(
 
 @pytest.mark.asyncio
 async def test_crumb_capture(
-    sentry_init, aiohttp_raw_server, aiohttp_client, event_loop, capture_events
+    debugg_ai_init, aiohttp_raw_server, aiohttp_client, event_loop, capture_events
 ):
     def before_breadcrumb(crumb, hint):
         crumb["data"]["extra"] = "foo"
         return crumb
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[AioHttpIntegration()], before_breadcrumb=before_breadcrumb
     )
 
@@ -543,7 +543,7 @@ async def test_crumb_capture(
 )
 @pytest.mark.asyncio
 async def test_crumb_capture_client_error(
-    sentry_init,
+    debugg_ai_init,
     aiohttp_raw_server,
     aiohttp_client,
     event_loop,
@@ -551,7 +551,7 @@ async def test_crumb_capture_client_error(
     status_code,
     level,
 ):
-    sentry_init(integrations=[AioHttpIntegration()])
+    debugg_ai_init(integrations=[AioHttpIntegration()])
 
     async def handler(request):
         return web.Response(status=status_code)
@@ -587,8 +587,8 @@ async def test_crumb_capture_client_error(
 
 
 @pytest.mark.asyncio
-async def test_outgoing_trace_headers(sentry_init, aiohttp_raw_server, aiohttp_client):
-    sentry_init(
+async def test_outgoing_trace_headers(debugg_ai_init, aiohttp_raw_server, aiohttp_client):
+    debugg_ai_init(
         integrations=[AioHttpIntegration()],
         traces_sample_rate=1.0,
     )
@@ -609,7 +609,7 @@ async def test_outgoing_trace_headers(sentry_init, aiohttp_raw_server, aiohttp_c
         request_span = transaction._span_recorder.spans[-1]
 
         assert resp.request_info.headers[
-            "sentry-trace"
+            "debugg-ai-trace"
         ] == "{trace_id}-{parent_span_id}-{sampled}".format(
             trace_id=transaction.trace_id,
             parent_span_id=request_span.span_id,
@@ -619,9 +619,9 @@ async def test_outgoing_trace_headers(sentry_init, aiohttp_raw_server, aiohttp_c
 
 @pytest.mark.asyncio
 async def test_outgoing_trace_headers_append_to_baggage(
-    sentry_init, aiohttp_raw_server, aiohttp_client
+    debugg_ai_init, aiohttp_raw_server, aiohttp_client
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[AioHttpIntegration()],
         traces_sample_rate=1.0,
         release="d08ebdb9309e1b004c6f52202de58a09c2268e42",
@@ -643,17 +643,17 @@ async def test_outgoing_trace_headers_append_to_baggage(
 
             assert (
                 resp.request_info.headers["baggage"]
-                == "custom=value,sentry-trace_id=0123456789012345678901234567890,sentry-sample_rand=0.500000,sentry-environment=production,sentry-release=d08ebdb9309e1b004c6f52202de58a09c2268e42,sentry-transaction=/interactions/other-dogs/new-dog,sentry-sample_rate=1.0,sentry-sampled=true"
+                == "custom=value,debugg-ai-trace_id=0123456789012345678901234567890,debugg-ai-sample_rand=0.500000,debugg-ai-environment=production,debugg-ai-release=d08ebdb9309e1b004c6f52202de58a09c2268e42,debugg-ai-transaction=/interactions/other-dogs/new-dog,debugg-ai-sample_rate=1.0,debugg-ai-sampled=true"
             )
 
 
 @pytest.mark.asyncio
 async def test_span_origin(
-    sentry_init,
+    debugg_ai_init,
     aiohttp_client,
     capture_events,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[AioHttpIntegration()],
         traces_sample_rate=1.0,
     )
@@ -709,14 +709,14 @@ async def test_span_origin(
 )
 @pytest.mark.asyncio
 async def test_failed_request_status_codes(
-    sentry_init,
+    debugg_ai_init,
     aiohttp_client,
     capture_events,
     integration_kwargs,
     exception_to_raise,
     should_capture,
 ):
-    sentry_init(integrations=[AioHttpIntegration(**integration_kwargs)])
+    debugg_ai_init(integrations=[AioHttpIntegration(**integration_kwargs)])
     events = capture_events()
 
     async def handle(_):
@@ -745,12 +745,12 @@ async def test_failed_request_status_codes(
 
 @pytest.mark.asyncio
 async def test_failed_request_status_codes_with_returned_status(
-    sentry_init, aiohttp_client, capture_events
+    debugg_ai_init, aiohttp_client, capture_events
 ):
     """
-    Returning a web.Response with a failed_request_status_code should not be reported to Sentry.
+    Returning a web.Response with a failed_request_status_code should not be reported to DebuggAI.
     """
-    sentry_init(integrations=[AioHttpIntegration(failed_request_status_codes={500})])
+    debugg_ai_init(integrations=[AioHttpIntegration(failed_request_status_codes={500})])
     events = capture_events()
 
     async def handle(_):
@@ -768,13 +768,13 @@ async def test_failed_request_status_codes_with_returned_status(
 
 @pytest.mark.asyncio
 async def test_failed_request_status_codes_non_http_exception(
-    sentry_init, aiohttp_client, capture_events
+    debugg_ai_init, aiohttp_client, capture_events
 ):
     """
     If an exception, which is not an instance of HTTPException, is raised, it should be captured, even if
     failed_request_status_codes is empty.
     """
-    sentry_init(integrations=[AioHttpIntegration(failed_request_status_codes=set())])
+    debugg_ai_init(integrations=[AioHttpIntegration(failed_request_status_codes=set())])
     events = capture_events()
 
     async def handle(_):

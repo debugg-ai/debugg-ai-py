@@ -9,8 +9,8 @@ from fakeredis.aioredis import FakeRedis
 
 
 @pytest.mark.asyncio
-async def test_async_basic(sentry_init, capture_events):
-    sentry_init(integrations=[RedisIntegration()])
+async def test_async_basic(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[RedisIntegration()])
     events = capture_events()
 
     connection = FakeRedis()
@@ -44,9 +44,9 @@ async def test_async_basic(sentry_init, capture_events):
 )
 @pytest.mark.asyncio
 async def test_async_redis_pipeline(
-    sentry_init, capture_events, is_transaction, send_default_pii, expected_first_ten
+    debugg_ai_init, capture_events, is_transaction, send_default_pii, expected_first_ten
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -86,8 +86,8 @@ async def test_async_redis_pipeline(
 
 
 @pytest.mark.asyncio
-async def test_async_span_origin(sentry_init, capture_events):
-    sentry_init(
+async def test_async_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
     )

@@ -13,7 +13,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import debugg_ai_sdk
 from debugg_ai_sdk import capture_message
 from debugg_ai_sdk.feature_flags import add_feature_flag
-from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.integrations.asgi import DebuggAIAsgiMiddleware
 from debugg_ai_sdk.integrations.fastapi import FastApiIntegration
 from debugg_ai_sdk.integrations.starlette import StarletteIntegration
 from debugg_ai_sdk.utils import parse_version
@@ -73,11 +73,11 @@ def fastapi_app_factory():
 
 
 @pytest.mark.asyncio
-async def test_response(sentry_init, capture_events):
+async def test_response(debugg_ai_init, capture_events):
     # FastAPI is heavily based on Starlette so we also need
     # to enable StarletteIntegration.
     # In the future this will be auto enabled.
-    sentry_init(
+    debugg_ai_init(
         integrations=[StarletteIntegration(), FastApiIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=True,
@@ -129,14 +129,14 @@ async def test_response(sentry_init, capture_events):
     ],
 )
 def test_transaction_style(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     url,
     transaction_style,
     expected_transaction,
     expected_source,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StarletteIntegration(transaction_style=transaction_style),
             FastApiIntegration(transaction_style=transaction_style),
@@ -163,15 +163,15 @@ def test_transaction_style(
 
 
 def test_legacy_setup(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
     # Check that behaviour does not change
     # if the user just adds the new Integrations
-    # and forgets to remove SentryAsgiMiddleware
-    sentry_init()
+    # and forgets to remove DebuggAIAsgiMiddleware
+    debugg_ai_init()
     app = fastapi_app_factory()
-    asgi_app = SentryAsgiMiddleware(app)
+    asgi_app = DebuggAIAsgiMiddleware(app)
 
     events = capture_events()
 
@@ -184,13 +184,13 @@ def test_legacy_setup(
 
 @pytest.mark.parametrize("endpoint", ["/sync/thread_ids", "/async/thread_ids"])
 @mock.patch("debugg_ai_sdk.profiler.transaction_profiler.PROFILE_MINIMUM_SAMPLES", 0)
-def test_active_thread_id(sentry_init, capture_envelopes, teardown_profiling, endpoint):
-    sentry_init(
+def test_active_thread_id(debugg_ai_init, capture_envelopes, teardown_profiling, endpoint):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         profiles_sample_rate=1.0,
     )
     app = fastapi_app_factory()
-    asgi_app = SentryAsgiMiddleware(app)
+    asgi_app = DebuggAIAsgiMiddleware(app)
 
     envelopes = capture_envelopes()
 
@@ -221,8 +221,8 @@ def test_active_thread_id(sentry_init, capture_envelopes, teardown_profiling, en
 
 
 @pytest.mark.asyncio
-async def test_original_request_not_scrubbed(sentry_init, capture_events):
-    sentry_init(
+async def test_original_request_not_scrubbed(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[StarletteIntegration(), FastApiIntegration()],
         traces_sample_rate=1.0,
     )
@@ -249,11 +249,11 @@ async def test_original_request_not_scrubbed(sentry_init, capture_events):
     assert event["request"]["headers"]["authorization"] == "[Filtered]"
 
 
-def test_response_status_code_ok_in_transaction_context(sentry_init, capture_envelopes):
+def test_response_status_code_ok_in_transaction_context(debugg_ai_init, capture_envelopes):
     """
     Tests that the response status code is added to the transaction "response" context.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[StarletteIntegration(), FastApiIntegration()],
         traces_sample_rate=1.0,
         release="demo-release",
@@ -278,13 +278,13 @@ def test_response_status_code_ok_in_transaction_context(sentry_init, capture_env
 
 
 def test_response_status_code_error_in_transaction_context(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
 ):
     """
     Tests that the response status code is added to the transaction "response" context.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[StarletteIntegration(), FastApiIntegration()],
         traces_sample_rate=1.0,
         release="demo-release",
@@ -314,13 +314,13 @@ def test_response_status_code_error_in_transaction_context(
 
 
 def test_response_status_code_not_found_in_transaction_context(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
 ):
     """
     Tests that the response status code is added to the transaction "response" context.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[StarletteIntegration(), FastApiIntegration()],
         traces_sample_rate=1.0,
         release="demo-release",
@@ -362,7 +362,7 @@ def test_response_status_code_not_found_in_transaction_context(
     ],
 )
 def test_transaction_name(
-    sentry_init,
+    debugg_ai_init,
     request_url,
     transaction_style,
     expected_transaction_name,
@@ -372,7 +372,7 @@ def test_transaction_name(
     """
     Tests that the transaction name is something meaningful.
     """
-    sentry_init(
+    debugg_ai_init(
         auto_enabling_integrations=False,  # Make sure that httpx integration is not added, because it adds tracing information to the starlette test clients request.
         integrations=[
             StarletteIntegration(transaction_style=transaction_style),
@@ -397,11 +397,11 @@ def test_transaction_name(
     )
 
 
-def test_route_endpoint_equal_dependant_call(sentry_init):
+def test_route_endpoint_equal_dependant_call(debugg_ai_init):
     """
     Tests that the route endpoint name is equal to the wrapped dependant call name.
     """
-    sentry_init(
+    debugg_ai_init(
         auto_enabling_integrations=False,  # Make sure that httpx integration is not added, because it adds tracing information to the starlette test clients request.
         integrations=[
             StarletteIntegration(),
@@ -436,7 +436,7 @@ def test_route_endpoint_equal_dependant_call(sentry_init):
     ],
 )
 def test_transaction_name_in_traces_sampler(
-    sentry_init,
+    debugg_ai_init,
     request_url,
     transaction_style,
     expected_transaction_name,
@@ -456,7 +456,7 @@ def test_transaction_name_in_traces_sampler(
             == expected_transaction_source
         )
 
-    sentry_init(
+    debugg_ai_init(
         auto_enabling_integrations=False,  # Make sure that httpx integration is not added, because it adds tracing information to the starlette test clients request.
         integrations=[StarletteIntegration(transaction_style=transaction_style)],
         traces_sampler=dummy_traces_sampler,
@@ -487,7 +487,7 @@ def test_transaction_name_in_traces_sampler(
     ],
 )
 def test_transaction_name_in_middleware(
-    sentry_init,
+    debugg_ai_init,
     request_url,
     transaction_style,
     expected_transaction_name,
@@ -497,7 +497,7 @@ def test_transaction_name_in_middleware(
     """
     Tests that the transaction name is something meaningful.
     """
-    sentry_init(
+    debugg_ai_init(
         auto_enabling_integrations=False,  # Make sure that httpx integration is not added, because it adds tracing information to the starlette test clients request.
         integrations=[
             StarletteIntegration(transaction_style=transaction_style),
@@ -532,7 +532,7 @@ def test_transaction_name_in_middleware(
 
 @test_starlette.parametrize_test_configurable_status_codes_deprecated
 def test_configurable_status_codes_deprecated(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     failed_request_status_codes,
     status_code,
@@ -548,7 +548,7 @@ def test_configurable_status_codes_deprecated(
             failed_request_status_codes=failed_request_status_codes
         )
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             starlette_integration,
             fast_api_integration,
@@ -576,14 +576,14 @@ def test_configurable_status_codes_deprecated(
     FASTAPI_VERSION < (0, 80),
     reason="Requires FastAPI >= 0.80, because earlier versions do not support HTTP 'HEAD' requests",
 )
-def test_transaction_http_method_default(sentry_init, capture_events):
+def test_transaction_http_method_default(debugg_ai_init, capture_events):
     """
     By default OPTIONS and HEAD requests do not create a transaction.
     """
     # FastAPI is heavily based on Starlette so we also need
     # to enable StarletteIntegration.
     # In the future this will be auto enabled.
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[
             StarletteIntegration(),
@@ -611,11 +611,11 @@ def test_transaction_http_method_default(sentry_init, capture_events):
     FASTAPI_VERSION < (0, 80),
     reason="Requires FastAPI >= 0.80, because earlier versions do not support HTTP 'HEAD' requests",
 )
-def test_transaction_http_method_custom(sentry_init, capture_events):
+def test_transaction_http_method_custom(debugg_ai_init, capture_events):
     # FastAPI is heavily based on Starlette so we also need
     # to enable StarletteIntegration.
     # In the future this will be auto enabled.
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[
             StarletteIntegration(
@@ -652,7 +652,7 @@ def test_transaction_http_method_custom(sentry_init, capture_events):
 
 @parametrize_test_configurable_status_codes
 def test_configurable_status_codes(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     failed_request_status_codes,
     status_code,
@@ -667,7 +667,7 @@ def test_configurable_status_codes(
         starlette_integration = StarletteIntegration(**integration_kwargs)
         fastapi_integration = FastApiIntegration(**integration_kwargs)
 
-    sentry_init(integrations=[starlette_integration, fastapi_integration])
+    debugg_ai_init(integrations=[starlette_integration, fastapi_integration])
 
     events = capture_events()
 
@@ -684,8 +684,8 @@ def test_configurable_status_codes(
 
 
 @pytest.mark.parametrize("transaction_style", ["endpoint", "url"])
-def test_app_host(sentry_init, capture_events, transaction_style):
-    sentry_init(
+def test_app_host(debugg_ai_init, capture_events, transaction_style):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[
             StarletteIntegration(transaction_style=transaction_style),
@@ -719,8 +719,8 @@ def test_app_host(sentry_init, capture_events, transaction_style):
 
 
 @pytest.mark.asyncio
-async def test_feature_flags(sentry_init, capture_events):
-    sentry_init(
+async def test_feature_flags(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarletteIntegration(), FastApiIntegration()],
     )

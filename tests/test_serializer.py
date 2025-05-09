@@ -95,7 +95,7 @@ def test_serialize_sets(extra_normalizer):
 
 def test_serialize_custom_mapping(extra_normalizer):
     class CustomReprDict(dict):
-        def __sentry_repr__(self):
+        def __debugg_ai_repr__(self):
             return "custom!"
 
     result = extra_normalizer(CustomReprDict(one=1, two=2))
@@ -104,9 +104,9 @@ def test_serialize_custom_mapping(extra_normalizer):
 
 def test_custom_mapping_doesnt_mess_with_mock(extra_normalizer):
     """
-    Adding the __sentry_repr__ magic method check in the serializer
+    Adding the __debugg_ai_repr__ magic method check in the serializer
     shouldn't mess with how mock works. This broke some stuff when we added
-    sentry_repr without the dunders.
+    debugg_ai_repr without the dunders.
     """
     mock = pytest.importorskip("unittest.mock")
     m = mock.Mock()

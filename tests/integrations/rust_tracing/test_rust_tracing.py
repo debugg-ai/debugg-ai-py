@@ -64,26 +64,26 @@ class FakeRustTracing:
         self.layer.on_record(str(span_id), """{"version": "memoized"}""", state)
 
 
-def test_on_new_span_on_close(sentry_init, capture_events):
+def test_on_new_span_on_close(debugg_ai_init, capture_events):
     rust_tracing = FakeRustTracing()
     integration = RustTracingIntegration(
         "test_on_new_span_on_close",
         initializer=rust_tracing.set_layer_impl,
         include_tracing_fields=True,
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     events = capture_events()
     with start_transaction():
         rust_tracing.new_span(RustTracingLevel.Info, 3)
 
-        sentry_first_rust_span = debugg_ai_sdk.get_current_span()
+        debugg_ai_first_rust_span = debugg_ai_sdk.get_current_span()
         _, rust_first_rust_span = rust_tracing.spans[3]
 
-        assert sentry_first_rust_span == rust_first_rust_span
+        assert debugg_ai_first_rust_span == rust_first_rust_span
 
         rust_tracing.close_span(3)
-        assert debugg_ai_sdk.get_current_span() != sentry_first_rust_span
+        assert debugg_ai_sdk.get_current_span() != debugg_ai_first_rust_span
 
     (event,) = events
     assert len(event["spans"]) == 1
@@ -105,43 +105,43 @@ def test_on_new_span_on_close(sentry_init, capture_events):
     assert data["version"] is None
 
 
-def test_nested_on_new_span_on_close(sentry_init, capture_events):
+def test_nested_on_new_span_on_close(debugg_ai_init, capture_events):
     rust_tracing = FakeRustTracing()
     integration = RustTracingIntegration(
         "test_nested_on_new_span_on_close",
         initializer=rust_tracing.set_layer_impl,
         include_tracing_fields=True,
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     events = capture_events()
     with start_transaction():
-        original_sentry_span = debugg_ai_sdk.get_current_span()
+        original_debugg_ai_span = debugg_ai_sdk.get_current_span()
 
         rust_tracing.new_span(RustTracingLevel.Info, 3, index_arg=10)
-        sentry_first_rust_span = debugg_ai_sdk.get_current_span()
+        debugg_ai_first_rust_span = debugg_ai_sdk.get_current_span()
         _, rust_first_rust_span = rust_tracing.spans[3]
 
         # Use a different `index_arg` value for the inner span to help
         # distinguish the two at the end of the test
         rust_tracing.new_span(RustTracingLevel.Info, 5, index_arg=9)
-        sentry_second_rust_span = debugg_ai_sdk.get_current_span()
+        debugg_ai_second_rust_span = debugg_ai_sdk.get_current_span()
         rust_parent_span, rust_second_rust_span = rust_tracing.spans[5]
 
-        assert rust_second_rust_span == sentry_second_rust_span
-        assert rust_parent_span == sentry_first_rust_span
+        assert rust_second_rust_span == debugg_ai_second_rust_span
+        assert rust_parent_span == debugg_ai_first_rust_span
         assert rust_parent_span == rust_first_rust_span
         assert rust_parent_span != rust_second_rust_span
 
         rust_tracing.close_span(5)
 
-        # Ensure the current sentry span was moved back to the parent
-        sentry_span_after_close = debugg_ai_sdk.get_current_span()
-        assert sentry_span_after_close == sentry_first_rust_span
+        # Ensure the current debugg-ai span was moved back to the parent
+        debugg_ai_span_after_close = debugg_ai_sdk.get_current_span()
+        assert debugg_ai_span_after_close == debugg_ai_first_rust_span
 
         rust_tracing.close_span(3)
 
-        assert debugg_ai_sdk.get_current_span() == original_sentry_span
+        assert debugg_ai_sdk.get_current_span() == original_debugg_ai_span
 
     (event,) = events
     assert len(event["spans"]) == 2
@@ -179,12 +179,12 @@ def test_nested_on_new_span_on_close(sentry_init, capture_events):
     assert second_span_data["version"] is None
 
 
-def test_on_new_span_without_transaction(sentry_init):
+def test_on_new_span_without_transaction(debugg_ai_init):
     rust_tracing = FakeRustTracing()
     integration = RustTracingIntegration(
         "test_on_new_span_without_transaction", rust_tracing.set_layer_impl
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     assert debugg_ai_sdk.get_current_span() is None
 
@@ -195,14 +195,14 @@ def test_on_new_span_without_transaction(sentry_init):
     assert current_span.containing_transaction is None
 
 
-def test_on_event_exception(sentry_init, capture_events):
+def test_on_event_exception(debugg_ai_init, capture_events):
     rust_tracing = FakeRustTracing()
     integration = RustTracingIntegration(
         "test_on_event_exception",
         rust_tracing.set_layer_impl,
         event_type_mapping=_test_event_type_mapping,
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     events = capture_events()
     debugg_ai_sdk.get_isolation_scope().clear_breadcrumbs()
@@ -231,14 +231,14 @@ def test_on_event_exception(sentry_init, capture_events):
     assert field_context["message"] == "Getting the 10th fibonacci number"
 
 
-def test_on_event_breadcrumb(sentry_init, capture_events):
+def test_on_event_breadcrumb(debugg_ai_init, capture_events):
     rust_tracing = FakeRustTracing()
     integration = RustTracingIntegration(
         "test_on_event_breadcrumb",
         rust_tracing.set_layer_impl,
         event_type_mapping=_test_event_type_mapping,
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     events = capture_events()
     debugg_ai_sdk.get_isolation_scope().clear_breadcrumbs()
@@ -262,14 +262,14 @@ def test_on_event_breadcrumb(sentry_init, capture_events):
     assert breadcrumbs[0]["type"] == "default"
 
 
-def test_on_event_event(sentry_init, capture_events):
+def test_on_event_event(debugg_ai_init, capture_events):
     rust_tracing = FakeRustTracing()
     integration = RustTracingIntegration(
         "test_on_event_event",
         rust_tracing.set_layer_impl,
         event_type_mapping=_test_event_type_mapping,
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     events = capture_events()
     debugg_ai_sdk.get_isolation_scope().clear_breadcrumbs()
@@ -299,14 +299,14 @@ def test_on_event_event(sentry_init, capture_events):
     assert field_context["message"] == "Getting the 10th fibonacci number"
 
 
-def test_on_event_ignored(sentry_init, capture_events):
+def test_on_event_ignored(debugg_ai_init, capture_events):
     rust_tracing = FakeRustTracing()
     integration = RustTracingIntegration(
         "test_on_event_ignored",
         rust_tracing.set_layer_impl,
         event_type_mapping=_test_event_type_mapping,
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     events = capture_events()
     debugg_ai_sdk.get_isolation_scope().clear_breadcrumbs()
@@ -325,7 +325,7 @@ def test_on_event_ignored(sentry_init, capture_events):
     assert "message" not in tx
 
 
-def test_span_filter(sentry_init, capture_events):
+def test_span_filter(debugg_ai_init, capture_events):
     def span_filter(metadata: Dict[str, object]) -> bool:
         return RustTracingLevel(metadata.get("level")) in (
             RustTracingLevel.Error,
@@ -341,11 +341,11 @@ def test_span_filter(sentry_init, capture_events):
         span_filter=span_filter,
         include_tracing_fields=True,
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     events = capture_events()
     with start_transaction():
-        original_sentry_span = debugg_ai_sdk.get_current_span()
+        original_debugg_ai_span = debugg_ai_sdk.get_current_span()
 
         # Span is not ignored
         rust_tracing.new_span(RustTracingLevel.Info, 3, index_arg=10)
@@ -360,7 +360,7 @@ def test_span_filter(sentry_init, capture_events):
         assert debugg_ai_sdk.get_current_span() == info_span
 
         rust_tracing.close_span(3)
-        assert debugg_ai_sdk.get_current_span() == original_sentry_span
+        assert debugg_ai_sdk.get_current_span() == original_debugg_ai_span
 
     (event,) = events
     assert len(event["spans"]) == 1
@@ -368,14 +368,14 @@ def test_span_filter(sentry_init, capture_events):
     assert event["spans"][0]["data"]["index"] == 10
 
 
-def test_record(sentry_init):
+def test_record(debugg_ai_init):
     rust_tracing = FakeRustTracing()
     integration = RustTracingIntegration(
         "test_record",
         initializer=rust_tracing.set_layer_impl,
         include_tracing_fields=True,
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     with start_transaction():
         rust_tracing.new_span(RustTracingLevel.Info, 3)
@@ -389,7 +389,7 @@ def test_record(sentry_init):
         assert span_after_record["data"]["version"] == "memoized"
 
 
-def test_record_in_ignored_span(sentry_init):
+def test_record_in_ignored_span(debugg_ai_init):
     def span_filter(metadata: Dict[str, object]) -> bool:
         # Just ignore Trace
         return RustTracingLevel(metadata.get("level")) != RustTracingLevel.Trace
@@ -401,7 +401,7 @@ def test_record_in_ignored_span(sentry_init):
         span_filter=span_filter,
         include_tracing_fields=True,
     )
-    sentry_init(integrations=[integration], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[integration], traces_sample_rate=1.0)
 
     with start_transaction():
         rust_tracing.new_span(RustTracingLevel.Info, 3)
@@ -412,7 +412,7 @@ def test_record_in_ignored_span(sentry_init):
         rust_tracing.new_span(RustTracingLevel.Trace, 5)
         rust_tracing.record(5)
 
-        # `on_record()` should not do anything to the current Sentry span if the associated Rust span was ignored
+        # `on_record()` should not do anything to the current DebuggAI span if the associated Rust span was ignored
         span_after_record = debugg_ai_sdk.get_current_span().to_json()
         assert span_after_record["data"]["version"] is None
 
@@ -429,7 +429,7 @@ def test_record_in_ignored_span(sentry_init):
     ],
 )
 def test_include_tracing_fields(
-    sentry_init, send_default_pii, include_tracing_fields, tracing_fields_expected
+    debugg_ai_init, send_default_pii, include_tracing_fields, tracing_fields_expected
 ):
     rust_tracing = FakeRustTracing()
     integration = RustTracingIntegration(
@@ -438,7 +438,7 @@ def test_include_tracing_fields(
         include_tracing_fields=include_tracing_fields,
     )
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[integration],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,

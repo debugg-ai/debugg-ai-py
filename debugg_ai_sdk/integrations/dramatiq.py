@@ -23,13 +23,13 @@ if TYPE_CHECKING:
 
 class DramatiqIntegration(Integration):
     """
-    Dramatiq integration for Sentry
+    Dramatiq integration for DebuggAI
 
     Please make sure that you call `debugg_ai_sdk.init` *before* initializing
     your broker, as it monkey patches `Broker.__init__`.
 
     This integration was originally developed and maintained
-    by https://github.com/jacobsvante and later donated to the Sentry
+    by https://github.com/jacobsvante and later donated to the DebuggAI
     project.
     """
 
@@ -45,7 +45,7 @@ def _patch_dramatiq_broker():
     # type: () -> None
     original_broker__init__ = Broker.__init__
 
-    def sentry_patched_broker__init__(self, *args, **kw):
+    def debugg_ai_patched_broker__init__(self, *args, **kw):
         # type: (Broker, *Any, **Any) -> None
         integration = debugg_ai_sdk.get_client().get_integration(DramatiqIntegration)
 
@@ -67,19 +67,19 @@ def _patch_dramatiq_broker():
             middleware = list(middleware)
 
         if integration is not None:
-            middleware = [m for m in middleware if not isinstance(m, SentryMiddleware)]
-            middleware.insert(0, SentryMiddleware())
+            middleware = [m for m in middleware if not isinstance(m, DebuggAIMiddleware)]
+            middleware.insert(0, DebuggAIMiddleware())
 
         kw["middleware"] = middleware
         original_broker__init__(self, *args, **kw)
 
-    Broker.__init__ = sentry_patched_broker__init__
+    Broker.__init__ = debugg_ai_patched_broker__init__
 
 
-class SentryMiddleware(Middleware):  # type: ignore[misc]
+class DebuggAIMiddleware(Middleware):  # type: ignore[misc]
     """
     A Dramatiq middleware that automatically captures and sends
-    exceptions to Sentry.
+    exceptions to DebuggAI.
 
     This is automatically added to every instantiated broker via the
     DramatiqIntegration.

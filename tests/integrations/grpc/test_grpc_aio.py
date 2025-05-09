@@ -18,12 +18,12 @@ from tests.integrations.grpc.grpc_test_service_pb2_grpc import (
 
 
 @pytest_asyncio.fixture(scope="function")
-async def grpc_server_and_channel(sentry_init):
+async def grpc_server_and_channel(debugg_ai_init):
     """
     Creates an async gRPC server and a channel connected to it.
     Returns both for use in tests, and cleans up afterward.
     """
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
 
     # Create server
     server = grpc.aio.server()
@@ -49,8 +49,8 @@ async def grpc_server_and_channel(sentry_init):
 
 
 @pytest.mark.asyncio
-async def test_noop_for_unimplemented_method(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
+async def test_noop_for_unimplemented_method(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[GRPCIntegration()])
 
     # Create empty server with no services
     server = grpc.aio.server()
@@ -107,13 +107,13 @@ async def test_grpc_server_continues_transaction(
         metadata = (
             (
                 "baggage",
-                "sentry-trace_id={trace_id},sentry-environment=test,"
-                "sentry-transaction=test-transaction,sentry-sample_rate=1.0".format(
+                "debugg-ai-trace_id={trace_id},debugg-ai-environment=test,"
+                "debugg-ai-transaction=test-transaction,debugg-ai-sample_rate=1.0".format(
                     trace_id=transaction.trace_id
                 ),
             ),
             (
-                "sentry-trace",
+                "debugg-ai-trace",
                 "{trace_id}-{parent_span_id}-{sampled}".format(
                     trace_id=transaction.trace_id,
                     parent_span_id=transaction.span_id,

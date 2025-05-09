@@ -3,13 +3,13 @@ from debugg_ai_sdk.tracing import NoOpSpan
 
 # These tests make sure that the examples from the documentation [1]
 # are working when OTel (OpenTelemetry) instrumentation is turned on,
-# and therefore, the Sentry tracing should not do anything.
+# and therefore, the DebuggAI tracing should not do anything.
 #
-# 1: https://docs.sentry.io/platforms/python/performance/instrumentation/custom-instrumentation/
+# 1: https://docs.debugg.ai/platforms/python/performance/instrumentation/custom-instrumentation/
 
 
-def test_noop_start_transaction(sentry_init):
-    sentry_init(instrumenter="otel")
+def test_noop_start_transaction(debugg_ai_init):
+    debugg_ai_init(instrumenter="otel")
 
     with debugg_ai_sdk.start_transaction(
         op="task", name="test_transaction_name"
@@ -20,8 +20,8 @@ def test_noop_start_transaction(sentry_init):
         transaction.name = "new name"
 
 
-def test_noop_start_span(sentry_init):
-    sentry_init(instrumenter="otel")
+def test_noop_start_span(debugg_ai_init):
+    debugg_ai_init(instrumenter="otel")
 
     with debugg_ai_sdk.start_span(op="http", name="GET /") as span:
         assert isinstance(span, NoOpSpan)
@@ -31,8 +31,8 @@ def test_noop_start_span(sentry_init):
         span.set_data("http.entity_type", "teapot")
 
 
-def test_noop_transaction_start_child(sentry_init):
-    sentry_init(instrumenter="otel")
+def test_noop_transaction_start_child(debugg_ai_init):
+    debugg_ai_init(instrumenter="otel")
 
     transaction = debugg_ai_sdk.start_transaction(name="task")
     assert isinstance(transaction, NoOpSpan)
@@ -42,8 +42,8 @@ def test_noop_transaction_start_child(sentry_init):
         assert debugg_ai_sdk.get_current_scope().span is child
 
 
-def test_noop_span_start_child(sentry_init):
-    sentry_init(instrumenter="otel")
+def test_noop_span_start_child(debugg_ai_init):
+    debugg_ai_init(instrumenter="otel")
     span = debugg_ai_sdk.start_span(name="task")
     assert isinstance(span, NoOpSpan)
 

@@ -3,8 +3,8 @@ import pytest
 import debugg_ai_sdk
 
 
-def test_start_span_description(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_start_span_description(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with debugg_ai_sdk.start_transaction(name="hi"):
@@ -17,8 +17,8 @@ def test_start_span_description(sentry_init, capture_events):
     assert event["spans"][0]["description"] == "span-desc"
 
 
-def test_start_span_name(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_start_span_name(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with debugg_ai_sdk.start_transaction(name="hi"):
@@ -30,8 +30,8 @@ def test_start_span_name(sentry_init, capture_events):
     assert event["spans"][0]["description"] == "span-name"
 
 
-def test_start_child_description(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_start_child_description(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with debugg_ai_sdk.start_transaction(name="hi"):
@@ -45,8 +45,8 @@ def test_start_child_description(sentry_init, capture_events):
     assert event["spans"][-1]["description"] == "child-desc"
 
 
-def test_start_child_name(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_start_child_name(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with debugg_ai_sdk.start_transaction(name="hi"):

@@ -97,14 +97,14 @@ FALSE_VALUES = [
 
 
 class INSTRUMENTER:
-    SENTRY = "sentry"
+    DEBUGG_AI = "debugg-ai"
     OTEL = "otel"
 
 
 class SPANDATA:
     """
     Additional information describing the type of the span.
-    See: https://develop.sentry.dev/sdk/performance/span-data-conventions/
+    See: https://develop.debugg-ai.dev/sdk/performance/span-data-conventions/
     """
 
     AI_FREQUENCY_PENALTY = "ai.frequency_penalty"
@@ -401,9 +401,9 @@ class SPANDATA:
 
 class SPANSTATUS:
     """
-    The status of a Sentry span.
+    The status of a DebuggAI span.
 
-    See: https://develop.sentry.dev/sdk/event-payloads/contexts/#trace-context
+    See: https://develop.debugg-ai.dev/sdk/event-payloads/contexts/#trace-context
     """
 
     ABORTED = "aborted"
@@ -539,7 +539,7 @@ class ClientConstructor:
         send_client_reports=True,  # type: bool
         _experiments={},  # type: Experiments  # noqa: B006
         proxy_headers=None,  # type: Optional[Dict[str, str]]
-        instrumenter=INSTRUMENTER.SENTRY,  # type: Optional[str]
+        instrumenter=INSTRUMENTER.DEBUGG_AI,  # type: Optional[str]
         before_send_transaction=None,  # type: Optional[TransactionProcessor]
         project_root=None,  # type: Optional[str]
         enable_tracing=None,  # type: Optional[bool]
@@ -563,7 +563,7 @@ class ClientConstructor:
         max_stack_frames=DEFAULT_MAX_STACK_FRAMES,  # type: Optional[int]
     ):
         # type: (...) -> None
-        """Initialize the Sentry SDK with the given parameters. All parameters described here can be used in a call to `debugg_ai_sdk.init()`.
+        """Initialize the DebuggAI SDK with the given parameters. All parameters described here can be used in a call to `debugg_ai_sdk.init()`.
 
         :param dsn: The DSN tells the SDK where to send the events.
 
@@ -571,7 +571,7 @@ class ClientConstructor:
 
             The `dsn` config option takes precedence over the environment variable.
 
-            Learn more about `DSN utilization <https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization>`_.
+            Learn more about `DSN utilization <https://docs.debugg.ai/product/debugg-ai-basics/dsn-explainer/#dsn-utilization>`_.
 
         :param debug: Turns debug mode on or off.
 
@@ -588,15 +588,15 @@ class ClientConstructor:
             If not set, the SDK will try to automatically configure a release out of the box but it's a better idea to
             manually set it to guarantee that the release is in sync with your deploy integrations.
 
-            Release names are strings, but some formats are detected by Sentry and might be rendered differently.
+            Release names are strings, but some formats are detected by DebuggAI and might be rendered differently.
 
-            See `the releases documentation <https://docs.sentry.io/platforms/python/configuration/releases/>`_ to learn how the SDK tries to
+            See `the releases documentation <https://docs.debugg.ai/platforms/python/configuration/releases/>`_ to learn how the SDK tries to
             automatically configure a release.
 
             The `release` config option takes precedence over the environment variable.
 
-            Learn more about how to send release data so Sentry can tell you about regressions between releases and
-            identify the potential source in `the product documentation <https://docs.sentry.io/product/releases/>`_.
+            Learn more about how to send release data so DebuggAI can tell you about regressions between releases and
+            identify the potential source in `the product documentation <https://docs.debugg.ai/product/releases/>`_.
 
         :param environment: Sets the environment. This string is freeform and set to `production` by default.
 
@@ -621,18 +621,18 @@ class ClientConstructor:
         :param error_sampler: Dynamically configures the sample rate for error events on a per-event basis.
 
             This configuration option accepts a function, which takes two parameters (the `event` and the `hint`), and
-            which returns a boolean (indicating whether the event should be sent to Sentry) or a floating-point number
+            which returns a boolean (indicating whether the event should be sent to DebuggAI) or a floating-point number
             between `0.0` and `1.0`, inclusive.
 
-            The number indicates the probability the event is sent to Sentry; the SDK will randomly decide whether to
+            The number indicates the probability the event is sent to DebuggAI; the SDK will randomly decide whether to
             send the event with the given probability.
 
             If this configuration option is specified, the `sample_rate` option is ignored.
 
-        :param ignore_errors: A list of exception class names that shouldn't be sent to Sentry.
+        :param ignore_errors: A list of exception class names that shouldn't be sent to DebuggAI.
 
             Errors that are an instance of these exceptions or a subclass of them, will be filtered out before they're
-            sent to Sentry.
+            sent to DebuggAI.
 
             By default, all errors are sent.
 
@@ -640,7 +640,7 @@ class ClientConstructor:
 
             This defaults to `100`, but you can set this to any number.
 
-            However, you should be aware that Sentry has a `maximum payload size <https://develop.sentry.dev/sdk/data-model/envelopes/#size-limits>`_
+            However, you should be aware that DebuggAI has a `maximum payload size <https://develop.debugg-ai.dev/sdk/data-model/envelopes/#size-limits>`_
             and any events exceeding that payload size will be dropped.
 
         :param attach_stacktrace: When enabled, stack traces are automatically attached to all messages logged.
@@ -650,23 +650,23 @@ class ClientConstructor:
 
             This option means that stack traces appear next to all log messages.
 
-            Grouping in Sentry is different for events with stack traces and without. As a result, you will get new
+            Grouping in DebuggAI is different for events with stack traces and without. As a result, you will get new
             groups as you enable or disable this flag for certain events.
 
         :param send_default_pii: If this flag is enabled, `certain personally identifiable information (PII)
-            <https://docs.sentry.io/platforms/python/data-management/data-collected/>`_ is added by active integrations.
+            <https://docs.debugg.ai/platforms/python/data-management/data-collected/>`_ is added by active integrations.
 
             If you enable this option, be sure to manually remove what you don't want to send using our features for
-            managing `Sensitive Data <https://docs.sentry.io/data-management/sensitive-data/>`_.
+            managing `Sensitive Data <https://docs.debugg.ai/data-management/sensitive-data/>`_.
 
         :param event_scrubber: Scrubs the event payload for sensitive information such as cookies, sessions, and
             passwords from a `denylist`.
 
             It can additionally be used to scrub from another `pii_denylist` if `send_default_pii` is disabled.
 
-            See how to `configure the scrubber here <https://docs.sentry.io/data-management/sensitive-data/#event-scrubber>`_.
+            See how to `configure the scrubber here <https://docs.debugg.ai/data-management/sensitive-data/#event-scrubber>`_.
 
-        :param include_source_context: When enabled, source context will be included in events sent to Sentry.
+        :param include_source_context: When enabled, source context will be included in events sent to DebuggAI.
 
             This source context includes the five lines of code above and below the line of code where an error
             happened.
@@ -674,11 +674,11 @@ class ClientConstructor:
         :param include_local_variables: When enabled, the SDK will capture a snapshot of local variables to send with
             the event to help with debugging.
 
-        :param add_full_stack: When capturing errors, Sentry stack traces typically only include frames that start the
+        :param add_full_stack: When capturing errors, DebuggAI stack traces typically only include frames that start the
             moment an error occurs.
 
             But if the `add_full_stack` option is enabled (set to `True`), all frames from the start of execution will
-            be included in the stack trace sent to Sentry.
+            be included in the stack trace sent to DebuggAI.
 
         :param max_stack_frames: This option limits the number of stack frames that will be captured when
             `add_full_stack` is enabled.
@@ -702,12 +702,12 @@ class ClientConstructor:
 
             This option takes precedence over `in_app_exclude`.
 
-            Sentry differentiates stack frames that are directly related to your application ("in application") from
+            DebuggAI differentiates stack frames that are directly related to your application ("in application") from
             stack frames that come from other packages such as the standard library, frameworks, or other dependencies.
 
             The application package is automatically marked as `inApp`.
 
-            The difference is visible in [sentry.io](https://sentry.io), where only the "in application" frames are
+            The difference is visible in [debugg.ai](https://debugg.ai), where only the "in application" frames are
             displayed by default.
 
         :param in_app_exclude: A list of string prefixes of module names that do not belong to the app, but rather to
@@ -724,9 +724,9 @@ class ClientConstructor:
             - `small`: Only small request bodies will be captured. The cutoff for small depends on the SDK (typically
               4KB).
             - `medium`: Medium and small requests will be captured (typically 10KB).
-            - `always`: The SDK will always capture the request body as long as Sentry can make sense of it.
+            - `always`: The SDK will always capture the request body as long as DebuggAI can make sense of it.
 
-            Please note that the Sentry server [limits HTTP request body size](https://develop.sentry.dev/sdk/
+            Please note that the DebuggAI server [limits HTTP request body size](https://develop.debugg-ai.dev/sdk/
             expected-features/data-handling/#variable-size). The server always enforces its size limit, regardless of
             how you configure this option.
 
@@ -734,17 +734,17 @@ class ClientConstructor:
             will be truncated.
 
             WARNING: If the value you set for this is exceptionally large, the event may exceed 1 MiB and will be
-            dropped by Sentry.
+            dropped by DebuggAI.
 
         :param ca_certs: A path to an alternative CA bundle file in PEM-format.
 
         :param send_client_reports: Set this boolean to `False` to disable sending of client reports.
 
-            Client reports allow the client to send status reports about itself to Sentry, such as information about
+            Client reports allow the client to send status reports about itself to DebuggAI, such as information about
             events that were dropped before being sent.
 
         :param integrations: List of integrations to enable in addition to `auto-enabling integrations (overview)
-            <https://docs.sentry.io/platforms/python/integrations>`_.
+            <https://docs.debugg.ai/platforms/python/integrations>`_.
 
             This setting can be used to override the default config options for a specific auto-enabling integration
             or to add an integration that is not auto-enabled.
@@ -752,17 +752,17 @@ class ClientConstructor:
         :param disabled_integrations: List of integrations that will be disabled.
 
             This setting can be used to explicitly turn off specific `auto-enabling integrations (list)
-            <https://docs.sentry.io/platforms/python/integrations/#available-integrations>`_ or
-            `default <https://docs.sentry.io/platforms/python/integrations/default-integrations/>`_ integrations.
+            <https://docs.debugg.ai/platforms/python/integrations/#available-integrations>`_ or
+            `default <https://docs.debugg.ai/platforms/python/integrations/default-integrations/>`_ integrations.
 
         :param auto_enabling_integrations: Configures whether `auto-enabling integrations (configuration)
-            <https://docs.sentry.io/platforms/python/integrations/#available-integrations>`_ should be enabled.
+            <https://docs.debugg.ai/platforms/python/integrations/#available-integrations>`_ should be enabled.
 
             When set to `False`, no auto-enabling integrations will be enabled by default, even if the corresponding
             framework/library is detected.
 
         :param default_integrations: Configures whether `default integrations
-            <https://docs.sentry.io/platforms/python/integrations/default-integrations/>`_ should be enabled.
+            <https://docs.debugg.ai/platforms/python/integrations/default-integrations/>`_ should be enabled.
 
             Setting `default_integrations` to `False` disables all default integrations **as well as all auto-enabling
             integrations**, unless they are specifically added in the `integrations` option, described above.
@@ -816,7 +816,7 @@ class ClientConstructor:
 
         :param shutdown_timeout: Controls how many seconds to wait before shutting down.
 
-            Sentry SDKs send events from a background queue. This queue is given a certain amount to drain pending
+            DebuggAI SDKs send events from a background queue. This queue is given a certain amount to drain pending
             events. The default is SDK specific but typically around two seconds.
 
             Setting this value too low may cause problems for sending events from command line applications.
@@ -838,13 +838,13 @@ class ClientConstructor:
 
         :param socket_options: An optional list of socket options to use.
 
-            These provide fine-grained, low-level control over the way the SDK connects to Sentry.
+            These provide fine-grained, low-level control over the way the SDK connects to DebuggAI.
 
             If provided, the options will override the default `urllib3` `socket options
             <https://urllib3.readthedocs.io/en/stable/reference/urllib3.connection.html#urllib3.connection.HTTPConnection>`_.
 
         :param traces_sample_rate: A number between `0` and `1`, controlling the percentage chance a given transaction
-            will be sent to Sentry.
+            will be sent to DebuggAI.
 
             (`0` represents 0% while `1` represents 100%.) Applies equally to all transactions created in the app.
 
@@ -852,13 +852,13 @@ class ClientConstructor:
 
             If `traces_sample_rate` is `0`, this means that no new traces will be created. However, if you have
             another service (for example a JS frontend) that makes requests to your service that include trace
-            information, those traces will be continued and thus transactions will be sent to Sentry.
+            information, those traces will be continued and thus transactions will be sent to DebuggAI.
 
             If you want to disable all tracing you need to set `traces_sample_rate=None`. In this case, no new traces
             will be started and no incoming traces will be continued.
 
         :param traces_sampler: A function responsible for determining the percentage chance a given transaction will be
-            sent to Sentry.
+            sent to DebuggAI.
 
             It will automatically be passed information about the transaction and the context in which it's being
             created, and must return a number between `0` (0% chance of being sent) and `1` (100% chance of being
@@ -869,7 +869,7 @@ class ClientConstructor:
             Either this or `traces_sample_rate` must be defined to enable tracing.
 
         :param trace_propagation_targets: An optional property that controls which downstream services receive tracing
-            data, in the form of a `sentry-trace` and a `baggage` header attached to any outgoing HTTP requests.
+            data, in the form of a `debugg-ai-trace` and a `baggage` header attached to any outgoing HTTP requests.
 
             The option may contain a list of strings or regex against which the URLs of outgoing requests are matched.
 
@@ -891,7 +891,7 @@ class ClientConstructor:
             This is a convenient option, making it possible to have one central place for configuring what functions
             to trace, instead of having custom instrumentation scattered all over your code base.
 
-            To learn more, see the `Custom Instrumentation <https://docs.sentry.io/platforms/python/tracing/instrumentation/custom-instrumentation/#define-span-creation-in-a-central-place>`_ documentation.
+            To learn more, see the `Custom Instrumentation <https://docs.debugg.ai/platforms/python/tracing/instrumentation/custom-instrumentation/#define-span-creation-in-a-central-place>`_ documentation.
 
         :param enable_backpressure_handling: When enabled, a new monitor thread will be spawned to perform health
             checks on the SDK.
@@ -913,9 +913,9 @@ class ClientConstructor:
         :param custom_repr: A custom `repr <https://docs.python.org/3/library/functions.html#repr>`_ function to run
             while serializing an object.
 
-            Use this to control how your custom objects and classes are visible in Sentry.
+            Use this to control how your custom objects and classes are visible in DebuggAI.
 
-            Return a string for that repr value to be used or `None` to continue serializing how Sentry would have
+            Return a string for that repr value to be used or `None` to continue serializing how DebuggAI would have
             done it anyway.
 
         :param profiles_sample_rate: A number between `0` and `1`, controlling the percentage chance a given sampled

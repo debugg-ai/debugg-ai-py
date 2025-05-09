@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def test_request_scrubbing(sentry_init, capture_events):
-    sentry_init()
+def test_request_scrubbing(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     try:
@@ -63,8 +63,8 @@ def test_request_scrubbing(sentry_init, capture_events):
     }
 
 
-def test_ip_address_not_scrubbed_when_pii_enabled(sentry_init, capture_events):
-    sentry_init(send_default_pii=True)
+def test_ip_address_not_scrubbed_when_pii_enabled(debugg_ai_init, capture_events):
+    debugg_ai_init(send_default_pii=True)
     events = capture_events()
 
     try:
@@ -89,8 +89,8 @@ def test_ip_address_not_scrubbed_when_pii_enabled(sentry_init, capture_events):
     }
 
 
-def test_stack_var_scrubbing(sentry_init, capture_events):
-    sentry_init()
+def test_stack_var_scrubbing(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     try:
@@ -118,8 +118,8 @@ def test_stack_var_scrubbing(sentry_init, capture_events):
     }
 
 
-def test_breadcrumb_extra_scrubbing(sentry_init, capture_events):
-    sentry_init(max_breadcrumbs=2)
+def test_breadcrumb_extra_scrubbing(debugg_ai_init, capture_events):
+    debugg_ai_init(max_breadcrumbs=2)
     events = capture_events()
     logger.info("breadcrumb 1", extra=dict(foo=1, password="secret"))
     logger.info("breadcrumb 2", extra=dict(bar=2, auth="secret"))
@@ -149,8 +149,8 @@ def test_breadcrumb_extra_scrubbing(sentry_init, capture_events):
     }
 
 
-def test_span_data_scrubbing(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_span_data_scrubbing(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction(name="hi"):
@@ -167,8 +167,8 @@ def test_span_data_scrubbing(sentry_init, capture_events):
     }
 
 
-def test_custom_denylist(sentry_init, capture_events):
-    sentry_init(
+def test_custom_denylist(debugg_ai_init, capture_events):
+    debugg_ai_init(
         event_scrubber=EventScrubber(
             denylist=["my_sensitive_var"], pii_denylist=["my_pii_var"]
         )
@@ -200,8 +200,8 @@ def test_custom_denylist(sentry_init, capture_events):
     }
 
 
-def test_scrubbing_doesnt_affect_local_vars(sentry_init, capture_events):
-    sentry_init()
+def test_scrubbing_doesnt_affect_local_vars(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     try:
@@ -218,8 +218,8 @@ def test_scrubbing_doesnt_affect_local_vars(sentry_init, capture_events):
     assert password == "cat123"
 
 
-def test_recursive_event_scrubber(sentry_init, capture_events):
-    sentry_init(event_scrubber=EventScrubber(recursive=True))
+def test_recursive_event_scrubber(debugg_ai_init, capture_events):
+    debugg_ai_init(event_scrubber=EventScrubber(recursive=True))
     events = capture_events()
     complex_structure = {
         "deep": {
@@ -233,8 +233,8 @@ def test_recursive_event_scrubber(sentry_init, capture_events):
     assert event["extra"]["deep"]["deeper"][0]["deepest"]["password"] == "'[Filtered]'"
 
 
-def test_recursive_scrubber_does_not_override_original(sentry_init, capture_events):
-    sentry_init(event_scrubber=EventScrubber(recursive=True))
+def test_recursive_scrubber_does_not_override_original(debugg_ai_init, capture_events):
+    debugg_ai_init(event_scrubber=EventScrubber(recursive=True))
     events = capture_events()
 
     data = {"csrf": "secret"}

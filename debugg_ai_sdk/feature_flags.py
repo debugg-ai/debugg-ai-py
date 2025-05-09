@@ -62,7 +62,7 @@ def add_feature_flag(flag, result):
     # type: (str, bool) -> None
     """
     Records a flag and its value to be sent on subsequent error events.
-    We recommend you do this on flag evaluations. Flags are buffered per Sentry scope.
+    We recommend you do this on flag evaluations. Flags are buffered per DebuggAI scope.
     """
     flags = debugg_ai_sdk.get_isolation_scope().flags
     flags.set(flag, result)

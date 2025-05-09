@@ -60,18 +60,18 @@ def _make_erroneous_query(capture_events):
     return event
 
 
-def test_gql_init(sentry_init):
+def test_gql_init(debugg_ai_init):
     """
     Integration test to ensure we can initialize the SDK with the GQL Integration
     """
-    sentry_init(integrations=[GQLIntegration()])
+    debugg_ai_init(integrations=[GQLIntegration()])
 
 
-def test_real_gql_request_no_error(sentry_init, capture_events):
+def test_real_gql_request_no_error(debugg_ai_init, capture_events):
     """
     Integration test verifying that the GQLIntegration works as expected with successful query.
     """
-    sentry_init(integrations=[GQLIntegration()])
+    debugg_ai_init(integrations=[GQLIntegration()])
     events = capture_events()
 
     response_data = {"example": "This is the example"}
@@ -87,12 +87,12 @@ def test_real_gql_request_no_error(sentry_init, capture_events):
     ), "the sdk captured an event, even though the query was successful"
 
 
-def test_real_gql_request_with_error_no_pii(sentry_init, capture_events):
+def test_real_gql_request_with_error_no_pii(debugg_ai_init, capture_events):
     """
     Integration test verifying that the GQLIntegration works as expected with query resulting
     in a GraphQL error, and that PII is not sent.
     """
-    sentry_init(integrations=[GQLIntegration()])
+    debugg_ai_init(integrations=[GQLIntegration()])
 
     event = _make_erroneous_query(capture_events)
 
@@ -100,12 +100,12 @@ def test_real_gql_request_with_error_no_pii(sentry_init, capture_events):
     assert "response" not in event["contexts"]
 
 
-def test_real_gql_request_with_error_with_pii(sentry_init, capture_events):
+def test_real_gql_request_with_error_with_pii(debugg_ai_init, capture_events):
     """
     Integration test verifying that the GQLIntegration works as expected with query resulting
     in a GraphQL error, and that PII is not sent.
     """
-    sentry_init(integrations=[GQLIntegration()], send_default_pii=True)
+    debugg_ai_init(integrations=[GQLIntegration()], send_default_pii=True)
 
     event = _make_erroneous_query(capture_events)
 

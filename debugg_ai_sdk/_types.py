@@ -13,7 +13,7 @@ class AnnotatedValue:
     Meta information for a data field in the event payload.
     This is to tell Relay that we have tampered with the fields value.
     See:
-    https://github.com/getsentry/relay/blob/be12cd49a0f06ea932ed9b9f93a655de5d6ad6d1/relay-general/src/types/meta.rs#L407-L423
+    https://github.com/debugg-ai/relay/blob/be12cd49a0f06ea932ed9b9f93a655de5d6ad6d1/relay-general/src/types/meta.rs#L407-L423
     """
 
     __slots__ = ("value", "metadata")
@@ -305,7 +305,7 @@ if TYPE_CHECKING:
         "day",
         "hour",
         "minute",
-        "second",  # not supported in Sentry and will result in a warning
+        "second",  # not supported in DebuggAI and will result in a warning
     ]
 
     MonitorConfigSchedule = TypedDict(

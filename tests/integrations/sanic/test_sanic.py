@@ -90,8 +90,8 @@ def get_client(app):
         return simple_client(app)
 
 
-def test_request_data(sentry_init, app, capture_events):
-    sentry_init(integrations=[SanicIntegration()])
+def test_request_data(debugg_ai_init, app, capture_events):
+    debugg_ai_init(integrations=[SanicIntegration()])
     events = capture_events()
 
     c = get_client(app)
@@ -129,9 +129,9 @@ def test_request_data(sentry_init, app, capture_events):
     ],
 )
 def test_transaction_name(
-    sentry_init, app, capture_events, url, expected_transaction, expected_source
+    debugg_ai_init, app, capture_events, url, expected_transaction, expected_source
 ):
-    sentry_init(integrations=[SanicIntegration()])
+    debugg_ai_init(integrations=[SanicIntegration()])
     events = capture_events()
 
     c = get_client(app)
@@ -144,8 +144,8 @@ def test_transaction_name(
     assert event["transaction_info"] == {"source": expected_source}
 
 
-def test_errors(sentry_init, app, capture_events):
-    sentry_init(integrations=[SanicIntegration()])
+def test_errors(debugg_ai_init, app, capture_events):
+    debugg_ai_init(integrations=[SanicIntegration()])
     events = capture_events()
 
     @app.route("/error")
@@ -169,8 +169,8 @@ def test_errors(sentry_init, app, capture_events):
     )
 
 
-def test_bad_request_not_captured(sentry_init, app, capture_events):
-    sentry_init(integrations=[SanicIntegration()])
+def test_bad_request_not_captured(debugg_ai_init, app, capture_events):
+    debugg_ai_init(integrations=[SanicIntegration()])
     events = capture_events()
 
     @app.route("/")
@@ -185,8 +185,8 @@ def test_bad_request_not_captured(sentry_init, app, capture_events):
     assert not events
 
 
-def test_error_in_errorhandler(sentry_init, app, capture_events):
-    sentry_init(integrations=[SanicIntegration()])
+def test_error_in_errorhandler(debugg_ai_init, app, capture_events):
+    debugg_ai_init(integrations=[SanicIntegration()])
     events = capture_events()
 
     @app.route("/error")
@@ -219,7 +219,7 @@ def test_error_in_errorhandler(sentry_init, app, capture_events):
     )
 
 
-def test_concurrency(sentry_init, app):
+def test_concurrency(debugg_ai_init, app):
     """
     Make sure we instrument Sanic in a way where request data does not leak
     between request handlers. This test also implicitly tests our concept of
@@ -230,7 +230,7 @@ def test_concurrency(sentry_init, app):
     because that's the only way we could reproduce leakage with such a low
     amount of concurrent tasks.
     """
-    sentry_init(integrations=[SanicIntegration()])
+    debugg_ai_init(integrations=[SanicIntegration()])
 
     @app.route("/context-check/<i>")
     async def context_check(request, i):
@@ -404,11 +404,11 @@ class TransactionTestConfig:
         ),
     ],
 )
-def test_transactions(test_config, sentry_init, app, capture_events):
+def test_transactions(test_config, debugg_ai_init, app, capture_events):
     # type: (TransactionTestConfig, Any, Any, Any) -> None
 
     # Init the SanicIntegration with the desired arguments
-    sentry_init(
+    debugg_ai_init(
         integrations=[SanicIntegration(*test_config.integration_args)],
         traces_sample_rate=1.0,
     )
@@ -449,8 +449,8 @@ def test_transactions(test_config, sentry_init, app, capture_events):
 @pytest.mark.skipif(
     not PERFORMANCE_SUPPORTED, reason="Performance not supported on this Sanic version"
 )
-def test_span_origin(sentry_init, app, capture_events):
-    sentry_init(integrations=[SanicIntegration()], traces_sample_rate=1.0)
+def test_span_origin(debugg_ai_init, app, capture_events):
+    debugg_ai_init(integrations=[SanicIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     c = get_client(app)

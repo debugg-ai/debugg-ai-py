@@ -4,7 +4,7 @@ from debugg_ai_sdk.integrations._wsgi_common import (
     DEFAULT_HTTP_METHODS_TO_CAPTURE,
     RequestExtractor,
 )
-from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.integrations.wsgi import DebuggAIWsgiMiddleware
 from debugg_ai_sdk.scope import should_send_default_pii
 from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE
 from debugg_ai_sdk.utils import (
@@ -77,7 +77,7 @@ class FlaskIntegration(Integration):
 
             if Flask == Quart:
                 # This is Quart masquerading as Flask, don't enable the Flask
-                # integration. See https://github.com/getsentry/sentry-python/issues/2709
+                # integration. See https://github.com/debugg-ai/debugg-ai-py/issues/2709
                 raise DidNotEnable(
                     "This is not a Flask app but rather Quart pretending to be Flask"
                 )
@@ -87,20 +87,20 @@ class FlaskIntegration(Integration):
         version = package_version("flask")
         _check_minimum_version(FlaskIntegration, version)
 
-        before_render_template.connect(_add_sentry_trace)
+        before_render_template.connect(_add_debugg_ai_trace)
         request_started.connect(_request_started)
         got_request_exception.connect(_capture_exception)
 
         old_app = Flask.__call__
 
-        def sentry_patched_wsgi_app(self, environ, start_response):
+        def debugg_ai_patched_wsgi_app(self, environ, start_response):
             # type: (Any, Dict[str, str], Callable[..., Any]) -> _ScopedResponse
             if debugg_ai_sdk.get_client().get_integration(FlaskIntegration) is None:
                 return old_app(self, environ, start_response)
 
             integration = debugg_ai_sdk.get_client().get_integration(FlaskIntegration)
 
-            middleware = SentryWsgiMiddleware(
+            middleware = DebuggAIWsgiMiddleware(
                 lambda *a, **kw: old_app(self, *a, **kw),
                 span_origin=FlaskIntegration.origin,
                 http_methods_to_capture=(
@@ -111,18 +111,18 @@ class FlaskIntegration(Integration):
             )
             return middleware(environ, start_response)
 
-        Flask.__call__ = sentry_patched_wsgi_app
+        Flask.__call__ = debugg_ai_patched_wsgi_app
 
 
-def _add_sentry_trace(sender, template, context, **extra):
+def _add_debugg_ai_trace(sender, template, context, **extra):
     # type: (Flask, Any, Dict[str, Any], **Any) -> None
-    if "sentry_trace" in context:
+    if "debugg_ai_trace" in context:
         return
 
     scope = debugg_ai_sdk.get_current_scope()
     trace_meta = Markup(scope.trace_propagation_meta())
-    context["sentry_trace"] = trace_meta  # for backwards compatibility
-    context["sentry_trace_meta"] = trace_meta
+    context["debugg_ai_trace"] = trace_meta  # for backwards compatibility
+    context["debugg_ai_trace_meta"] = trace_meta
 
 
 def _set_transaction_name_and_source(scope, transaction_style, request):

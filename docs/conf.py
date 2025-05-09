@@ -27,9 +27,9 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-project = "sentry-python"
-copyright = "2019-{}, Sentry Team and Contributors".format(datetime.now().year)
-author = "Sentry Team and Contributors"
+project = "debugg-ai-py"
+copyright = "2019-{}, DebuggAI Team and Contributors".format(datetime.now().year)
+author = "DebuggAI Team and Contributors"
 
 release = "2.27.0"
 version = ".".join(release.split(".")[:2])  # The short X.Y version.
@@ -95,7 +95,7 @@ html_theme = "shibuya"
 # documentation.
 #
 html_theme_options = {
-    "github_url": "https://github.com/getsentry/sentry-python",
+    "github_url": "https://github.com/debugg-ai/debugg-ai-py",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -117,7 +117,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "sentry-pythondoc"
+htmlhelp_basename = "debugg-ai-pydoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -143,9 +143,9 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "sentry-python.tex",
-        "sentry-python Documentation",
-        "Sentry Team and Contributors",
+        "debugg-ai-py.tex",
+        "debugg-ai-py Documentation",
+        "DebuggAI Team and Contributors",
         "manual",
     )
 ]
@@ -155,7 +155,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "sentry-python", "sentry-python Documentation", [author], 1)]
+man_pages = [(master_doc, "debugg-ai-py", "debugg-ai-py Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -166,11 +166,11 @@ man_pages = [(master_doc, "sentry-python", "sentry-python Documentation", [autho
 texinfo_documents = [
     (
         master_doc,
-        "sentry-python",
-        "sentry-python Documentation",
+        "debugg-ai-py",
+        "debugg-ai-py Documentation",
         author,
-        "sentry-python",
-        "The official Sentry SDK for Python.",
+        "debugg-ai-py",
+        "The official DebuggAI SDK for Python.",
         "Miscellaneous",
     )
 ]

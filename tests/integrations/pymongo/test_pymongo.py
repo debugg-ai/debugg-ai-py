@@ -25,8 +25,8 @@ def mongo_server():
 
 
 @pytest.mark.parametrize("with_pii", [False, True])
-def test_transactions(sentry_init, capture_events, mongo_server, with_pii):
-    sentry_init(
+def test_transactions(debugg_ai_init, capture_events, mongo_server, with_pii):
+    debugg_ai_init(
         integrations=[PyMongoIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=with_pii,
@@ -105,8 +105,8 @@ def test_transactions(sentry_init, capture_events, mongo_server, with_pii):
 
 
 @pytest.mark.parametrize("with_pii", [False, True])
-def test_breadcrumbs(sentry_init, capture_events, mongo_server, with_pii):
-    sentry_init(
+def test_breadcrumbs(debugg_ai_init, capture_events, mongo_server, with_pii):
+    debugg_ai_init(
         integrations=[PyMongoIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=with_pii,
@@ -436,8 +436,8 @@ def test_strip_pii(testcase):
     assert _strip_pii(testcase["command"]) == testcase["command_stripped"]
 
 
-def test_span_origin(sentry_init, capture_events, mongo_server):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events, mongo_server):
+    debugg_ai_init(
         integrations=[PyMongoIntegration()],
         traces_sample_rate=1.0,
     )

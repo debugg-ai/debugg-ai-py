@@ -27,16 +27,16 @@ def celery_config():
 
 
 @pytest.fixture
-def celery_init(sentry_init, celery_config):
+def celery_init(debugg_ai_init, celery_config):
     """
-    Create a Sentry instrumented Celery app.
+    Create a DebuggAI instrumented Celery app.
     """
     from celery import Celery
 
     from debugg_ai_sdk.integrations.celery import CeleryIntegration
 
     def inner(propagate_traces=True, monitor_beat_tasks=False, **kwargs):
-        sentry_init(
+        debugg_ai_init(
             integrations=[
                 CeleryIntegration(
                     propagate_traces=propagate_traces,
@@ -62,7 +62,7 @@ def test_explanation(celery_init, capture_envelopes):
 
     # First initialize a Celery app.
     # You can give the options of CeleryIntegrations
-    # and the options for `sentry_dks.init` as keyword arguments.
+    # and the options for `debugg_ai_dks.init` as keyword arguments.
     # See the celery_init fixture for details.
     app = celery_init(
         monitor_beat_tasks=True,

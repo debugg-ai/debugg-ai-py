@@ -40,23 +40,23 @@ class Boto3Integration(Integration):
 
         orig_init = BaseClient.__init__
 
-        def sentry_patched_init(self, *args, **kwargs):
+        def debugg_ai_patched_init(self, *args, **kwargs):
             # type: (Type[BaseClient], *Any, **Any) -> None
             orig_init(self, *args, **kwargs)
             meta = self.meta
             service_id = meta.service_model.service_id.hyphenize()
             meta.events.register(
                 "request-created",
-                partial(_sentry_request_created, service_id=service_id),
+                partial(_debugg_ai_request_created, service_id=service_id),
             )
-            meta.events.register("after-call", _sentry_after_call)
-            meta.events.register("after-call-error", _sentry_after_call_error)
+            meta.events.register("after-call", _debugg_ai_after_call)
+            meta.events.register("after-call-error", _debugg_ai_after_call_error)
 
-        BaseClient.__init__ = sentry_patched_init
+        BaseClient.__init__ = debugg_ai_patched_init
 
 
 @ensure_integration_enabled(Boto3Integration)
-def _sentry_request_created(service_id, request, operation_name, **kwargs):
+def _debugg_ai_request_created(service_id, request, operation_name, **kwargs):
     # type: (str, AWSRequest, str, **Any) -> None
     description = "aws.%s.%s" % (service_id, operation_name)
     span = debugg_ai_sdk.start_span(
@@ -81,12 +81,12 @@ def _sentry_request_created(service_id, request, operation_name, **kwargs):
 
     # request.context is an open-ended data-structure
     # where we can add anything useful in request life cycle.
-    request.context["_sentrysdk_span"] = span
+    request.context["_debugg-aisdk_span"] = span
 
 
-def _sentry_after_call(context, parsed, **kwargs):
+def _debugg_ai_after_call(context, parsed, **kwargs):
     # type: (Dict[str, Any], Dict[str, Any], **Any) -> None
-    span = context.pop("_sentrysdk_span", None)  # type: Optional[Span]
+    span = context.pop("_debugg-aisdk_span", None)  # type: Optional[Span]
 
     # Span could be absent if the integration is disabled.
     if span is None:
@@ -106,7 +106,7 @@ def _sentry_after_call(context, parsed, **kwargs):
     orig_read = body.read
     orig_close = body.close
 
-    def sentry_streaming_body_read(*args, **kwargs):
+    def debugg_ai_streaming_body_read(*args, **kwargs):
         # type: (*Any, **Any) -> bytes
         try:
             ret = orig_read(*args, **kwargs)
@@ -117,19 +117,19 @@ def _sentry_after_call(context, parsed, **kwargs):
             streaming_span.finish()
             raise
 
-    body.read = sentry_streaming_body_read
+    body.read = debugg_ai_streaming_body_read
 
-    def sentry_streaming_body_close(*args, **kwargs):
+    def debugg_ai_streaming_body_close(*args, **kwargs):
         # type: (*Any, **Any) -> None
         streaming_span.finish()
         orig_close(*args, **kwargs)
 
-    body.close = sentry_streaming_body_close
+    body.close = debugg_ai_streaming_body_close
 
 
-def _sentry_after_call_error(context, exception, **kwargs):
+def _debugg_ai_after_call_error(context, exception, **kwargs):
     # type: (Dict[str, Any], Type[BaseException], **Any) -> None
-    span = context.pop("_sentrysdk_span", None)  # type: Optional[Span]
+    span = context.pop("_debugg-aisdk_span", None)  # type: Optional[Span]
 
     # Span could be absent if the integration is disabled.
     if span is None:

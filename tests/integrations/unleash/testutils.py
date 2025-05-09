@@ -19,7 +19,7 @@ def mock_unleash_client():
     Example:
         with mock_unleash_client():
             client = UnleashClient()  # Uses mock implementation
-            sentry_init(integrations=[UnleashIntegration()])
+            debugg_ai_init(integrations=[UnleashIntegration()])
     """
     old_init = UnleashClient.__init__
     old_is_enabled = UnleashClient.is_enabled

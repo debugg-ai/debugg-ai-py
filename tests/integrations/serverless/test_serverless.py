@@ -3,8 +3,8 @@ import pytest
 from debugg_ai_sdk.integrations.serverless import serverless_function
 
 
-def test_basic(sentry_init, capture_exceptions, monkeypatch):
-    sentry_init()
+def test_basic(debugg_ai_init, capture_exceptions, monkeypatch):
+    debugg_ai_init()
     exceptions = capture_exceptions()
 
     flush_calls = []
@@ -23,8 +23,8 @@ def test_basic(sentry_init, capture_exceptions, monkeypatch):
     assert flush_calls == [1]
 
 
-def test_flush_disabled(sentry_init, capture_exceptions, monkeypatch):
-    sentry_init()
+def test_flush_disabled(debugg_ai_init, capture_exceptions, monkeypatch):
+    debugg_ai_init()
     exceptions = capture_exceptions()
 
     flush_calls = []

@@ -12,7 +12,7 @@ from unittest import mock
 import pytest
 
 from debugg_ai_sdk import capture_message, get_baggage, get_traceparent
-from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.integrations.asgi import DebuggAIAsgiMiddleware
 from debugg_ai_sdk.integrations.starlette import (
     StarletteIntegration,
     StarletteRequestExtractor,
@@ -283,7 +283,7 @@ class SamplePartialReceiveSendMiddleware:
 
 
 @pytest.mark.asyncio
-async def test_starletterequestextractor_content_length(sentry_init):
+async def test_starletterequestextractor_content_length(debugg_ai_init):
     scope = SCOPE.copy()
     scope["headers"] = [
         [b"content-length", str(len(json.dumps(BODY_JSON))).encode()],
@@ -295,7 +295,7 @@ async def test_starletterequestextractor_content_length(sentry_init):
 
 
 @pytest.mark.asyncio
-async def test_starletterequestextractor_cookies(sentry_init):
+async def test_starletterequestextractor_cookies(debugg_ai_init):
     starlette_request = starlette.requests.Request(SCOPE)
     extractor = StarletteRequestExtractor(starlette_request)
 
@@ -306,7 +306,7 @@ async def test_starletterequestextractor_cookies(sentry_init):
 
 
 @pytest.mark.asyncio
-async def test_starletterequestextractor_json(sentry_init):
+async def test_starletterequestextractor_json(debugg_ai_init):
     starlette_request = starlette.requests.Request(SCOPE)
 
     # Mocking async `_receive()` that works in Python 3.7+
@@ -320,7 +320,7 @@ async def test_starletterequestextractor_json(sentry_init):
 
 
 @pytest.mark.asyncio
-async def test_starletterequestextractor_form(sentry_init):
+async def test_starletterequestextractor_form(debugg_ai_init):
     scope = SCOPE.copy()
     scope["headers"] = [
         [b"content-type", b"multipart/form-data; boundary=fd721ef49ea403a6"],
@@ -349,12 +349,12 @@ async def test_starletterequestextractor_form(sentry_init):
 
 @pytest.mark.asyncio
 async def test_starletterequestextractor_body_consumed_twice(
-    sentry_init, capture_events
+    debugg_ai_init, capture_events
 ):
     """
     Starlette does cache when you read the request data via `request.json()`
     or `request.body()`, but it does NOT when using `request.form()`.
-    So we have an edge case when the Sentry Starlette reads the body using `.form()`
+    So we have an edge case when the DebuggAI Starlette reads the body using `.form()`
     and the user wants to read the body using `.body()`.
     Because the underlying stream can not be consumed twice and is not cached.
 
@@ -386,8 +386,8 @@ async def test_starletterequestextractor_body_consumed_twice(
 
 
 @pytest.mark.asyncio
-async def test_starletterequestextractor_extract_request_info_too_big(sentry_init):
-    sentry_init(
+async def test_starletterequestextractor_extract_request_info_too_big(debugg_ai_init):
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[StarletteIntegration()],
     )
@@ -417,8 +417,8 @@ async def test_starletterequestextractor_extract_request_info_too_big(sentry_ini
 
 
 @pytest.mark.asyncio
-async def test_starletterequestextractor_extract_request_info(sentry_init):
-    sentry_init(
+async def test_starletterequestextractor_extract_request_info(debugg_ai_init):
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[StarletteIntegration()],
     )
@@ -448,8 +448,8 @@ async def test_starletterequestextractor_extract_request_info(sentry_init):
 
 
 @pytest.mark.asyncio
-async def test_starletterequestextractor_extract_request_info_no_pii(sentry_init):
-    sentry_init(
+async def test_starletterequestextractor_extract_request_info_no_pii(debugg_ai_init):
+    debugg_ai_init(
         send_default_pii=False,
         integrations=[StarletteIntegration()],
     )
@@ -505,14 +505,14 @@ async def test_starletterequestextractor_extract_request_info_no_pii(sentry_init
     ],
 )
 def test_transaction_style(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     url,
     transaction_style,
     expected_transaction,
     expected_source,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[StarletteIntegration(transaction_style=transaction_style)],
     )
     starlette_app = starlette_app_factory()
@@ -535,14 +535,14 @@ def test_transaction_style(
     ],
 )
 def test_catch_exceptions(
-    sentry_init,
+    debugg_ai_init,
     capture_exceptions,
     capture_events,
     test_url,
     expected_error,
     expected_message,
 ):
-    sentry_init(integrations=[StarletteIntegration()])
+    debugg_ai_init(integrations=[StarletteIntegration()])
     starlette_app = starlette_app_factory()
     exceptions = capture_exceptions()
     events = capture_events()
@@ -561,8 +561,8 @@ def test_catch_exceptions(
     assert event["exception"]["values"][0]["mechanism"]["type"] == "starlette"
 
 
-def test_user_information_error(sentry_init, capture_events):
-    sentry_init(
+def test_user_information_error(debugg_ai_init, capture_events):
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[StarletteIntegration()],
     )
@@ -584,8 +584,8 @@ def test_user_information_error(sentry_init, capture_events):
     assert user["username"] == "Gabriela"
 
 
-def test_user_information_error_no_pii(sentry_init, capture_events):
-    sentry_init(
+def test_user_information_error_no_pii(debugg_ai_init, capture_events):
+    debugg_ai_init(
         send_default_pii=False,
         integrations=[StarletteIntegration()],
     )
@@ -604,8 +604,8 @@ def test_user_information_error_no_pii(sentry_init, capture_events):
     assert "user" not in event
 
 
-def test_user_information_transaction(sentry_init, capture_events):
-    sentry_init(
+def test_user_information_transaction(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         send_default_pii=True,
         integrations=[StarletteIntegration()],
@@ -625,8 +625,8 @@ def test_user_information_transaction(sentry_init, capture_events):
     assert user["username"] == "Gabriela"
 
 
-def test_user_information_transaction_no_pii(sentry_init, capture_events):
-    sentry_init(
+def test_user_information_transaction_no_pii(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         send_default_pii=False,
         integrations=[StarletteIntegration()],
@@ -643,8 +643,8 @@ def test_user_information_transaction_no_pii(sentry_init, capture_events):
     assert "user" not in transaction_event
 
 
-def test_middleware_spans(sentry_init, capture_events):
-    sentry_init(
+def test_middleware_spans(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarletteIntegration()],
     )
@@ -683,8 +683,8 @@ def test_middleware_spans(sentry_init, capture_events):
             idx += 1
 
 
-def test_middleware_spans_disabled(sentry_init, capture_events):
-    sentry_init(
+def test_middleware_spans_disabled(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarletteIntegration(middleware_spans=False)],
     )
@@ -704,8 +704,8 @@ def test_middleware_spans_disabled(sentry_init, capture_events):
     assert len(transaction_event["spans"]) == 0
 
 
-def test_middleware_callback_spans(sentry_init, capture_events):
-    sentry_init(
+def test_middleware_callback_spans(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarletteIntegration()],
     )
@@ -748,7 +748,7 @@ def test_middleware_callback_spans(sentry_init, capture_events):
         },
         {
             "op": "middleware.starlette.send",
-            "description": "SentryAsgiMiddleware._run_app.<locals>._sentry_wrapped_send",
+            "description": "DebuggAIAsgiMiddleware._run_app.<locals>._debugg_ai_wrapped_send",
             "tags": {"starlette.middleware_name": "ServerErrorMiddleware"},
         },
         {
@@ -763,7 +763,7 @@ def test_middleware_callback_spans(sentry_init, capture_events):
         },
         {
             "op": "middleware.starlette.send",
-            "description": "SentryAsgiMiddleware._run_app.<locals>._sentry_wrapped_send",
+            "description": "DebuggAIAsgiMiddleware._run_app.<locals>._debugg_ai_wrapped_send",
             "tags": {"starlette.middleware_name": "ServerErrorMiddleware"},
         },
     ]
@@ -776,8 +776,8 @@ def test_middleware_callback_spans(sentry_init, capture_events):
         idx += 1
 
 
-def test_middleware_receive_send(sentry_init, capture_events):
-    sentry_init(
+def test_middleware_receive_send(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarletteIntegration()],
     )
@@ -794,8 +794,8 @@ def test_middleware_receive_send(sentry_init, capture_events):
         pass
 
 
-def test_middleware_partial_receive_send(sentry_init, capture_events):
-    sentry_init(
+def test_middleware_partial_receive_send(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarletteIntegration()],
     )
@@ -839,7 +839,7 @@ def test_middleware_partial_receive_send(sentry_init, capture_events):
         },
         {
             "op": "middleware.starlette.send",
-            "description": "SentryAsgiMiddleware._run_app.<locals>._sentry_wrapped_send",
+            "description": "DebuggAIAsgiMiddleware._run_app.<locals>._debugg_ai_wrapped_send",
             "tags": {"starlette.middleware_name": "ServerErrorMiddleware"},
         },
         {
@@ -871,8 +871,8 @@ def test_middleware_partial_receive_send(sentry_init, capture_events):
     STARLETTE_VERSION < (0, 35),
     reason="Positional args for middleware have been introduced in Starlette >= 0.35",
 )
-def test_middleware_positional_args(sentry_init):
-    sentry_init(
+def test_middleware_positional_args(debugg_ai_init):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarletteIntegration()],
     )
@@ -884,15 +884,15 @@ def test_middleware_positional_args(sentry_init):
 
 
 def test_legacy_setup(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
     # Check that behaviour does not change
     # if the user just adds the new Integration
-    # and forgets to remove SentryAsgiMiddleware
-    sentry_init()
+    # and forgets to remove DebuggAIAsgiMiddleware
+    debugg_ai_init()
     app = starlette_app_factory()
-    asgi_app = SentryAsgiMiddleware(app)
+    asgi_app = DebuggAIAsgiMiddleware(app)
 
     events = capture_events()
 
@@ -905,13 +905,13 @@ def test_legacy_setup(
 
 @pytest.mark.parametrize("endpoint", ["/sync/thread_ids", "/async/thread_ids"])
 @mock.patch("debugg_ai_sdk.profiler.transaction_profiler.PROFILE_MINIMUM_SAMPLES", 0)
-def test_active_thread_id(sentry_init, capture_envelopes, teardown_profiling, endpoint):
-    sentry_init(
+def test_active_thread_id(debugg_ai_init, capture_envelopes, teardown_profiling, endpoint):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         profiles_sample_rate=1.0,
     )
     app = starlette_app_factory()
-    asgi_app = SentryAsgiMiddleware(app)
+    asgi_app = DebuggAIAsgiMiddleware(app)
 
     envelopes = capture_envelopes()
 
@@ -941,8 +941,8 @@ def test_active_thread_id(sentry_init, capture_envelopes, teardown_profiling, en
         assert str(data["active"]) == trace_context["data"]["thread.id"]
 
 
-def test_original_request_not_scrubbed(sentry_init, capture_events):
-    sentry_init(integrations=[StarletteIntegration()])
+def test_original_request_not_scrubbed(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[StarletteIntegration()])
 
     events = capture_events()
 
@@ -971,8 +971,8 @@ def test_original_request_not_scrubbed(sentry_init, capture_events):
 
 
 @pytest.mark.skipif(STARLETTE_VERSION < (0, 24), reason="Requires Starlette >= 0.24")
-def test_template_tracing_meta(sentry_init, capture_events):
-    sentry_init(
+def test_template_tracing_meta(debugg_ai_init, capture_events):
+    debugg_ai_init(
         auto_enabling_integrations=False,  # Make sure that httpx integration is not added, because it adds tracing information to the starlette test clients request.
         integrations=[StarletteIntegration()],
     )
@@ -990,7 +990,7 @@ def test_template_tracing_meta(sentry_init, capture_events):
     assert baggage != ""
 
     match = re.match(
-        r'^<meta name="sentry-trace" content="([^\"]*)"><meta name="baggage" content="([^\"]*)">',
+        r'^<meta name="debugg-ai-trace" content="([^\"]*)"><meta name="baggage" content="([^\"]*)">',
         rendered_meta,
     )
     assert match is not None
@@ -1018,7 +1018,7 @@ def test_template_tracing_meta(sentry_init, capture_events):
     ],
 )
 def test_transaction_name(
-    sentry_init,
+    debugg_ai_init,
     request_url,
     transaction_style,
     expected_transaction_name,
@@ -1028,7 +1028,7 @@ def test_transaction_name(
     """
     Tests that the transaction name is something meaningful.
     """
-    sentry_init(
+    debugg_ai_init(
         auto_enabling_integrations=False,  # Make sure that httpx integration is not added, because it adds tracing information to the starlette test clients request.
         integrations=[StarletteIntegration(transaction_style=transaction_style)],
         traces_sample_rate=1.0,
@@ -1067,7 +1067,7 @@ def test_transaction_name(
     ],
 )
 def test_transaction_name_in_traces_sampler(
-    sentry_init,
+    debugg_ai_init,
     request_url,
     transaction_style,
     expected_transaction_name,
@@ -1087,7 +1087,7 @@ def test_transaction_name_in_traces_sampler(
             == expected_transaction_source
         )
 
-    sentry_init(
+    debugg_ai_init(
         auto_enabling_integrations=False,  # Make sure that httpx integration is not added, because it adds tracing information to the starlette test clients request.
         integrations=[StarletteIntegration(transaction_style=transaction_style)],
         traces_sampler=dummy_traces_sampler,
@@ -1117,7 +1117,7 @@ def test_transaction_name_in_traces_sampler(
     ],
 )
 def test_transaction_name_in_middleware(
-    sentry_init,
+    debugg_ai_init,
     request_url,
     transaction_style,
     expected_transaction_name,
@@ -1127,7 +1127,7 @@ def test_transaction_name_in_middleware(
     """
     Tests that the transaction name is something meaningful.
     """
-    sentry_init(
+    debugg_ai_init(
         auto_enabling_integrations=False,  # Make sure that httpx integration is not added, because it adds tracing information to the starlette test clients request.
         integrations=[
             StarletteIntegration(transaction_style=transaction_style),
@@ -1158,8 +1158,8 @@ def test_transaction_name_in_middleware(
     )
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[StarletteIntegration()],
         traces_sample_rate=1.0,
     )
@@ -1224,7 +1224,7 @@ Also used by the FastAPI tests.
 
 @parametrize_test_configurable_status_codes_deprecated
 def test_configurable_status_codes_deprecated(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     failed_request_status_codes,
     status_code,
@@ -1235,7 +1235,7 @@ def test_configurable_status_codes_deprecated(
             failed_request_status_codes=failed_request_status_codes
         )
 
-    sentry_init(integrations=[starlette_integration])
+    debugg_ai_init(integrations=[starlette_integration])
 
     events = capture_events()
 
@@ -1261,11 +1261,11 @@ def test_configurable_status_codes_deprecated(
     STARLETTE_VERSION < (0, 21),
     reason="Requires Starlette >= 0.21, because earlier versions do not support HTTP 'HEAD' requests",
 )
-def test_transaction_http_method_default(sentry_init, capture_events):
+def test_transaction_http_method_default(debugg_ai_init, capture_events):
     """
     By default OPTIONS and HEAD requests do not create a transaction.
     """
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[
             StarletteIntegration(),
@@ -1291,8 +1291,8 @@ def test_transaction_http_method_default(sentry_init, capture_events):
     STARLETTE_VERSION < (0, 21),
     reason="Requires Starlette >= 0.21, because earlier versions do not support HTTP 'HEAD' requests",
 )
-def test_transaction_http_method_custom(sentry_init, capture_events):
-    sentry_init(
+def test_transaction_http_method_custom(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[
             StarletteIntegration(
@@ -1323,7 +1323,7 @@ def test_transaction_http_method_custom(sentry_init, capture_events):
 
 @parametrize_test_configurable_status_codes
 def test_configurable_status_codes(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     failed_request_status_codes,
     status_code,
@@ -1337,7 +1337,7 @@ def test_configurable_status_codes(
         warnings.simplefilter("error", DeprecationWarning)
         starlette_integration = StarletteIntegration(**integration_kwargs)
 
-    sentry_init(integrations=[starlette_integration])
+    debugg_ai_init(integrations=[starlette_integration])
 
     events = capture_events()
 
@@ -1357,7 +1357,7 @@ def test_configurable_status_codes(
 
 
 @pytest.mark.asyncio
-async def test_starletterequestextractor_malformed_json_error_handling(sentry_init):
+async def test_starletterequestextractor_malformed_json_error_handling(debugg_ai_init):
     scope = SCOPE.copy()
     scope["headers"] = [
         [b"content-type", b"application/json"],

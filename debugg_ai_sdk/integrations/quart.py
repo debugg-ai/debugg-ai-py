@@ -5,7 +5,7 @@ from functools import wraps
 import debugg_ai_sdk
 from debugg_ai_sdk.integrations import DidNotEnable, Integration
 from debugg_ai_sdk.integrations._wsgi_common import _filter_headers
-from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.integrations.asgi import DebuggAIAsgiMiddleware
 from debugg_ai_sdk.scope import should_send_default_pii
 from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE
 from debugg_ai_sdk.utils import (
@@ -87,26 +87,26 @@ def patch_asgi_app():
     # type: () -> None
     old_app = Quart.__call__
 
-    async def sentry_patched_asgi_app(self, scope, receive, send):
+    async def debugg_ai_patched_asgi_app(self, scope, receive, send):
         # type: (Any, Any, Any, Any) -> Any
         if debugg_ai_sdk.get_client().get_integration(QuartIntegration) is None:
             return await old_app(self, scope, receive, send)
 
-        middleware = SentryAsgiMiddleware(
+        middleware = DebuggAIAsgiMiddleware(
             lambda *a, **kw: old_app(self, *a, **kw),
             span_origin=QuartIntegration.origin,
         )
         middleware.__call__ = middleware._run_asgi3
         return await middleware(scope, receive, send)
 
-    Quart.__call__ = sentry_patched_asgi_app
+    Quart.__call__ = debugg_ai_patched_asgi_app
 
 
 def patch_scaffold_route():
     # type: () -> None
     old_route = Scaffold.route
 
-    def _sentry_route(*args, **kwargs):
+    def _debugg_ai_route(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         old_decorator = old_route(*args, **kwargs)
 
@@ -119,25 +119,25 @@ def patch_scaffold_route():
 
                 @wraps(old_func)
                 @ensure_integration_enabled(QuartIntegration, old_func)
-                def _sentry_func(*args, **kwargs):
+                def _debugg_ai_func(*args, **kwargs):
                     # type: (*Any, **Any) -> Any
                     current_scope = debugg_ai_sdk.get_current_scope()
                     if current_scope.transaction is not None:
                         current_scope.transaction.update_active_thread()
 
-                    sentry_scope = debugg_ai_sdk.get_isolation_scope()
-                    if sentry_scope.profile is not None:
-                        sentry_scope.profile.update_active_thread_id()
+                    debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
+                    if debugg_ai_scope.profile is not None:
+                        debugg_ai_scope.profile.update_active_thread_id()
 
                     return old_func(*args, **kwargs)
 
-                return old_decorator(_sentry_func)
+                return old_decorator(_debugg_ai_func)
 
             return old_decorator(old_func)
 
         return decorator
 
-    Scaffold.route = _sentry_route
+    Scaffold.route = _debugg_ai_route
 
 
 def _set_transaction_name_and_source(scope, transaction_style, request):

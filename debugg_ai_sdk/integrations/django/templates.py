@@ -91,8 +91,8 @@ def patch_templates():
 
         # Inject trace meta tags into template context
         context = context or {}
-        if "sentry_trace_meta" not in context:
-            context["sentry_trace_meta"] = mark_safe(
+        if "debugg_ai_trace_meta" not in context:
+            context["debugg_ai_trace_meta"] = mark_safe(
                 debugg_ai_sdk.get_current_scope().trace_propagation_meta()
             )
 

@@ -72,9 +72,9 @@ _client_init_debug = ContextVar("client_init_debug")
 
 
 SDK_INFO = {
-    "name": "sentry.python",  # SDK name will be overridden after integrations have been loaded with debugg_ai_sdk.integrations.setup_integrations()
+    "name": "debugg-ai.python",  # SDK name will be overridden after integrations have been loaded with debugg_ai_sdk.integrations.setup_integrations()
     "version": VERSION,
-    "packages": [{"name": "pypi:sentry-sdk", "version": VERSION}],
+    "packages": [{"name": "pypi:debugg-ai-sdk", "version": VERSION}],
 }  # type: SDKInfo
 
 
@@ -116,7 +116,7 @@ def _get_options(*args, **kwargs):
         rv["server_name"] = socket.gethostname()
 
     if rv["instrumenter"] is None:
-        rv["instrumenter"] = INSTRUMENTER.SENTRY
+        rv["instrumenter"] = INSTRUMENTER.DEBUGG_AI
 
     if rv["project_root"] is None:
         try:
@@ -164,7 +164,7 @@ class BaseClient:
     """
     .. versionadded:: 2.0.0
 
-    The basic definition of a client that is used for sending data to Sentry.
+    The basic definition of a client that is used for sending data to DebuggAI.
     """
 
     spotlight = None  # type: Optional[SpotlightClient]
@@ -202,7 +202,7 @@ class BaseClient:
         """
         .. versionadded:: 2.0.0
 
-        Returns whether the client is active (able to send data to Sentry)
+        Returns whether the client is active (able to send data to DebuggAI)
         """
         return False
 
@@ -255,7 +255,7 @@ class NonRecordingClient(BaseClient):
     """
     .. versionadded:: 2.0.0
 
-    A client that does not send any events to Sentry. This is used as a fallback when the Sentry SDK is not yet initialized.
+    A client that does not send any events to DebuggAI. This is used as a fallback when the DebuggAI SDK is not yet initialized.
     """
 
     pass
@@ -264,7 +264,7 @@ class NonRecordingClient(BaseClient):
 class _Client(BaseClient):
     """
     The client is internally responsible for capturing the events and
-    forwarding them to sentry through the configured transport.  It takes
+    forwarding them to debugg-ai through the configured transport.  It takes
     the client options as keyword arguments and optionally the DSN as first
     argument.
 
@@ -413,8 +413,8 @@ class _Client(BaseClient):
             )
 
             spotlight_config = self.options.get("spotlight")
-            if spotlight_config is None and "SENTRY_SPOTLIGHT" in os.environ:
-                spotlight_env_value = os.environ["SENTRY_SPOTLIGHT"]
+            if spotlight_config is None and "DEBUGG_AI_SPOTLIGHT" in os.environ:
+                spotlight_env_value = os.environ["DEBUGG_AI_SPOTLIGHT"]
                 spotlight_config = env_to_bool(spotlight_env_value, strict=True)
                 self.options["spotlight"] = (
                     spotlight_config
@@ -471,7 +471,7 @@ class _Client(BaseClient):
         """
         .. versionadded:: 2.0.0
 
-        Returns whether the client is active (able to send data to Sentry)
+        Returns whether the client is active (able to send data to DebuggAI)
         """
         return True
 
@@ -480,7 +480,7 @@ class _Client(BaseClient):
         """
         .. versionadded:: 2.0.0
 
-        Returns whether the client should send default PII (Personally Identifiable Information) data to Sentry.
+        Returns whether the client should send default PII (Personally Identifiable Information) data to DebuggAI.
         """
         return self.options.get("send_default_pii") or False
 
@@ -812,7 +812,7 @@ class _Client(BaseClient):
         # type: (...) -> Optional[str]
         """Captures an event.
 
-        :param event: A ready-made event that can be directly sent to Sentry.
+        :param event: A ready-made event that can be directly sent to DebuggAI.
 
         :param hint: Contains metadata about the event that can be read from `before_send`, such as the original exception object or a HTTP request object.
 
@@ -895,24 +895,24 @@ class _Client(BaseClient):
             return
         isolation_scope = current_scope.get_isolation_scope()
 
-        log["attributes"]["sentry.sdk.name"] = SDK_INFO["name"]
-        log["attributes"]["sentry.sdk.version"] = SDK_INFO["version"]
+        log["attributes"]["debugg-ai.sdk.name"] = SDK_INFO["name"]
+        log["attributes"]["debugg-ai.sdk.version"] = SDK_INFO["version"]
 
         server_name = self.options.get("server_name")
         if server_name is not None and SPANDATA.SERVER_ADDRESS not in log["attributes"]:
             log["attributes"][SPANDATA.SERVER_ADDRESS] = server_name
 
         environment = self.options.get("environment")
-        if environment is not None and "sentry.environment" not in log["attributes"]:
-            log["attributes"]["sentry.environment"] = environment
+        if environment is not None and "debugg-ai.environment" not in log["attributes"]:
+            log["attributes"]["debugg-ai.environment"] = environment
 
         release = self.options.get("release")
-        if release is not None and "sentry.release" not in log["attributes"]:
-            log["attributes"]["sentry.release"] = release
+        if release is not None and "debugg-ai.release" not in log["attributes"]:
+            log["attributes"]["debugg-ai.release"] = release
 
         span = current_scope.span
-        if span is not None and "sentry.trace.parent_span_id" not in log["attributes"]:
-            log["attributes"]["sentry.trace.parent_span_id"] = span.span_id
+        if span is not None and "debugg-ai.trace.parent_span_id" not in log["attributes"]:
+            log["attributes"]["debugg-ai.trace.parent_span_id"] = span.span_id
 
         if log.get("trace_id") is None:
             transaction = current_scope.transaction
@@ -926,7 +926,7 @@ class _Client(BaseClient):
         debug = self.options.get("debug", False)
         if debug:
             logger.debug(
-                f'[Sentry Logs] [{log.get("severity_text")}] {log.get("body")}'
+                f'[DebuggAI Logs] [{log.get("severity_text")}] {log.get("body")}'
             )
 
         before_send_log = self.options["_experiments"].get("before_send_log")

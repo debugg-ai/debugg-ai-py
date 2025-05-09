@@ -63,8 +63,8 @@ class HelloHandler(RequestHandler):
         return b"hello"
 
 
-def test_basic(tornado_testcase, sentry_init, capture_events):
-    sentry_init(integrations=[TornadoIntegration()], send_default_pii=True)
+def test_basic(tornado_testcase, debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[TornadoIntegration()], send_default_pii=True)
     events = capture_events()
     client = tornado_testcase(Application([(r"/hi", CrashingHandler)]))
 
@@ -111,8 +111,8 @@ def test_basic(tornado_testcase, sentry_init, capture_events):
         (HelloHandler, 200),
     ],
 )
-def test_transactions(tornado_testcase, sentry_init, capture_events, handler, code):
-    sentry_init(integrations=[TornadoIntegration()], traces_sample_rate=1.0)
+def test_transactions(tornado_testcase, debugg_ai_init, capture_events, handler, code):
+    debugg_ai_init(integrations=[TornadoIntegration()], traces_sample_rate=1.0)
     events = capture_events()
     client = tornado_testcase(Application([(r"/hi", handler)]))
 
@@ -185,8 +185,8 @@ def test_transactions(tornado_testcase, sentry_init, capture_events, handler, co
         )
 
 
-def test_400_not_logged(tornado_testcase, sentry_init, capture_events):
-    sentry_init(integrations=[TornadoIntegration()])
+def test_400_not_logged(tornado_testcase, debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[TornadoIntegration()])
     events = capture_events()
 
     class CrashingHandler(RequestHandler):
@@ -201,8 +201,8 @@ def test_400_not_logged(tornado_testcase, sentry_init, capture_events):
     assert not events
 
 
-def test_user_auth(tornado_testcase, sentry_init, capture_events):
-    sentry_init(integrations=[TornadoIntegration()], send_default_pii=True)
+def test_user_auth(tornado_testcase, debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[TornadoIntegration()], send_default_pii=True)
     events = capture_events()
 
     class UserHandler(RequestHandler):
@@ -243,8 +243,8 @@ def test_user_auth(tornado_testcase, sentry_init, capture_events):
     assert "user" not in event
 
 
-def test_formdata(tornado_testcase, sentry_init, capture_events):
-    sentry_init(integrations=[TornadoIntegration()], send_default_pii=True)
+def test_formdata(tornado_testcase, debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[TornadoIntegration()], send_default_pii=True)
     events = capture_events()
 
     class FormdataHandler(RequestHandler):
@@ -268,8 +268,8 @@ def test_formdata(tornado_testcase, sentry_init, capture_events):
     assert event["request"]["data"] == {"field1": ["value1"], "field2": ["value2"]}
 
 
-def test_json(tornado_testcase, sentry_init, capture_events):
-    sentry_init(integrations=[TornadoIntegration()], send_default_pii=True)
+def test_json(tornado_testcase, debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[TornadoIntegration()], send_default_pii=True)
     events = capture_events()
 
     class FormdataHandler(RequestHandler):
@@ -297,12 +297,12 @@ def test_json(tornado_testcase, sentry_init, capture_events):
 
 
 def test_error_has_new_trace_context_performance_enabled(
-    tornado_testcase, sentry_init, capture_events
+    tornado_testcase, debugg_ai_init, capture_events
 ):
     """
     Check if an 'trace' context is added to errros and transactions when performance monitoring is enabled.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[TornadoIntegration()],
         traces_sample_rate=1.0,
     )
@@ -330,12 +330,12 @@ def test_error_has_new_trace_context_performance_enabled(
 
 
 def test_error_has_new_trace_context_performance_disabled(
-    tornado_testcase, sentry_init, capture_events
+    tornado_testcase, debugg_ai_init, capture_events
 ):
     """
     Check if an 'trace' context is added to errros and transactions when performance monitoring is disabled.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[TornadoIntegration()],
         traces_sample_rate=None,  # this is the default, just added for clarity
     )
@@ -359,13 +359,13 @@ def test_error_has_new_trace_context_performance_disabled(
 
 
 def test_error_has_existing_trace_context_performance_enabled(
-    tornado_testcase, sentry_init, capture_events
+    tornado_testcase, debugg_ai_init, capture_events
 ):
     """
     Check if an 'trace' context is added to errros and transactions
-    from the incoming 'sentry-trace' header when performance monitoring is enabled.
+    from the incoming 'debugg-ai-trace' header when performance monitoring is enabled.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[TornadoIntegration()],
         traces_sample_rate=1.0,
     )
@@ -374,9 +374,9 @@ def test_error_has_existing_trace_context_performance_enabled(
     trace_id = "471a43a4192642f0b136d5159a501701"
     parent_span_id = "6e8f22c393e68f19"
     parent_sampled = 1
-    sentry_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
 
-    headers = {"sentry-trace": sentry_trace_header}
+    headers = {"debugg-ai-trace": debugg_ai_trace_header}
 
     client = tornado_testcase(Application([(r"/hi", CrashingWithMessageHandler)]))
     client.fetch("/hi", headers=headers)
@@ -401,13 +401,13 @@ def test_error_has_existing_trace_context_performance_enabled(
 
 
 def test_error_has_existing_trace_context_performance_disabled(
-    tornado_testcase, sentry_init, capture_events
+    tornado_testcase, debugg_ai_init, capture_events
 ):
     """
     Check if an 'trace' context is added to errros and transactions
-    from the incoming 'sentry-trace' header when performance monitoring is disabled.
+    from the incoming 'debugg-ai-trace' header when performance monitoring is disabled.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[TornadoIntegration()],
         traces_sample_rate=None,  # this is the default, just added for clarity
     )
@@ -416,9 +416,9 @@ def test_error_has_existing_trace_context_performance_disabled(
     trace_id = "471a43a4192642f0b136d5159a501701"
     parent_span_id = "6e8f22c393e68f19"
     parent_sampled = 1
-    sentry_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled)
 
-    headers = {"sentry-trace": sentry_trace_header}
+    headers = {"debugg-ai-trace": debugg_ai_trace_header}
 
     client = tornado_testcase(Application([(r"/hi", CrashingWithMessageHandler)]))
     client.fetch("/hi", headers=headers)
@@ -438,8 +438,8 @@ def test_error_has_existing_trace_context_performance_disabled(
     )
 
 
-def test_span_origin(tornado_testcase, sentry_init, capture_events):
-    sentry_init(integrations=[TornadoIntegration()], traces_sample_rate=1.0)
+def test_span_origin(tornado_testcase, debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[TornadoIntegration()], traces_sample_rate=1.0)
     events = capture_events()
     client = tornado_testcase(Application([(r"/hi", CrashingHandler)]))
 

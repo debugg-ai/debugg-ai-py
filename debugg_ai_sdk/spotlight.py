@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from typing import Self
 
 from debugg_ai_sdk.utils import (
-    logger as sentry_logger,
+    logger as debugg_ai_logger,
     env_to_bool,
     capture_internal_exceptions,
 )
@@ -50,18 +50,18 @@ class SpotlightClient:
                 body=body.getvalue(),
                 method="POST",
                 headers={
-                    "Content-Type": "application/x-sentry-envelope",
+                    "Content-Type": "application/x-debugg-ai-envelope",
                 },
             )
             req.close()
             self.fails = 0
         except Exception as e:
             if self.fails < 2:
-                sentry_logger.warning(str(e))
+                debugg_ai_logger.warning(str(e))
                 self.fails += 1
             elif self.fails == 2:
                 self.fails += 1
-                sentry_logger.warning(
+                debugg_ai_logger.warning(
                     "Looks like Spotlight is not running, will keep trying to send events but will not log errors."
                 )
             # omitting self.fails += 1 in the `else:` case intentionally
@@ -103,7 +103,7 @@ try:
 
             spotlight_client = self.debugg_ai_sdk.get_client().spotlight
             if spotlight_client is None:
-                sentry_logger.warning(
+                debugg_ai_logger.warning(
                     "Cannot find Spotlight client from SpotlightMiddleware, disabling the middleware."
                 )
                 return None
@@ -128,7 +128,7 @@ try:
                         spotlight_js_url=spotlight_js_url,
                     )
                 except urllib.error.URLError as err:
-                    sentry_logger.debug(
+                    debugg_ai_logger.debug(
                         "Cannot get Spotlight JS to inject at %s. SpotlightMiddleware will not be very useful.",
                         spotlight_js_url,
                         exc_info=err,
@@ -226,8 +226,8 @@ def setup_spotlight(options):
         if (
             settings is not None
             and settings.DEBUG
-            and env_to_bool(os.environ.get("SENTRY_SPOTLIGHT_ON_ERROR", "1"))
-            and env_to_bool(os.environ.get("SENTRY_SPOTLIGHT_MIDDLEWARE", "1"))
+            and env_to_bool(os.environ.get("DEBUGG_AI_SPOTLIGHT_ON_ERROR", "1"))
+            and env_to_bool(os.environ.get("DEBUGG_AI_SPOTLIGHT_MIDDLEWARE", "1"))
         ):
             middleware = settings.MIDDLEWARE
             if DJANGO_SPOTLIGHT_MIDDLEWARE_PATH not in middleware:

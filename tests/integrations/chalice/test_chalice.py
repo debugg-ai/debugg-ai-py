@@ -27,9 +27,9 @@ def _generate_lambda_context(self):
 
 
 @pytest.fixture
-def app(sentry_init):
-    sentry_init(integrations=[ChaliceIntegration()])
-    app = Chalice(app_name="sentry_chalice")
+def app(debugg_ai_init):
+    debugg_ai_init(integrations=[ChaliceIntegration()])
+    app = Chalice(app_name="debugg_ai_chalice")
 
     @app.route("/boom")
     def boom():

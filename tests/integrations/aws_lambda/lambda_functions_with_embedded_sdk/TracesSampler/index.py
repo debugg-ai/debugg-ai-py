@@ -41,7 +41,7 @@ def handler(event, context):
         "statusCode": 200,
         "body": json.dumps(
             {
-                "message": "Hello from Lambda with embedded Sentry SDK!",
+                "message": "Hello from Lambda with embedded DebuggAI SDK!",
                 "event": event,
                 "sampling_context_data": sampling_context_data,
             }

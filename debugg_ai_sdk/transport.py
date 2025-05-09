@@ -80,7 +80,7 @@ class Transport(ABC):
         DEPRECATED: Please use capture_envelope instead.
 
         This gets invoked with the event dictionary when an event should
-        be sent to sentry.
+        be sent to debugg-ai.
         """
 
         warnings.warn(
@@ -97,11 +97,11 @@ class Transport(ABC):
     def capture_envelope(self, envelope):
         # type: (Self, Envelope) -> None
         """
-        Send an envelope to Sentry.
+        Send an envelope to DebuggAI.
 
         Envelopes are a data container format that can hold any type of data
-        submitted to Sentry. We use it to send all event data (including errors,
-        transactions, crons check-ins, etc.) to Sentry.
+        submitted to DebuggAI. We use it to send all event data (including errors,
+        transactions, crons check-ins, etc.) to DebuggAI.
         """
         pass
 
@@ -206,7 +206,7 @@ class BaseHttpTransport(Transport):
         assert self.parsed_dsn is not None
         self.options = options  # type: Dict[str, Any]
         self._worker = BackgroundWorker(queue_size=options["transport_queue_size"])
-        self._auth = self.parsed_dsn.to_auth("sentry.python/%s" % VERSION)
+        self._auth = self.parsed_dsn.to_auth("debugg-ai.python/%s" % VERSION)
         self._disabled_until = {}  # type: Dict[Optional[EventDataCategory], datetime]
         # We only use this Retry() class for the `get_retry_after` method it exposes
         self._retry = urllib3.util.Retry()
@@ -304,9 +304,9 @@ class BaseHttpTransport(Transport):
 
         # new sentries with more rate limit insights.  We honor this header
         # no matter of the status code to update our internal rate limits.
-        header = self._get_header_value(response, "x-sentry-rate-limits")
+        header = self._get_header_value(response, "x-debugg-ai-rate-limits")
         if header:
-            logger.warning("Rate-limited via x-sentry-rate-limits")
+            logger.warning("Rate-limited via x-debugg-ai-rate-limits")
             self._disabled_until.update(_parse_rate_limits(header))
 
         # old sentries only communicate global rate limit hits via the

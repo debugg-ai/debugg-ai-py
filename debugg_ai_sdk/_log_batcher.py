@@ -111,10 +111,10 @@ class LogBatcher:
                 return {"value": val, "type": "string"}
             return {"value": safe_repr(val), "type": "string"}
 
-        if "sentry.severity_number" not in log["attributes"]:
-            log["attributes"]["sentry.severity_number"] = log["severity_number"]
-        if "sentry.severity_text" not in log["attributes"]:
-            log["attributes"]["sentry.severity_text"] = log["severity_text"]
+        if "debugg-ai.severity_number" not in log["attributes"]:
+            log["attributes"]["debugg-ai.severity_number"] = log["severity_number"]
+        if "debugg-ai.severity_text" not in log["attributes"]:
+            log["attributes"]["debugg-ai.severity_text"] = log["severity_text"]
 
         res = {
             "timestamp": int(log["time_unix_nano"]) / 1.0e9,
@@ -141,7 +141,7 @@ class LogBatcher:
             envelope.add_item(
                 Item(
                     type="log",
-                    content_type="application/vnd.sentry.items.log+json",
+                    content_type="application/vnd.debugg-ai.items.log+json",
                     headers={
                         "item_count": len(self._log_buffer),
                     },

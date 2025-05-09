@@ -36,10 +36,10 @@ def patch_asyncio():
         loop = asyncio.get_running_loop()
         orig_task_factory = loop.get_task_factory()
 
-        def _sentry_task_factory(loop, coro, **kwargs):
+        def _debugg_ai_task_factory(loop, coro, **kwargs):
             # type: (asyncio.AbstractEventLoop, Coroutine[Any, Any, Any], Any) -> asyncio.Future[Any]
 
-            async def _task_with_sentry_span_creation():
+            async def _task_with_debugg_ai_span_creation():
                 # type: () -> Any
                 result = None
 
@@ -61,7 +61,7 @@ def patch_asyncio():
             # Trying to use user set task factory (if there is one)
             if orig_task_factory:
                 task = orig_task_factory(
-                    loop, _task_with_sentry_span_creation(), **kwargs
+                    loop, _task_with_debugg_ai_span_creation(), **kwargs
                 )
 
             if task is None:
@@ -72,14 +72,14 @@ def patch_asyncio():
                 # WARNING:
                 # If the default behavior of the task creation in asyncio changes,
                 # this will break!
-                task = Task(_task_with_sentry_span_creation(), loop=loop, **kwargs)
+                task = Task(_task_with_debugg_ai_span_creation(), loop=loop, **kwargs)
                 if task._source_traceback:  # type: ignore
                     del task._source_traceback[-1]  # type: ignore
 
             # Set the task name to include the original coroutine's name
             try:
                 cast("asyncio.Task[Any]", task).set_name(
-                    f"{get_name(coro)} (Sentry-wrapped)"
+                    f"{get_name(coro)} (DebuggAI-wrapped)"
                 )
             except AttributeError:
                 # set_name might not be available in all Python versions
@@ -87,15 +87,15 @@ def patch_asyncio():
 
             return task
 
-        loop.set_task_factory(_sentry_task_factory)  # type: ignore
+        loop.set_task_factory(_debugg_ai_task_factory)  # type: ignore
 
     except RuntimeError:
         # When there is no running loop, we have nothing to patch.
         logger.warning(
-            "There is no running asyncio loop so there is nothing Sentry can patch. "
+            "There is no running asyncio loop so there is nothing DebuggAI can patch. "
             "Please make sure you call debugg_ai_sdk.init() within a running "
             "asyncio loop for the AsyncioIntegration to work. "
-            "See https://docs.sentry.io/platforms/python/integrations/asyncio/"
+            "See https://docs.debugg.ai/platforms/python/integrations/asyncio/"
         )
 
 

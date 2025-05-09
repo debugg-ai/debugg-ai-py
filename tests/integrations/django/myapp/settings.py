@@ -51,7 +51,7 @@ INSTALLED_APPS = [
 
 class TestMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        # https://github.com/getsentry/sentry-python/issues/837 -- We should
+        # https://github.com/debugg-ai/debugg-ai-py/issues/837 -- We should
         # not touch the resolver_match because apparently people rely on it.
         if request.resolver_match:
             assert not getattr(request.resolver_match.callback, "__wrapped__", None)
@@ -121,12 +121,12 @@ try:
 
     DATABASES["postgres"] = {
         "ENGINE": db_engine,
-        "HOST": os.environ.get("SENTRY_PYTHON_TEST_POSTGRES_HOST", "localhost"),
-        "PORT": int(os.environ.get("SENTRY_PYTHON_TEST_POSTGRES_PORT", "5432")),
-        "USER": os.environ.get("SENTRY_PYTHON_TEST_POSTGRES_USER", "postgres"),
-        "PASSWORD": os.environ.get("SENTRY_PYTHON_TEST_POSTGRES_PASSWORD", "sentry"),
+        "HOST": os.environ.get("DEBUGG_AI_PYTHON_TEST_POSTGRES_HOST", "localhost"),
+        "PORT": int(os.environ.get("DEBUGG_AI_PYTHON_TEST_POSTGRES_PORT", "5432")),
+        "USER": os.environ.get("DEBUGG_AI_PYTHON_TEST_POSTGRES_USER", "postgres"),
+        "PASSWORD": os.environ.get("DEBUGG_AI_PYTHON_TEST_POSTGRES_PASSWORD", "debugg-ai"),
         "NAME": os.environ.get(
-            "SENTRY_PYTHON_TEST_POSTGRES_NAME", f"myapp_db_{os.getpid()}"
+            "DEBUGG_AI_PYTHON_TEST_POSTGRES_NAME", f"myapp_db_{os.getpid()}"
         ),
     }
 except (ImportError, KeyError):

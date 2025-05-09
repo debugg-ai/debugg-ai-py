@@ -10,10 +10,10 @@ from debugg_ai_sdk.tracing import Span
 
 
 @pytest.mark.skip(reason="This deprecated feature has been removed in SDK 2.0.")
-def test_start_span_to_start_transaction(sentry_init, capture_events):
+def test_start_span_to_start_transaction(debugg_ai_init, capture_events):
     # XXX: this only exists for backwards compatibility with code before
     # Transaction / start_transaction were introduced.
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with start_span(transaction="/1/"):

@@ -55,8 +55,8 @@ def test_transport_option(monkeypatch):
     if "DEBUGGAI_INGEST_URL" in os.environ:
         monkeypatch.delenv("DEBUGGAI_INGEST_URL")
 
-    dsn = "https://foo@sentry.io/123"
-    dsn2 = "https://bar@sentry.io/124"
+    dsn = "https://foo@debugg.ai/123"
+    dsn2 = "https://bar@debugg.ai/124"
     assert str(Client(dsn=dsn).dsn) == dsn
     assert Client().dsn is None
 
@@ -70,7 +70,7 @@ def test_transport_option(monkeypatch):
     "testcase",
     [
         {
-            "dsn": "http://foo@sentry.io/123",
+            "dsn": "http://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": None,
             "arg_http_proxy": "http://localhost/123",
@@ -78,7 +78,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "http",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": None,
             "arg_http_proxy": "https://localhost/123",
@@ -86,7 +86,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "https",
         },
         {
-            "dsn": "http://foo@sentry.io/123",
+            "dsn": "http://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": None,
             "arg_http_proxy": "http://localhost/123",
@@ -94,7 +94,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "http",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": None,
             "arg_http_proxy": "http://localhost/123",
@@ -102,7 +102,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "https",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": None,
             "arg_http_proxy": "http://localhost/123",
@@ -110,7 +110,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "http",
         },
         {
-            "dsn": "http://foo@sentry.io/123",
+            "dsn": "http://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": None,
             "arg_http_proxy": None,
@@ -118,7 +118,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": None,
         },
         {
-            "dsn": "http://foo@sentry.io/123",
+            "dsn": "http://foo@debugg.ai/123",
             "env_http_proxy": "http://localhost/123",
             "env_https_proxy": None,
             "arg_http_proxy": None,
@@ -126,7 +126,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "http",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": "https://localhost/123",
             "arg_http_proxy": None,
@@ -134,7 +134,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "https",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": "http://localhost/123",
             "env_https_proxy": None,
             "arg_http_proxy": None,
@@ -142,7 +142,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "http",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": "http://localhost/123",
             "env_https_proxy": "https://localhost/123",
             "arg_http_proxy": "",
@@ -150,7 +150,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": None,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": "http://localhost/123",
             "env_https_proxy": "https://localhost/123",
             "arg_http_proxy": None,
@@ -158,7 +158,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "https",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": "http://localhost/123",
             "env_https_proxy": None,
             "arg_http_proxy": None,
@@ -166,7 +166,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "http",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": "http://localhost/123",
             "env_https_proxy": "https://localhost/123",
             "arg_http_proxy": None,
@@ -174,7 +174,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "http",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": "http://localhost/123",
             "env_https_proxy": "https://localhost/123",
             "arg_http_proxy": "",
@@ -182,7 +182,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": "https",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": "https://localhost/123",
             "arg_http_proxy": None,
@@ -190,7 +190,7 @@ def test_transport_option(monkeypatch):
             "expected_proxy_scheme": None,
         },
         {
-            "dsn": "http://foo@sentry.io/123",
+            "dsn": "http://foo@debugg.ai/123",
             "env_http_proxy": "http://localhost/123",
             "env_https_proxy": "https://localhost/123",
             "arg_http_proxy": None,
@@ -199,46 +199,46 @@ def test_transport_option(monkeypatch):
         },
         # NO_PROXY testcases
         {
-            "dsn": "http://foo@sentry.io/123",
+            "dsn": "http://foo@debugg.ai/123",
             "env_http_proxy": "http://localhost/123",
             "env_https_proxy": None,
-            "env_no_proxy": "sentry.io,example.com",
+            "env_no_proxy": "debugg.ai,example.com",
             "arg_http_proxy": None,
             "arg_https_proxy": None,
             "expected_proxy_scheme": None,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": "https://localhost/123",
-            "env_no_proxy": "example.com,sentry.io",
+            "env_no_proxy": "example.com,debugg.ai",
             "arg_http_proxy": None,
             "arg_https_proxy": None,
             "expected_proxy_scheme": None,
         },
         {
-            "dsn": "http://foo@sentry.io/123",
+            "dsn": "http://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": None,
-            "env_no_proxy": "sentry.io,example.com",
+            "env_no_proxy": "debugg.ai,example.com",
             "arg_http_proxy": "http://localhost/123",
             "arg_https_proxy": None,
             "expected_proxy_scheme": "http",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": None,
-            "env_no_proxy": "sentry.io,example.com",
+            "env_no_proxy": "debugg.ai,example.com",
             "arg_http_proxy": None,
             "arg_https_proxy": "https://localhost/123",
             "expected_proxy_scheme": "https",
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "env_http_proxy": None,
             "env_https_proxy": None,
-            "env_no_proxy": "sentry.io,example.com",
+            "env_no_proxy": "debugg.ai,example.com",
             "arg_http_proxy": None,
             "arg_https_proxy": "https://localhost/123",
             "expected_proxy_scheme": "https",
@@ -302,55 +302,55 @@ def test_proxy(monkeypatch, testcase, http2):
     "testcase",
     [
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "arg_http_proxy": "http://localhost/123",
             "arg_https_proxy": None,
             "should_be_socks_proxy": False,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "arg_http_proxy": "socks4a://localhost/123",
             "arg_https_proxy": None,
             "should_be_socks_proxy": True,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "arg_http_proxy": "socks4://localhost/123",
             "arg_https_proxy": None,
             "should_be_socks_proxy": True,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "arg_http_proxy": "socks5h://localhost/123",
             "arg_https_proxy": None,
             "should_be_socks_proxy": True,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "arg_http_proxy": "socks5://localhost/123",
             "arg_https_proxy": None,
             "should_be_socks_proxy": True,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "arg_http_proxy": None,
             "arg_https_proxy": "socks4a://localhost/123",
             "should_be_socks_proxy": True,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "arg_http_proxy": None,
             "arg_https_proxy": "socks4://localhost/123",
             "should_be_socks_proxy": True,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "arg_http_proxy": None,
             "arg_https_proxy": "socks5h://localhost/123",
             "should_be_socks_proxy": True,
         },
         {
-            "dsn": "https://foo@sentry.io/123",
+            "dsn": "https://foo@debugg.ai/123",
             "arg_http_proxy": None,
             "arg_https_proxy": "socks5://localhost/123",
             "should_be_socks_proxy": True,
@@ -380,15 +380,15 @@ def test_socks_proxy(testcase, http2):
     )
 
 
-def test_simple_transport(sentry_init):
+def test_simple_transport(debugg_ai_init):
     events = []
-    sentry_init(transport=events.append)
+    debugg_ai_init(transport=events.append)
     capture_message("Hello World!")
     assert events[0]["message"] == "Hello World!"
 
 
-def test_ignore_errors(sentry_init, capture_events):
-    sentry_init(ignore_errors=[ZeroDivisionError])
+def test_ignore_errors(debugg_ai_init, capture_events):
+    debugg_ai_init(ignore_errors=[ZeroDivisionError])
     events = capture_events()
 
     class MyDivisionError(ZeroDivisionError):
@@ -408,8 +408,8 @@ def test_ignore_errors(sentry_init, capture_events):
     assert events[0]["exception"]["values"][0]["type"] == "ValueError"
 
 
-def test_include_local_variables_enabled(sentry_init, capture_events):
-    sentry_init(include_local_variables=True)
+def test_include_local_variables_enabled(debugg_ai_init, capture_events):
+    debugg_ai_init(include_local_variables=True)
     events = capture_events()
     try:
         1 / 0
@@ -424,8 +424,8 @@ def test_include_local_variables_enabled(sentry_init, capture_events):
     )
 
 
-def test_include_local_variables_disabled(sentry_init, capture_events):
-    sentry_init(include_local_variables=False)
+def test_include_local_variables_disabled(debugg_ai_init, capture_events):
+    debugg_ai_init(include_local_variables=False)
     events = capture_events()
     try:
         1 / 0
@@ -440,8 +440,8 @@ def test_include_local_variables_disabled(sentry_init, capture_events):
     )
 
 
-def test_include_source_context_enabled(sentry_init, capture_events):
-    sentry_init(include_source_context=True)
+def test_include_source_context_enabled(debugg_ai_init, capture_events):
+    debugg_ai_init(include_source_context=True)
     events = capture_events()
     try:
         1 / 0
@@ -456,8 +456,8 @@ def test_include_source_context_enabled(sentry_init, capture_events):
     assert "context_line" in frame
 
 
-def test_include_source_context_disabled(sentry_init, capture_events):
-    sentry_init(include_source_context=False)
+def test_include_source_context_disabled(debugg_ai_init, capture_events):
+    debugg_ai_init(include_source_context=False)
     events = capture_events()
     try:
         1 / 0
@@ -473,8 +473,8 @@ def test_include_source_context_disabled(sentry_init, capture_events):
 
 
 @pytest.mark.parametrize("integrations", [[], [ExecutingIntegration()]])
-def test_function_names(sentry_init, capture_events, integrations):
-    sentry_init(integrations=integrations)
+def test_function_names(debugg_ai_init, capture_events, integrations):
+    debugg_ai_init(integrations=integrations)
     events = capture_events()
 
     def foo():
@@ -501,8 +501,8 @@ def test_function_names(sentry_init, capture_events, integrations):
         assert functions == ["foo", "bar"]
 
 
-def test_attach_stacktrace_enabled(sentry_init, capture_events):
-    sentry_init(attach_stacktrace=True)
+def test_attach_stacktrace_enabled(debugg_ai_init, capture_events):
+    debugg_ai_init(attach_stacktrace=True)
     events = capture_events()
 
     def foo():
@@ -520,8 +520,8 @@ def test_attach_stacktrace_enabled(sentry_init, capture_events):
     assert functions[-2:] == ["foo", "bar"]
 
 
-def test_attach_stacktrace_enabled_no_locals(sentry_init, capture_events):
-    sentry_init(attach_stacktrace=True, include_local_variables=False)
+def test_attach_stacktrace_enabled_no_locals(debugg_ai_init, capture_events):
+    debugg_ai_init(attach_stacktrace=True, include_local_variables=False)
     events = capture_events()
 
     def foo():
@@ -538,8 +538,8 @@ def test_attach_stacktrace_enabled_no_locals(sentry_init, capture_events):
     assert local_vars[-2:] == [None, None]
 
 
-def test_attach_stacktrace_in_app(sentry_init, capture_events):
-    sentry_init(attach_stacktrace=True, in_app_exclude=["_pytest"])
+def test_attach_stacktrace_in_app(debugg_ai_init, capture_events):
+    debugg_ai_init(attach_stacktrace=True, in_app_exclude=["_pytest"])
     events = capture_events()
 
     capture_message("hi")
@@ -552,8 +552,8 @@ def test_attach_stacktrace_in_app(sentry_init, capture_events):
     assert all(f["in_app"] is False for f in pytest_frames)
 
 
-def test_attach_stacktrace_disabled(sentry_init, capture_events):
-    sentry_init(attach_stacktrace=False)
+def test_attach_stacktrace_disabled(debugg_ai_init, capture_events):
+    debugg_ai_init(attach_stacktrace=False)
     events = capture_events()
     capture_message("HI")
 
@@ -561,8 +561,8 @@ def test_attach_stacktrace_disabled(sentry_init, capture_events):
     assert "threads" not in event
 
 
-def test_capture_event_works(sentry_init):
-    sentry_init(transport=_TestTransport())
+def test_capture_event_works(debugg_ai_init):
+    debugg_ai_init(transport=_TestTransport())
     pytest.raises(EnvelopeCapturedError, lambda: capture_event({}))
     pytest.raises(EnvelopeCapturedError, lambda: capture_event({}))
 
@@ -614,14 +614,14 @@ def test_atexit(tmpdir, monkeypatch, num_messages, http2):
 
 
 def test_configure_scope_available(
-    sentry_init, request, monkeypatch, suppress_deprecation_warnings
+    debugg_ai_init, request, monkeypatch, suppress_deprecation_warnings
 ):
     """
     Test that scope is configured if client is configured
 
     This test can be removed once configure_scope and the Hub are removed.
     """
-    sentry_init()
+    debugg_ai_init()
 
     with configure_scope() as scope:
         assert scope is Hub.current.scope
@@ -639,8 +639,8 @@ def test_configure_scope_available(
 
 
 @pytest.mark.tests_internal_exceptions
-def test_client_debug_option_enabled(sentry_init, caplog):
-    sentry_init(debug=True)
+def test_client_debug_option_enabled(debugg_ai_init, caplog):
+    debugg_ai_init(debug=True)
 
     capture_internal_exception((ValueError, ValueError("OK"), None))
     assert "OK" in caplog.text
@@ -648,9 +648,9 @@ def test_client_debug_option_enabled(sentry_init, caplog):
 
 @pytest.mark.tests_internal_exceptions
 @pytest.mark.parametrize("with_client", (True, False))
-def test_client_debug_option_disabled(with_client, sentry_init, caplog):
+def test_client_debug_option_disabled(with_client, debugg_ai_init, caplog):
     if with_client:
-        sentry_init()
+        debugg_ai_init()
 
     capture_internal_exception((ValueError, ValueError("OK"), None))
     assert "OK" not in caplog.text
@@ -659,7 +659,7 @@ def test_client_debug_option_disabled(with_client, sentry_init, caplog):
 @pytest.mark.skip(
     reason="New behavior in SDK 2.0: You have a scope before init and add data to it."
 )
-def test_scope_initialized_before_client(sentry_init, capture_events):
+def test_scope_initialized_before_client(debugg_ai_init, capture_events):
     """
     This is a consequence of how configure_scope() works. We must
     make `configure_scope()` a noop if no client is configured. Even
@@ -668,7 +668,7 @@ def test_scope_initialized_before_client(sentry_init, capture_events):
     with configure_scope() as scope:
         scope.set_tag("foo", 42)
 
-    sentry_init()
+    debugg_ai_init()
 
     events = capture_events()
     capture_message("hi")
@@ -677,16 +677,16 @@ def test_scope_initialized_before_client(sentry_init, capture_events):
     assert "tags" not in event
 
 
-def test_weird_chars(sentry_init, capture_events):
-    sentry_init()
+def test_weird_chars(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
     capture_message("föö".encode("latin1"))
     (event,) = events
     assert json.loads(json.dumps(event)) == event
 
 
-def test_nan(sentry_init, capture_events):
-    sentry_init()
+def test_nan(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     try:
@@ -706,8 +706,8 @@ def test_nan(sentry_init, capture_events):
     assert event["tags"]["mynan"] == "nan"
 
 
-def test_cyclic_frame_vars(sentry_init, capture_events):
-    sentry_init()
+def test_cyclic_frame_vars(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     try:
@@ -723,8 +723,8 @@ def test_cyclic_frame_vars(sentry_init, capture_events):
     }
 
 
-def test_cyclic_data(sentry_init, capture_events):
-    sentry_init()
+def test_cyclic_data(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     data = {}
@@ -742,8 +742,8 @@ def test_cyclic_data(sentry_init, capture_events):
     assert data == {"not_cyclic2": "", "not_cyclic": "", "is_cyclic": "<cyclic>"}
 
 
-def test_databag_depth_stripping(sentry_init, capture_events, benchmark):
-    sentry_init()
+def test_databag_depth_stripping(debugg_ai_init, capture_events, benchmark):
+    debugg_ai_init()
     events = capture_events()
 
     value = ["a"]
@@ -764,8 +764,8 @@ def test_databag_depth_stripping(sentry_init, capture_events, benchmark):
         assert len(json.dumps(event)) < 10000
 
 
-def test_databag_string_stripping(sentry_init, capture_events, benchmark):
-    sentry_init()
+def test_databag_string_stripping(debugg_ai_init, capture_events, benchmark):
+    debugg_ai_init()
     events = capture_events()
 
     @benchmark
@@ -782,8 +782,8 @@ def test_databag_string_stripping(sentry_init, capture_events, benchmark):
         assert len(json.dumps(event)) < 10000
 
 
-def test_databag_breadth_stripping(sentry_init, capture_events, benchmark):
-    sentry_init()
+def test_databag_breadth_stripping(debugg_ai_init, capture_events, benchmark):
+    debugg_ai_init()
     events = capture_events()
 
     @benchmark
@@ -804,8 +804,8 @@ def test_databag_breadth_stripping(sentry_init, capture_events, benchmark):
         assert len(json.dumps(event)) < 10000
 
 
-def test_chained_exceptions(sentry_init, capture_events):
-    sentry_init()
+def test_chained_exceptions(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     try:
@@ -828,8 +828,8 @@ def test_chained_exceptions(sentry_init, capture_events):
 
 
 @pytest.mark.tests_internal_exceptions
-def test_broken_mapping(sentry_init, capture_events):
-    sentry_init()
+def test_broken_mapping(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     class C(Mapping):
@@ -858,8 +858,8 @@ def test_broken_mapping(sentry_init, capture_events):
     )
 
 
-def test_mapping_sends_exception(sentry_init, capture_events):
-    sentry_init()
+def test_mapping_sends_exception(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     class C(Mapping):
@@ -894,8 +894,8 @@ def test_mapping_sends_exception(sentry_init, capture_events):
     }
 
 
-def test_object_sends_exception(sentry_init, capture_events):
-    sentry_init()
+def test_object_sends_exception(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     class C:
@@ -920,8 +920,8 @@ def test_object_sends_exception(sentry_init, capture_events):
     )
 
 
-def test_errno_errors(sentry_init, capture_events):
-    sentry_init()
+def test_errno_errors(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     class FooError(Exception):
@@ -936,11 +936,11 @@ def test_errno_errors(sentry_init, capture_events):
 
 
 @maximum_python_312
-def test_non_string_variables(sentry_init, capture_events):
+def test_non_string_variables(debugg_ai_init, capture_events):
     """There is some extremely terrible code in the wild that
     inserts non-strings as variable names into `locals()`."""
 
-    sentry_init()
+    debugg_ai_init()
     events = capture_events()
 
     try:
@@ -957,14 +957,14 @@ def test_non_string_variables(sentry_init, capture_events):
     assert frame["vars"]["42"] == "True"
 
 
-def test_dict_changed_during_iteration(sentry_init, capture_events):
+def test_dict_changed_during_iteration(debugg_ai_init, capture_events):
     """
     Some versions of Bottle modify the WSGI environment inside of this __repr__
     impl: https://github.com/bottlepy/bottle/blob/0.12.16/bottle.py#L1386
 
-    See https://github.com/getsentry/sentry-python/pull/298 for discussion
+    See https://github.com/debugg-ai/debugg-ai-py/pull/298 for discussion
     """
-    sentry_init(send_default_pii=True)
+    debugg_ai_init(send_default_pii=True)
     events = capture_events()
 
     class TooSmartClass:
@@ -991,7 +991,7 @@ def test_dict_changed_during_iteration(sentry_init, capture_events):
     assert frame["vars"]["environ"] == {"a": "<This is me>"}
 
 
-def test_custom_repr_on_vars(sentry_init, capture_events):
+def test_custom_repr_on_vars(debugg_ai_init, capture_events):
     class Foo:
         pass
 
@@ -1006,7 +1006,7 @@ def test_custom_repr_on_vars(sentry_init, capture_events):
         else:
             return None
 
-    sentry_init(custom_repr=custom_repr)
+    debugg_ai_init(custom_repr=custom_repr)
     events = capture_events()
 
     try:
@@ -1031,13 +1031,13 @@ def test_custom_repr_on_vars(sentry_init, capture_events):
         "http://894b7d594095440f8dfea9b300e6f572@localhost:8000/2",
     ],
 )
-def test_init_string_types(dsn, sentry_init):
+def test_init_string_types(dsn, debugg_ai_init):
     # Allow unicode strings on Python 3 and both on Python 2 (due to
     # unicode_literals)
     #
     # Supporting bytes on Python 3 is not really wrong but probably would be
     # extra code
-    sentry_init(dsn)
+    debugg_ai_init(dsn)
     assert (
         debugg_ai_sdk.get_client().dsn
         == "http://894b7d594095440f8dfea9b300e6f572@localhost:8000/2"
@@ -1049,9 +1049,9 @@ def test_init_string_types(dsn, sentry_init):
     [({}, DEFAULT_MAX_BREADCRUMBS), ({"max_breadcrumbs": 50}, 50)],
 )
 def test_max_breadcrumbs_option(
-    sentry_init, capture_events, sdk_options, expected_breadcrumbs
+    debugg_ai_init, capture_events, sdk_options, expected_breadcrumbs
 ):
-    sentry_init(sdk_options)
+    debugg_ai_init(sdk_options)
     events = capture_events()
 
     for _ in range(1231):
@@ -1062,9 +1062,9 @@ def test_max_breadcrumbs_option(
     assert len(events[0]["breadcrumbs"]["values"]) == expected_breadcrumbs
 
 
-def test_multiple_positional_args(sentry_init):
+def test_multiple_positional_args(debugg_ai_init):
     with pytest.raises(TypeError) as exinfo:
-        sentry_init(1, None)
+        debugg_ai_init(1, None)
     assert "Only single positional argument is expected" in str(exinfo.value)
 
 
@@ -1076,9 +1076,9 @@ def test_multiple_positional_args(sentry_init):
     ],
 )
 def test_max_value_length_option(
-    sentry_init, capture_events, sdk_options, expected_data_length
+    debugg_ai_init, capture_events, sdk_options, expected_data_length
 ):
-    sentry_init(sdk_options)
+    debugg_ai_init(sdk_options)
     events = capture_events()
 
     capture_message("a" * 2000)
@@ -1123,7 +1123,7 @@ def test_max_value_length_option(
 )
 @pytest.mark.tests_internal_exceptions
 def test_debug_option(
-    sentry_init,
+    debugg_ai_init,
     monkeypatch,
     caplog,
     client_option,
@@ -1133,9 +1133,9 @@ def test_debug_option(
     monkeypatch.setenv("DEBUGGAI_DEBUG", env_var_value)
 
     if client_option is None:
-        sentry_init()
+        debugg_ai_init()
     else:
-        sentry_init(debug=client_option)
+        debugg_ai_init(debug=client_option)
 
     capture_internal_exception((ValueError, ValueError("something is wrong"), None))
     if debug_output_expected:
@@ -1162,21 +1162,21 @@ def test_debug_option(
     ],
 )
 def test_spotlight_option(
-    sentry_init,
+    debugg_ai_init,
     monkeypatch,
     client_option,
     env_var_value,
     spotlight_url_expected,
 ):
     if env_var_value is None:
-        monkeypatch.delenv("SENTRY_SPOTLIGHT", raising=False)
+        monkeypatch.delenv("DEBUGG_AI_SPOTLIGHT", raising=False)
     else:
-        monkeypatch.setenv("SENTRY_SPOTLIGHT", env_var_value)
+        monkeypatch.setenv("DEBUGG_AI_SPOTLIGHT", env_var_value)
 
     if client_option is None:
-        sentry_init()
+        debugg_ai_init()
     else:
-        sentry_init(spotlight=client_option)
+        debugg_ai_init(spotlight=client_option)
 
     client = debugg_ai_sdk.get_client()
     url = client.spotlight.url if client.spotlight else None
@@ -1203,9 +1203,9 @@ class IssuesSamplerTestConfig:
         self.sample_rate = sample_rate
         self.exception_to_raise = exception_to_raise
 
-    def init_sdk(self, sentry_init):
+    def init_sdk(self, debugg_ai_init):
         # type: (Callable[[*Any], None]) -> None
-        sentry_init(
+        debugg_ai_init(
             error_sampler=self.sampler_function_mock, sample_rate=self.sample_rate
         )
 
@@ -1277,8 +1277,8 @@ class IssuesSamplerTestConfig:
         ),
     ),
 )
-def test_error_sampler(_, sentry_init, capture_events, test_config):
-    test_config.init_sdk(sentry_init)
+def test_error_sampler(_, debugg_ai_init, capture_events, test_config):
+    test_config.init_sdk(debugg_ai_init)
 
     events = capture_events()
 
@@ -1322,11 +1322,11 @@ def test_error_sampler(_, sentry_init, capture_events, test_config):
         [{"py-call-uwsgi-fork-hooks": True}, ["--enable-threads"]],
     ],
 )
-def test_uwsgi_warnings(sentry_init, recwarn, opt, missing_flags):
+def test_uwsgi_warnings(debugg_ai_init, recwarn, opt, missing_flags):
     uwsgi = mock.MagicMock()
     uwsgi.opt = opt
     with mock.patch.dict("sys.modules", uwsgi=uwsgi):
-        sentry_init(profiles_sample_rate=1.0)
+        debugg_ai_init(profiles_sample_rate=1.0)
         if missing_flags:
             assert len(recwarn) == 1
             record = recwarn.pop()
@@ -1418,9 +1418,9 @@ class TestSpanClientReports:
 
         return self
 
-    def run(self, sentry_init, capture_record_lost_event_calls):
+    def run(self, debugg_ai_init, capture_record_lost_event_calls):
         """Runs the test case with the configured parameters."""
-        sentry_init(before_send_transaction=self.before_send)
+        debugg_ai_init(before_send_transaction=self.before_send)
         record_lost_event_calls = capture_record_lost_event_calls()
 
         with debugg_ai_sdk.isolation_scope() as scope:
@@ -1488,11 +1488,11 @@ class TestSpanClientReports:
         ),
     ),
 )
-def test_dropped_transaction(sentry_init, capture_record_lost_event_calls, test_config):
-    test_config.run(sentry_init, capture_record_lost_event_calls)
+def test_dropped_transaction(debugg_ai_init, capture_record_lost_event_calls, test_config):
+    test_config.run(debugg_ai_init, capture_record_lost_event_calls)
 
 
 @pytest.mark.parametrize("enable_tracing", [True, False])
-def test_enable_tracing_deprecated(sentry_init, enable_tracing):
+def test_enable_tracing_deprecated(debugg_ai_init, enable_tracing):
     with pytest.warns(DeprecationWarning):
-        sentry_init(enable_tracing=enable_tracing)
+        debugg_ai_init(enable_tracing=enable_tracing)

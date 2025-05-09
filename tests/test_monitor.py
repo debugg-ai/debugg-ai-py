@@ -18,8 +18,8 @@ class UnhealthyTestTransport(HealthyTestTransport):
         return False
 
 
-def test_no_monitor_if_disabled(sentry_init):
-    sentry_init(
+def test_no_monitor_if_disabled(debugg_ai_init):
+    debugg_ai_init(
         transport=HealthyTestTransport(),
         enable_backpressure_handling=False,
     )
@@ -27,8 +27,8 @@ def test_no_monitor_if_disabled(sentry_init):
     assert debugg_ai_sdk.get_client().monitor is None
 
 
-def test_monitor_if_enabled(sentry_init):
-    sentry_init(transport=HealthyTestTransport())
+def test_monitor_if_enabled(debugg_ai_init):
+    debugg_ai_init(transport=HealthyTestTransport())
 
     monitor = debugg_ai_sdk.get_client().monitor
     assert monitor is not None
@@ -37,11 +37,11 @@ def test_monitor_if_enabled(sentry_init):
     assert monitor.is_healthy() is True
     assert monitor.downsample_factor == 0
     assert monitor._thread is not None
-    assert monitor._thread.name == "sentry.monitor"
+    assert monitor._thread.name == "debugg-ai.monitor"
 
 
-def test_monitor_unhealthy(sentry_init):
-    sentry_init(transport=UnhealthyTestTransport())
+def test_monitor_unhealthy(debugg_ai_init):
+    debugg_ai_init(transport=UnhealthyTestTransport())
 
     monitor = debugg_ai_sdk.get_client().monitor
     monitor.interval = 0.1
@@ -55,9 +55,9 @@ def test_monitor_unhealthy(sentry_init):
 
 
 def test_transaction_uses_downsampled_rate(
-    sentry_init, capture_record_lost_event_calls, monkeypatch
+    debugg_ai_init, capture_record_lost_event_calls, monkeypatch
 ):
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         transport=UnhealthyTestTransport(),
     )
@@ -86,8 +86,8 @@ def test_transaction_uses_downsampled_rate(
     )
 
 
-def test_monitor_no_thread_on_shutdown_no_errors(sentry_init):
-    sentry_init(transport=HealthyTestTransport())
+def test_monitor_no_thread_on_shutdown_no_errors(debugg_ai_init):
+    debugg_ai_init(transport=HealthyTestTransport())
 
     # make it seem like the interpreter is shutting down
     with mock.patch(

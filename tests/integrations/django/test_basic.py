@@ -47,8 +47,8 @@ def client():
     return Client(application)
 
 
-def test_view_exceptions(sentry_init, client, capture_exceptions, capture_events):
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+def test_view_exceptions(debugg_ai_init, client, capture_exceptions, capture_events):
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
     exceptions = capture_exceptions()
     events = capture_events()
     client.get(reverse("view_exc"))
@@ -61,7 +61,7 @@ def test_view_exceptions(sentry_init, client, capture_exceptions, capture_events
 
 
 def test_ensures_x_forwarded_header_is_honored_in_sdk_when_enabled_in_django(
-    sentry_init, client, capture_exceptions, capture_events, settings
+    debugg_ai_init, client, capture_exceptions, capture_events, settings
 ):
     """
     Test that ensures if django settings.USE_X_FORWARDED_HOST is set to True
@@ -69,7 +69,7 @@ def test_ensures_x_forwarded_header_is_honored_in_sdk_when_enabled_in_django(
     """
     settings.USE_X_FORWARDED_HOST = True
 
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
     exceptions = capture_exceptions()
     events = capture_events()
     client.get(reverse("view_exc"), headers={"X_FORWARDED_HOST": "example.com"})
@@ -82,13 +82,13 @@ def test_ensures_x_forwarded_header_is_honored_in_sdk_when_enabled_in_django(
 
 
 def test_ensures_x_forwarded_header_is_not_honored_when_unenabled_in_django(
-    sentry_init, client, capture_exceptions, capture_events
+    debugg_ai_init, client, capture_exceptions, capture_events
 ):
     """
     Test that ensures if django settings.USE_X_FORWARDED_HOST is set to False
     then the SDK sets the request url to the `HTTP_POST`
     """
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
     exceptions = capture_exceptions()
     events = capture_events()
     client.get(reverse("view_exc"), headers={"X_FORWARDED_HOST": "example.com"})
@@ -100,8 +100,8 @@ def test_ensures_x_forwarded_header_is_not_honored_when_unenabled_in_django(
     assert event["request"]["url"] == "http://localhost/view-exc"
 
 
-def test_middleware_exceptions(sentry_init, client, capture_exceptions):
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+def test_middleware_exceptions(debugg_ai_init, client, capture_exceptions):
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
     exceptions = capture_exceptions()
     client.get(reverse("middleware_exc"))
 
@@ -109,8 +109,8 @@ def test_middleware_exceptions(sentry_init, client, capture_exceptions):
     assert isinstance(error, ZeroDivisionError)
 
 
-def test_request_captured(sentry_init, client, capture_events):
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+def test_request_captured(debugg_ai_init, client, capture_events):
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
     events = capture_events()
     content, status, headers = unpack_werkzeug_response(client.get(reverse("message")))
 
@@ -128,8 +128,8 @@ def test_request_captured(sentry_init, client, capture_events):
     }
 
 
-def test_transaction_with_class_view(sentry_init, client, capture_events):
-    sentry_init(
+def test_transaction_with_class_view(debugg_ai_init, client, capture_events):
+    debugg_ai_init(
         integrations=[DjangoIntegration(transaction_style="function_name")],
         send_default_pii=True,
     )
@@ -147,8 +147,8 @@ def test_transaction_with_class_view(sentry_init, client, capture_events):
     assert event["message"] == "hi"
 
 
-def test_has_trace_if_performance_enabled(sentry_init, client, capture_events):
-    sentry_init(
+def test_has_trace_if_performance_enabled(debugg_ai_init, client, capture_events):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 http_methods_to_capture=("HEAD",),
@@ -177,8 +177,8 @@ def test_has_trace_if_performance_enabled(sentry_init, client, capture_events):
     )
 
 
-def test_has_trace_if_performance_disabled(sentry_init, client, capture_events):
-    sentry_init(
+def test_has_trace_if_performance_disabled(debugg_ai_init, client, capture_events):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
     )
     events = capture_events()
@@ -198,8 +198,8 @@ def test_has_trace_if_performance_disabled(sentry_init, client, capture_events):
     )
 
 
-def test_trace_from_headers_if_performance_enabled(sentry_init, client, capture_events):
-    sentry_init(
+def test_trace_from_headers_if_performance_enabled(debugg_ai_init, client, capture_events):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 http_methods_to_capture=("HEAD",),
@@ -211,10 +211,10 @@ def test_trace_from_headers_if_performance_enabled(sentry_init, client, capture_
     events = capture_events()
 
     trace_id = "582b43a4192642f0b136d5159a501701"
-    sentry_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
 
     client.head(
-        reverse("view_exc_with_msg"), headers={"sentry-trace": sentry_trace_header}
+        reverse("view_exc_with_msg"), headers={"debugg-ai-trace": debugg_ai_trace_header}
     )
 
     (msg_event, error_event, transaction_event) = events
@@ -234,9 +234,9 @@ def test_trace_from_headers_if_performance_enabled(sentry_init, client, capture_
 
 
 def test_trace_from_headers_if_performance_disabled(
-    sentry_init, client, capture_events
+    debugg_ai_init, client, capture_events
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 http_methods_to_capture=("HEAD",),
@@ -247,10 +247,10 @@ def test_trace_from_headers_if_performance_disabled(
     events = capture_events()
 
     trace_id = "582b43a4192642f0b136d5159a501701"
-    sentry_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
 
     client.head(
-        reverse("view_exc_with_msg"), headers={"sentry-trace": sentry_trace_header}
+        reverse("view_exc_with_msg"), headers={"debugg-ai-trace": debugg_ai_trace_header}
     )
 
     (msg_event, error_event) = events
@@ -267,8 +267,8 @@ def test_trace_from_headers_if_performance_disabled(
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
-def test_user_captured(sentry_init, client, capture_events):
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+def test_user_captured(debugg_ai_init, client, capture_events):
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
     events = capture_events()
     content, status, headers = unpack_werkzeug_response(client.get(reverse("mylogin")))
     assert content == b"ok"
@@ -289,8 +289,8 @@ def test_user_captured(sentry_init, client, capture_events):
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
-def test_queryset_repr(sentry_init, capture_events):
-    sentry_init(integrations=[DjangoIntegration()])
+def test_queryset_repr(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[DjangoIntegration()])
     events = capture_events()
     User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
 
@@ -310,8 +310,8 @@ def test_queryset_repr(sentry_init, capture_events):
     )
 
 
-def test_custom_error_handler_request_context(sentry_init, client, capture_events):
-    sentry_init(integrations=[DjangoIntegration()])
+def test_custom_error_handler_request_context(debugg_ai_init, client, capture_events):
+    debugg_ai_init(integrations=[DjangoIntegration()])
     events = capture_events()
     content, status, headers = unpack_werkzeug_response(client.post("/404"))
     assert status.lower() == "404 not found"
@@ -329,14 +329,14 @@ def test_custom_error_handler_request_context(sentry_init, client, capture_event
     }
 
 
-def test_500(sentry_init, client):
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+def test_500(debugg_ai_init, client):
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
 
     content, status, headers = unpack_werkzeug_response(client.get("/view-exc"))
     assert status.lower() == "500 internal server error"
     content = content.decode("utf-8")
 
-    assert content == "Sentry error."
+    assert content == "DebuggAI error."
 
 
 @pytest.mark.forked
@@ -351,8 +351,8 @@ def test_management_command_raises():
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
 @pytest.mark.parametrize("with_integration", [True, False])
-def test_sql_queries(sentry_init, capture_events, with_integration):
-    sentry_init(
+def test_sql_queries(debugg_ai_init, capture_events, with_integration):
+    debugg_ai_init(
         integrations=[DjangoIntegration()] if with_integration else [],
         send_default_pii=True,
         _experiments={"record_sql_params": True},
@@ -383,8 +383,8 @@ def test_sql_queries(sentry_init, capture_events, with_integration):
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
-def test_sql_dict_query_params(sentry_init, capture_events):
-    sentry_init(
+def test_sql_dict_query_params(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
         _experiments={"record_sql_params": True},
@@ -418,9 +418,9 @@ def test_sql_dict_query_params(sentry_init, capture_events):
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
-def test_response_trace(sentry_init, client, capture_events, render_span_tree):
+def test_response_trace(debugg_ai_init, client, capture_events, render_span_tree):
     pytest.importorskip("rest_framework")
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
     )
@@ -448,8 +448,8 @@ def test_response_trace(sentry_init, client, capture_events, render_span_tree):
 )
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
-def test_sql_psycopg2_string_composition(sentry_init, capture_events, query):
-    sentry_init(
+def test_sql_psycopg2_string_composition(debugg_ai_init, capture_events, query):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
         _experiments={"record_sql_params": True},
@@ -480,8 +480,8 @@ def test_sql_psycopg2_string_composition(sentry_init, capture_events, query):
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
-def test_sql_psycopg2_placeholders(sentry_init, capture_events):
-    sentry_init(
+def test_sql_psycopg2_placeholders(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
         _experiments={"record_sql_params": True},
@@ -540,11 +540,11 @@ def test_sql_psycopg2_placeholders(sentry_init, capture_events):
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator(transaction=True)
-def test_django_connect_trace(sentry_init, client, capture_events, render_span_tree):
+def test_django_connect_trace(debugg_ai_init, client, capture_events, render_span_tree):
     """
     Verify we record a span when opening a new database.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
         traces_sample_rate=1.0,
@@ -577,11 +577,11 @@ def test_django_connect_trace(sentry_init, client, capture_events, render_span_t
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator(transaction=True)
-def test_django_connect_breadcrumbs(sentry_init, capture_events):
+def test_django_connect_breadcrumbs(debugg_ai_init, capture_events):
     """
     Verify we record a breadcrumb when opening a new database.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
     )
@@ -613,8 +613,8 @@ def test_django_connect_breadcrumbs(sentry_init, capture_events):
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator(transaction=True)
-def test_db_connection_span_data(sentry_init, client, capture_events):
-    sentry_init(
+def test_db_connection_span_data(debugg_ai_init, client, capture_events):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
         traces_sample_rate=1.0,
@@ -646,10 +646,10 @@ def test_db_connection_span_data(sentry_init, client, capture_events):
                 "database"
             ) or conn_params.get("dbname")
             assert data.get(SPANDATA.SERVER_ADDRESS) == os.environ.get(
-                "SENTRY_PYTHON_TEST_POSTGRES_HOST", "localhost"
+                "DEBUGG_AI_PYTHON_TEST_POSTGRES_HOST", "localhost"
             )
             assert data.get(SPANDATA.SERVER_PORT) == os.environ.get(
-                "SENTRY_PYTHON_TEST_POSTGRES_PORT", "5432"
+                "DEBUGG_AI_PYTHON_TEST_POSTGRES_PORT", "5432"
             )
 
 
@@ -686,7 +686,7 @@ def test_set_db_data_custom_backend():
     ],
 )
 def test_transaction_style(
-    sentry_init,
+    debugg_ai_init,
     client,
     capture_events,
     transaction_style,
@@ -695,7 +695,7 @@ def test_transaction_style(
     expected_source,
     expected_response,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration(transaction_style=transaction_style)],
         send_default_pii=True,
     )
@@ -708,8 +708,8 @@ def test_transaction_style(
     assert event["transaction_info"] == {"source": expected_source}
 
 
-def test_request_body(sentry_init, client, capture_events):
-    sentry_init(integrations=[DjangoIntegration()])
+def test_request_body(debugg_ai_init, client, capture_events):
+    debugg_ai_init(integrations=[DjangoIntegration()])
     events = capture_events()
     content, status, headers = unpack_werkzeug_response(
         client.post(reverse("post_echo"), data=b"heyooo", content_type="text/plain")
@@ -743,8 +743,8 @@ def test_request_body(sentry_init, client, capture_events):
 
 
 @pytest.mark.xfail
-def test_read_request(sentry_init, client, capture_events):
-    sentry_init(integrations=[DjangoIntegration()])
+def test_read_request(debugg_ai_init, client, capture_events):
+    debugg_ai_init(integrations=[DjangoIntegration()])
     events = capture_events()
 
     content, status, headers = unpack_werkzeug_response(
@@ -762,8 +762,8 @@ def test_read_request(sentry_init, client, capture_events):
     assert "data" not in event["request"]
 
 
-def test_request_body_already_read(sentry_init, client, capture_events):
-    sentry_init(integrations=[DjangoIntegration()])
+def test_request_body_already_read(debugg_ai_init, client, capture_events):
+    debugg_ai_init(integrations=[DjangoIntegration()])
 
     events = capture_events()
 
@@ -782,8 +782,8 @@ def test_request_body_already_read(sentry_init, client, capture_events):
         assert "data" not in event["request"]
 
 
-def test_template_tracing_meta(sentry_init, client, capture_events):
-    sentry_init(integrations=[DjangoIntegration()])
+def test_template_tracing_meta(debugg_ai_init, client, capture_events):
+    debugg_ai_init(integrations=[DjangoIntegration()])
     events = capture_events()
 
     content, _, _ = unpack_werkzeug_response(client.get(reverse("template_test3")))
@@ -794,7 +794,7 @@ def test_template_tracing_meta(sentry_init, client, capture_events):
     assert baggage != ""
 
     match = re.match(
-        r'^<meta name="sentry-trace" content="([^\"]*)"><meta name="baggage" content="([^\"]*)">\n',
+        r'^<meta name="debugg-ai-trace" content="([^\"]*)"><meta name="baggage" content="([^\"]*)">\n',
         rendered_meta,
     )
     assert match is not None
@@ -806,9 +806,9 @@ def test_template_tracing_meta(sentry_init, client, capture_events):
 
 @pytest.mark.parametrize("with_executing_integration", [[], [ExecutingIntegration()]])
 def test_template_exception(
-    sentry_init, client, capture_events, with_executing_integration
+    debugg_ai_init, client, capture_events, with_executing_integration
 ):
-    sentry_init(integrations=[DjangoIntegration()] + with_executing_integration)
+    debugg_ai_init(integrations=[DjangoIntegration()] + with_executing_integration)
     events = capture_events()
 
     content, status, headers = unpack_werkzeug_response(
@@ -865,10 +865,10 @@ def test_template_exception(
     ],
 )
 def test_rest_framework_basic(
-    sentry_init, client, capture_events, capture_exceptions, ct, body, route
+    debugg_ai_init, client, capture_events, capture_exceptions, ct, body, route
 ):
     pytest.importorskip("rest_framework")
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
     exceptions = capture_exceptions()
     events = capture_events()
 
@@ -894,11 +894,11 @@ def test_rest_framework_basic(
 @pytest.mark.parametrize(
     "endpoint", ["rest_permission_denied_exc", "permission_denied_exc"]
 )
-def test_does_not_capture_403(sentry_init, client, capture_events, endpoint):
+def test_does_not_capture_403(debugg_ai_init, client, capture_events, endpoint):
     if endpoint == "rest_permission_denied_exc":
         pytest.importorskip("rest_framework")
 
-    sentry_init(integrations=[DjangoIntegration()])
+    debugg_ai_init(integrations=[DjangoIntegration()])
     events = capture_events()
 
     _, status, _ = unpack_werkzeug_response(client.get(reverse(endpoint)))
@@ -907,8 +907,8 @@ def test_does_not_capture_403(sentry_init, client, capture_events, endpoint):
     assert not events
 
 
-def test_render_spans(sentry_init, client, capture_events, render_span_tree):
-    sentry_init(
+def test_render_spans(debugg_ai_init, client, capture_events, render_span_tree):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
     )
@@ -958,8 +958,8 @@ else:
 """
 
 
-def test_middleware_spans(sentry_init, client, capture_events, render_span_tree):
-    sentry_init(
+def test_middleware_spans(debugg_ai_init, client, capture_events, render_span_tree):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(signals_spans=False),
         ],
@@ -975,8 +975,8 @@ def test_middleware_spans(sentry_init, client, capture_events, render_span_tree)
     assert render_span_tree(transaction) == EXPECTED_MIDDLEWARE_SPANS
 
 
-def test_middleware_spans_disabled(sentry_init, client, capture_events):
-    sentry_init(
+def test_middleware_spans_disabled(debugg_ai_init, client, capture_events):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(middleware_spans=False, signals_spans=False),
         ],
@@ -999,8 +999,8 @@ EXPECTED_SIGNALS_SPANS = """\
 """
 
 
-def test_signals_spans(sentry_init, client, capture_events, render_span_tree):
-    sentry_init(
+def test_signals_spans(debugg_ai_init, client, capture_events, render_span_tree):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(middleware_spans=False),
         ],
@@ -1022,8 +1022,8 @@ def test_signals_spans(sentry_init, client, capture_events, render_span_tree):
     assert transaction["spans"][1]["description"] == "django.db.close_old_connections"
 
 
-def test_signals_spans_disabled(sentry_init, client, capture_events):
-    sentry_init(
+def test_signals_spans_disabled(debugg_ai_init, client, capture_events):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(middleware_spans=False, signals_spans=False),
         ],
@@ -1047,8 +1047,8 @@ EXPECTED_SIGNALS_SPANS_FILTERED = """\
 """
 
 
-def test_signals_spans_filtering(sentry_init, client, capture_events, render_span_tree):
-    sentry_init(
+def test_signals_spans_filtering(debugg_ai_init, client, capture_events, render_span_tree):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 middleware_spans=False,
@@ -1080,13 +1080,13 @@ def test_signals_spans_filtering(sentry_init, client, capture_events, render_spa
     )
 
 
-def test_csrf(sentry_init, client):
+def test_csrf(debugg_ai_init, client):
     """
     Assert that CSRF view decorator works even with the view wrapped in our own
     callable.
     """
 
-    sentry_init(integrations=[DjangoIntegration()])
+    debugg_ai_init(integrations=[DjangoIntegration()])
 
     content, status, _headers = unpack_werkzeug_response(
         client.post(reverse("csrf_hello_not_exempt"))
@@ -1094,12 +1094,12 @@ def test_csrf(sentry_init, client):
     assert status.lower() == "403 forbidden"
 
     content, status, _headers = unpack_werkzeug_response(
-        client.post(reverse("sentryclass_csrf"))
+        client.post(reverse("debugg-aiclass_csrf"))
     )
     assert status.lower() == "403 forbidden"
 
     content, status, _headers = unpack_werkzeug_response(
-        client.post(reverse("sentryclass"))
+        client.post(reverse("debugg-aiclass"))
     )
     assert status.lower() == "200 ok"
     assert content == b"ok"
@@ -1119,7 +1119,7 @@ def test_csrf(sentry_init, client):
 
 @pytest.mark.skipif(DJANGO_VERSION < (2, 0), reason="Requires Django > 2.0")
 def test_custom_urlconf_middleware(
-    settings, sentry_init, client, capture_events, render_span_tree
+    settings, debugg_ai_init, client, capture_events, render_span_tree
 ):
     """
     Some middlewares (for instance in django-tenants) overwrite request.urlconf.
@@ -1130,7 +1130,7 @@ def test_custom_urlconf_middleware(
     settings.MIDDLEWARE.insert(0, urlconf)
     client.application.load_middleware()
 
-    sentry_init(integrations=[DjangoIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[DjangoIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     content, status, _headers = unpack_werkzeug_response(client.get("/custom/ok"))
@@ -1173,8 +1173,8 @@ def test_get_receiver_name():
 
 
 @pytest.mark.skipif(DJANGO_VERSION <= (1, 11), reason="Requires Django > 1.11")
-def test_span_origin(sentry_init, client, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, client, capture_events):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 middleware_spans=True,
@@ -1201,11 +1201,11 @@ def test_span_origin(sentry_init, client, capture_events):
     assert signal_span_found
 
 
-def test_transaction_http_method_default(sentry_init, client, capture_events):
+def test_transaction_http_method_default(debugg_ai_init, client, capture_events):
     """
     By default OPTIONS and HEAD requests do not create a transaction.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
     )
@@ -1221,8 +1221,8 @@ def test_transaction_http_method_default(sentry_init, client, capture_events):
     assert event["request"]["method"] == "GET"
 
 
-def test_transaction_http_method_custom(sentry_init, client, capture_events):
-    sentry_init(
+def test_transaction_http_method_custom(debugg_ai_init, client, capture_events):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 http_methods_to_capture=(
@@ -1246,7 +1246,7 @@ def test_transaction_http_method_custom(sentry_init, client, capture_events):
     assert event2["request"]["method"] == "HEAD"
 
 
-def test_ensures_spotlight_middleware_when_spotlight_is_enabled(sentry_init, settings):
+def test_ensures_spotlight_middleware_when_spotlight_is_enabled(debugg_ai_init, settings):
     """
     Test that ensures if Spotlight is enabled, relevant SpotlightMiddleware
     is added to middleware list in settings.
@@ -1254,7 +1254,7 @@ def test_ensures_spotlight_middleware_when_spotlight_is_enabled(sentry_init, set
     settings.DEBUG = True
     original_middleware = frozenset(settings.MIDDLEWARE)
 
-    sentry_init(integrations=[DjangoIntegration()], spotlight=True)
+    debugg_ai_init(integrations=[DjangoIntegration()], spotlight=True)
 
     added = frozenset(settings.MIDDLEWARE) ^ original_middleware
 
@@ -1262,18 +1262,18 @@ def test_ensures_spotlight_middleware_when_spotlight_is_enabled(sentry_init, set
 
 
 def test_ensures_no_spotlight_middleware_when_env_killswitch_is_false(
-    monkeypatch, sentry_init, settings
+    monkeypatch, debugg_ai_init, settings
 ):
     """
     Test that ensures if Spotlight is enabled, but is set to a falsy value
     the relevant SpotlightMiddleware is NOT added to middleware list in settings.
     """
     settings.DEBUG = True
-    monkeypatch.setenv("SENTRY_SPOTLIGHT_ON_ERROR", "no")
+    monkeypatch.setenv("DEBUGG_AI_SPOTLIGHT_ON_ERROR", "no")
 
     original_middleware = frozenset(settings.MIDDLEWARE)
 
-    sentry_init(integrations=[DjangoIntegration()], spotlight=True)
+    debugg_ai_init(integrations=[DjangoIntegration()], spotlight=True)
 
     added = frozenset(settings.MIDDLEWARE) ^ original_middleware
 
@@ -1281,7 +1281,7 @@ def test_ensures_no_spotlight_middleware_when_env_killswitch_is_false(
 
 
 def test_ensures_no_spotlight_middleware_when_no_spotlight(
-    monkeypatch, sentry_init, settings
+    monkeypatch, debugg_ai_init, settings
 ):
     """
     Test that ensures if Spotlight is not enabled
@@ -1290,11 +1290,11 @@ def test_ensures_no_spotlight_middleware_when_no_spotlight(
     settings.DEBUG = True
 
     # We should NOT have the middleware even if the env var is truthy if Spotlight is off
-    monkeypatch.setenv("SENTRY_SPOTLIGHT_ON_ERROR", "1")
+    monkeypatch.setenv("DEBUGG_AI_SPOTLIGHT_ON_ERROR", "1")
 
     original_middleware = frozenset(settings.MIDDLEWARE)
 
-    sentry_init(integrations=[DjangoIntegration()], spotlight=False)
+    debugg_ai_init(integrations=[DjangoIntegration()], spotlight=False)
 
     added = frozenset(settings.MIDDLEWARE) ^ original_middleware
 

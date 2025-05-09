@@ -22,7 +22,7 @@ from debugg_ai_sdk.utils import (
     qualname_from_function,
     to_string,
     try_convert,
-    is_sentry_url,
+    is_debugg_ai_url,
     _is_external_source,
     _is_in_project_root,
     _module_in_list,
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from types import FrameType
 
 
-SENTRY_TRACE_REGEX = re.compile(
+DEBUGG_AI_TRACE_REGEX = re.compile(
     "^[ \t]*"  # whitespace
     "([0-9a-f]{32})?"  # trace_id
     "-?([0-9a-f]{16})?"  # span_id
@@ -309,10 +309,10 @@ def add_query_source(span):
             span.set_data(SPANDATA.CODE_FUNCTION, frame.f_code.co_name)
 
 
-def extract_sentrytrace_data(header):
+def extract_debugg_ai_trace_data(header):
     # type: (Optional[str]) -> Optional[Dict[str, Union[str, bool, None]]]
     """
-    Given a `sentry-trace` header string, return a dictionary of data.
+    Given a `debugg-ai-trace` header string, return a dictionary of data.
     """
     if not header:
         return None
@@ -320,7 +320,7 @@ def extract_sentrytrace_data(header):
     if header.startswith("00-") and header.endswith("-00"):
         header = header[3:-3]
 
-    match = SENTRY_TRACE_REGEX.match(header)
+    match = DEBUGG_AI_TRACE_REGEX.match(header)
     if not match:
         return None
 
@@ -363,7 +363,7 @@ def _format_sql(cursor, sql):
 
 class PropagationContext:
     """
-    The PropagationContext represents the data of a trace in Sentry.
+    The PropagationContext represents the data of a trace in DebuggAI.
     """
 
     __slots__ = (
@@ -384,7 +384,7 @@ class PropagationContext:
     ):
         # type: (...) -> None
         self._trace_id = trace_id
-        """The trace id of the Sentry trace."""
+        """The trace id of the DebuggAI trace."""
 
         self._span_id = span_id
         """The span id of the currently executing span."""
@@ -414,13 +414,13 @@ class PropagationContext:
                 baggage_header
             ).dynamic_sampling_context()
 
-        sentry_trace_header = normalized_data.get(SENTRY_TRACE_HEADER_NAME)
-        if sentry_trace_header:
-            sentrytrace_data = extract_sentrytrace_data(sentry_trace_header)
-            if sentrytrace_data is not None:
+        debugg_ai_trace_header = normalized_data.get(DEBUGG_AI_TRACE_HEADER_NAME)
+        if debugg_ai_trace_header:
+            debugg_ai_trace_data = extract_debugg_ai_trace_data(debugg_ai_trace_header)
+            if debugg_ai_trace_data is not None:
                 if propagation_context is None:
                     propagation_context = PropagationContext()
-                propagation_context.update(sentrytrace_data)
+                propagation_context.update(debugg_ai_trace_data)
 
         if propagation_context is not None:
             propagation_context._fill_sample_rand()
@@ -430,7 +430,7 @@ class PropagationContext:
     @property
     def trace_id(self):
         # type: () -> str
-        """The trace id of the Sentry trace."""
+        """The trace id of the DebuggAI trace."""
         if not self._trace_id:
             # New trace, don't fill in sample_rand
             self._trace_id = uuid.uuid4().hex
@@ -549,18 +549,18 @@ class Baggage:
     it is the caller's responsibility to enforce this restriction.
     """
 
-    __slots__ = ("sentry_items", "third_party_items", "mutable")
+    __slots__ = ("debugg_ai_items", "third_party_items", "mutable")
 
-    SENTRY_PREFIX = "sentry-"
-    SENTRY_PREFIX_REGEX = re.compile("^sentry-")
+    DEBUGG_AI_PREFIX = "debugg-ai-"
+    DEBUGG_AI_PREFIX_REGEX = re.compile("^debugg-ai-")
 
     def __init__(
         self,
-        sentry_items,  # type: Dict[str, str]
+        debugg_ai_items,  # type: Dict[str, str]
         third_party_items="",  # type: str
         mutable=True,  # type: bool
     ):
-        self.sentry_items = sentry_items
+        self.debugg_ai_items = debugg_ai_items
         self.third_party_items = third_party_items
         self.mutable = mutable
 
@@ -573,9 +573,9 @@ class Baggage:
     ):
         # type: (...) -> Baggage
         """
-        freeze if incoming header already has sentry baggage
+        freeze if incoming header already has debugg-ai baggage
         """
-        sentry_items = {}
+        debugg_ai_items = {}
         third_party_items = ""
         mutable = True
 
@@ -587,98 +587,98 @@ class Baggage:
                 with capture_internal_exceptions():
                     item = item.strip()
                     key, val = item.split("=")
-                    if Baggage.SENTRY_PREFIX_REGEX.match(key):
+                    if Baggage.DEBUGG_AI_PREFIX_REGEX.match(key):
                         baggage_key = unquote(key.split("-")[1])
-                        sentry_items[baggage_key] = unquote(val)
+                        debugg_ai_items[baggage_key] = unquote(val)
                         mutable = False
                     else:
                         third_party_items += ("," if third_party_items else "") + item
 
         if _sample_rand is not None:
-            sentry_items["sample_rand"] = str(_sample_rand)
+            debugg_ai_items["sample_rand"] = str(_sample_rand)
             mutable = False
 
-        return Baggage(sentry_items, third_party_items, mutable)
+        return Baggage(debugg_ai_items, third_party_items, mutable)
 
     @classmethod
     def from_options(cls, scope):
         # type: (debugg_ai_sdk.scope.Scope) -> Optional[Baggage]
 
-        sentry_items = {}  # type: Dict[str, str]
+        debugg_ai_items = {}  # type: Dict[str, str]
         third_party_items = ""
         mutable = False
 
         client = debugg_ai_sdk.get_client()
 
         if not client.is_active() or scope._propagation_context is None:
-            return Baggage(sentry_items)
+            return Baggage(debugg_ai_items)
 
         options = client.options
         propagation_context = scope._propagation_context
 
         if propagation_context is not None:
-            sentry_items["trace_id"] = propagation_context.trace_id
+            debugg_ai_items["trace_id"] = propagation_context.trace_id
 
         if options.get("environment"):
-            sentry_items["environment"] = options["environment"]
+            debugg_ai_items["environment"] = options["environment"]
 
         if options.get("release"):
-            sentry_items["release"] = options["release"]
+            debugg_ai_items["release"] = options["release"]
 
         if options.get("dsn"):
-            sentry_items["public_key"] = Dsn(options["dsn"]).public_key
+            debugg_ai_items["public_key"] = Dsn(options["dsn"]).public_key
 
         if options.get("traces_sample_rate"):
-            sentry_items["sample_rate"] = str(options["traces_sample_rate"])
+            debugg_ai_items["sample_rate"] = str(options["traces_sample_rate"])
 
-        return Baggage(sentry_items, third_party_items, mutable)
+        return Baggage(debugg_ai_items, third_party_items, mutable)
 
     @classmethod
     def populate_from_transaction(cls, transaction):
         # type: (debugg_ai_sdk.tracing.Transaction) -> Baggage
         """
-        Populate fresh baggage entry with sentry_items and make it immutable
+        Populate fresh baggage entry with debugg_ai_items and make it immutable
         if this is the head SDK which originates traces.
         """
         client = debugg_ai_sdk.get_client()
-        sentry_items = {}  # type: Dict[str, str]
+        debugg_ai_items = {}  # type: Dict[str, str]
 
         if not client.is_active():
-            return Baggage(sentry_items)
+            return Baggage(debugg_ai_items)
 
         options = client.options or {}
 
-        sentry_items["trace_id"] = transaction.trace_id
-        sentry_items["sample_rand"] = str(transaction._sample_rand)
+        debugg_ai_items["trace_id"] = transaction.trace_id
+        debugg_ai_items["sample_rand"] = str(transaction._sample_rand)
 
         if options.get("environment"):
-            sentry_items["environment"] = options["environment"]
+            debugg_ai_items["environment"] = options["environment"]
 
         if options.get("release"):
-            sentry_items["release"] = options["release"]
+            debugg_ai_items["release"] = options["release"]
 
         if options.get("dsn"):
-            sentry_items["public_key"] = Dsn(options["dsn"]).public_key
+            debugg_ai_items["public_key"] = Dsn(options["dsn"]).public_key
 
         if (
             transaction.name
             and transaction.source not in LOW_QUALITY_TRANSACTION_SOURCES
         ):
-            sentry_items["transaction"] = transaction.name
+            debugg_ai_items["transaction"] = transaction.name
 
         if transaction.sample_rate is not None:
-            sentry_items["sample_rate"] = str(transaction.sample_rate)
+            debugg_ai_items["sample_rate"] = str(transaction.sample_rate)
 
         if transaction.sampled is not None:
-            sentry_items["sampled"] = "true" if transaction.sampled else "false"
+            debugg_ai_items["sampled"] = "true" if transaction.sampled else "false"
 
         # there's an existing baggage but it was mutable,
         # which is why we are creating this new baggage.
-        # However, if by chance the user put some sentry items in there, give them precedence.
-        if transaction._baggage and transaction._baggage.sentry_items:
-            sentry_items.update(transaction._baggage.sentry_items)
+        # However, if by chance the user put some debugg-ai items in there, give them precedence.
+        if transaction._baggage and transaction._baggage.debugg_ai_items:
+            debugg_ai_items.update(transaction._baggage.debugg_ai_items)
 
-        return Baggage(sentry_items, mutable=False)
+        return Baggage(debugg_ai_items, mutable=False)
 
     def freeze(self):
         # type: () -> None
@@ -688,7 +688,7 @@ class Baggage:
         # type: () -> Dict[str, str]
         header = {}
 
-        for key, item in self.sentry_items.items():
+        for key, item in self.debugg_ai_items.items():
             header[key] = item
 
         return header
@@ -697,9 +697,9 @@ class Baggage:
         # type: (bool) -> str
         items = []
 
-        for key, val in self.sentry_items.items():
+        for key, val in self.debugg_ai_items.items():
             with capture_internal_exceptions():
-                item = Baggage.SENTRY_PREFIX + quote(key) + "=" + quote(str(val))
+                item = Baggage.DEBUGG_AI_PREFIX + quote(key) + "=" + quote(str(val))
                 items.append(item)
 
         if include_third_party:
@@ -708,28 +708,28 @@ class Baggage:
         return ",".join(items)
 
     @staticmethod
-    def strip_sentry_baggage(header):
+    def strip_debugg_ai_baggage(header):
         # type: (str) -> str
-        """Remove Sentry baggage from the given header.
+        """Remove DebuggAI baggage from the given header.
 
-        Given a Baggage header, return a new Baggage header with all Sentry baggage items removed.
+        Given a Baggage header, return a new Baggage header with all DebuggAI baggage items removed.
         """
         return ",".join(
             (
                 item
                 for item in header.split(",")
-                if not Baggage.SENTRY_PREFIX_REGEX.match(item.strip())
+                if not Baggage.DEBUGG_AI_PREFIX_REGEX.match(item.strip())
             )
         )
 
     def _sample_rand(self):
         # type: () -> Optional[Decimal]
-        """Convenience method to get the sample_rand value from the sentry_items.
+        """Convenience method to get the sample_rand value from the debugg_ai_items.
 
         We validate the value and parse it as a Decimal before returning it. The value is considered
         valid if it is a Decimal in the range [0, 1).
         """
-        sample_rand = try_convert(Decimal, self.sentry_items.get("sample_rand"))
+        sample_rand = try_convert(Decimal, self.debugg_ai_items.get("sample_rand"))
 
         if sample_rand is not None and Decimal(0) <= sample_rand < Decimal(1):
             return sample_rand
@@ -748,7 +748,7 @@ def should_propagate_trace(client, url):
     """
     trace_propagation_targets = client.options["trace_propagation_targets"]
 
-    if is_sentry_url(client, url):
+    if is_debugg_ai_url(client, url):
         return False
 
     return match_regex_list(url, trace_propagation_targets, substring_matching=True)
@@ -789,7 +789,7 @@ def start_child_span_decorator(func):
             if span is None:
                 logger.debug(
                     "Cannot create a child span for %s. "
-                    "Please start a Sentry transaction before calling this function.",
+                    "Please start a DebuggAI transaction before calling this function.",
                     qualname_from_function(func),
                 )
                 return await func(*args, **kwargs)
@@ -817,7 +817,7 @@ def start_child_span_decorator(func):
             if span is None:
                 logger.debug(
                     "Cannot create a child span for %s. "
-                    "Please start a Sentry transaction before calling this function.",
+                    "Please start a DebuggAI transaction before calling this function.",
                     qualname_from_function(func),
                 )
                 return func(*args, **kwargs)
@@ -900,7 +900,7 @@ def _sample_rand_range(parent_sampled, sample_rate):
 from debugg_ai_sdk.tracing import (
     BAGGAGE_HEADER_NAME,
     LOW_QUALITY_TRANSACTION_SOURCES,
-    SENTRY_TRACE_HEADER_NAME,
+    DEBUGG_AI_TRACE_HEADER_NAME,
 )
 
 if TYPE_CHECKING:

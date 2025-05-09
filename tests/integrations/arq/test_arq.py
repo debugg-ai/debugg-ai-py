@@ -41,7 +41,7 @@ def patch_fakeredis_info_command():
 
 
 @pytest.fixture
-def init_arq(sentry_init):
+def init_arq(debugg_ai_init):
     def inner(
         cls_functions=None,
         cls_cron_jobs=None,
@@ -58,7 +58,7 @@ def init_arq(sentry_init):
         if kw_cron_jobs is not None:
             kwargs["cron_jobs"] = kw_cron_jobs
 
-        sentry_init(
+        debugg_ai_init(
             integrations=[ArqIntegration()],
             traces_sample_rate=1.0,
             send_default_pii=True,
@@ -86,7 +86,7 @@ def init_arq(sentry_init):
 
 
 @pytest.fixture
-def init_arq_with_dict_settings(sentry_init):
+def init_arq_with_dict_settings(debugg_ai_init):
     def inner(
         cls_functions=None,
         cls_cron_jobs=None,
@@ -103,7 +103,7 @@ def init_arq_with_dict_settings(sentry_init):
         if kw_cron_jobs is not None:
             kwargs["cron_jobs"] = kw_cron_jobs
 
-        sentry_init(
+        debugg_ai_init(
             integrations=[ArqIntegration()],
             traces_sample_rate=1.0,
             send_default_pii=True,

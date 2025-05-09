@@ -75,10 +75,10 @@ def test_crons_task_success():
     fake_task = MagicMock()
     fake_task.request = {
         "headers": {
-            "sentry-monitor-slug": "test123",
-            "sentry-monitor-check-in-id": "1234567890",
-            "sentry-monitor-start-timestamp-s": 200.1,
-            "sentry-monitor-config": {
+            "debugg-ai-monitor-slug": "test123",
+            "debugg-ai-monitor-check-in-id": "1234567890",
+            "debugg-ai-monitor-start-timestamp-s": 200.1,
+            "debugg-ai-monitor-config": {
                 "schedule": {
                     "type": "interval",
                     "value": 3,
@@ -86,7 +86,7 @@ def test_crons_task_success():
                 },
                 "timezone": "Europe/Vienna",
             },
-            "sentry-monitor-some-future-key": "some-future-value",
+            "debugg-ai-monitor-some-future-key": "some-future-value",
         },
     }
 
@@ -119,10 +119,10 @@ def test_crons_task_failure():
     fake_task = MagicMock()
     fake_task.request = {
         "headers": {
-            "sentry-monitor-slug": "test123",
-            "sentry-monitor-check-in-id": "1234567890",
-            "sentry-monitor-start-timestamp-s": 200.1,
-            "sentry-monitor-config": {
+            "debugg-ai-monitor-slug": "test123",
+            "debugg-ai-monitor-check-in-id": "1234567890",
+            "debugg-ai-monitor-start-timestamp-s": 200.1,
+            "debugg-ai-monitor-config": {
                 "schedule": {
                     "type": "interval",
                     "value": 3,
@@ -130,7 +130,7 @@ def test_crons_task_failure():
                 },
                 "timezone": "Europe/Vienna",
             },
-            "sentry-monitor-some-future-key": "some-future-value",
+            "debugg-ai-monitor-some-future-key": "some-future-value",
         },
     }
 
@@ -163,10 +163,10 @@ def test_crons_task_retry():
     fake_task = MagicMock()
     fake_task.request = {
         "headers": {
-            "sentry-monitor-slug": "test123",
-            "sentry-monitor-check-in-id": "1234567890",
-            "sentry-monitor-start-timestamp-s": 200.1,
-            "sentry-monitor-config": {
+            "debugg-ai-monitor-slug": "test123",
+            "debugg-ai-monitor-check-in-id": "1234567890",
+            "debugg-ai-monitor-start-timestamp-s": 200.1,
+            "debugg-ai-monitor-config": {
                 "schedule": {
                     "type": "interval",
                     "value": 3,
@@ -174,7 +174,7 @@ def test_crons_task_retry():
                 },
                 "timezone": "Europe/Vienna",
             },
-            "sentry-monitor-some-future-key": "some-future-value",
+            "debugg-ai-monitor-some-future-key": "some-future-value",
         },
     }
 
@@ -270,7 +270,7 @@ def test_get_monitor_config_seconds():
     with mock.patch("debugg_ai_sdk.integrations.logger.warning") as mock_logger_warning:
         monitor_config = _get_monitor_config(celery_schedule, app, "foo")
         mock_logger_warning.assert_called_with(
-            "Intervals shorter than one minute are not supported by Sentry Crons. Monitor '%s' has an interval of %s seconds. Use the `exclude_beat_tasks` option in the celery integration to exclude it.",
+            "Intervals shorter than one minute are not supported by DebuggAI Crons. Monitor '%s' has an interval of %s seconds. Use the `exclude_beat_tasks` option in the celery integration to exclude it.",
             "foo",
             3,
         )

@@ -27,13 +27,13 @@ if TYPE_CHECKING:
     from debugg_ai_sdk.utils import ExcInfo
 
 
-def _check_sentry_initialized():
+def _check_debugg_ai_initialized():
     # type: () -> None
     if debugg_ai_sdk.get_client().is_active():
         return
 
     logger.debug(
-        "[Tracing] Sentry not initialized in ray cluster worker, performance data will be discarded."
+        "[Tracing] DebuggAI not initialized in ray cluster worker, performance data will be discarded."
     )
 
 
@@ -56,7 +56,7 @@ def _patch_ray_remote():
             """
             Ray Worker
             """
-            _check_sentry_initialized()
+            _check_debugg_ai_initialized()
 
             transaction = debugg_ai_sdk.continue_trace(
                 _tracing or {},

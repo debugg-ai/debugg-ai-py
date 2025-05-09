@@ -8,35 +8,35 @@ from opentelemetry.trace import SpanKind, SpanContext, Status, StatusCode
 
 import debugg_ai_sdk
 from debugg_ai_sdk.integrations.opentelemetry.span_processor import (
-    SentrySpanProcessor,
+    DebuggAISpanProcessor,
     link_trace_context_to_error_event,
 )
 from debugg_ai_sdk.tracing import Span, Transaction
-from debugg_ai_sdk.tracing_utils import extract_sentrytrace_data
+from debugg_ai_sdk.tracing_utils import extract_debugg_ai_trace_data
 
 
-def test_is_sentry_span():
+def test_is_debugg_ai_span():
     otel_span = MagicMock()
 
-    span_processor = SentrySpanProcessor()
-    assert not span_processor._is_sentry_span(otel_span)
+    span_processor = DebuggAISpanProcessor()
+    assert not span_processor._is_debugg_ai_span(otel_span)
 
     client = MagicMock()
     client.options = {"instrumenter": "otel"}
-    client.dsn = "https://1234567890abcdef@o123456.ingest.sentry.io/123456"
+    client.dsn = "https://1234567890abcdef@o123456.ingest.debugg.ai/123456"
     debugg_ai_sdk.get_global_scope().set_client(client)
 
-    assert not span_processor._is_sentry_span(otel_span)
+    assert not span_processor._is_debugg_ai_span(otel_span)
 
     otel_span.attributes = {
         "http.url": "https://example.com",
     }
-    assert not span_processor._is_sentry_span(otel_span)
+    assert not span_processor._is_debugg_ai_span(otel_span)
 
     otel_span.attributes = {
-        "http.url": "https://o123456.ingest.sentry.io/api/123/envelope",
+        "http.url": "https://o123456.ingest.debugg.ai/api/123/envelope",
     }
-    assert span_processor._is_sentry_span(otel_span)
+    assert span_processor._is_debugg_ai_span(otel_span)
 
 
 def test_get_otel_context():
@@ -45,7 +45,7 @@ def test_get_otel_context():
     otel_span.resource = MagicMock()
     otel_span.resource.attributes = {"baz": "qux"}
 
-    span_processor = SentrySpanProcessor()
+    span_processor = DebuggAISpanProcessor()
     otel_context = span_processor._get_otel_context(otel_span)
 
     assert otel_context == {
@@ -66,13 +66,13 @@ def test_get_trace_data_with_span_and_trace():
 
     parent_context = {}
 
-    span_processor = SentrySpanProcessor()
-    sentry_trace_data = span_processor._get_trace_data(otel_span, parent_context)
-    assert sentry_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
-    assert sentry_trace_data["span_id"] == "1234567890abcdef"
-    assert sentry_trace_data["parent_span_id"] is None
-    assert sentry_trace_data["parent_sampled"] is None
-    assert sentry_trace_data["baggage"] is None
+    span_processor = DebuggAISpanProcessor()
+    debugg_ai_trace_data = span_processor._get_trace_data(otel_span, parent_context)
+    assert debugg_ai_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
+    assert debugg_ai_trace_data["span_id"] == "1234567890abcdef"
+    assert debugg_ai_trace_data["parent_span_id"] is None
+    assert debugg_ai_trace_data["parent_sampled"] is None
+    assert debugg_ai_trace_data["baggage"] is None
 
 
 def test_get_trace_data_with_span_and_trace_and_parent():
@@ -88,16 +88,16 @@ def test_get_trace_data_with_span_and_trace_and_parent():
 
     parent_context = {}
 
-    span_processor = SentrySpanProcessor()
-    sentry_trace_data = span_processor._get_trace_data(otel_span, parent_context)
-    assert sentry_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
-    assert sentry_trace_data["span_id"] == "1234567890abcdef"
-    assert sentry_trace_data["parent_span_id"] == "abcdef1234567890"
-    assert sentry_trace_data["parent_sampled"] is None
-    assert sentry_trace_data["baggage"] is None
+    span_processor = DebuggAISpanProcessor()
+    debugg_ai_trace_data = span_processor._get_trace_data(otel_span, parent_context)
+    assert debugg_ai_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
+    assert debugg_ai_trace_data["span_id"] == "1234567890abcdef"
+    assert debugg_ai_trace_data["parent_span_id"] == "abcdef1234567890"
+    assert debugg_ai_trace_data["parent_sampled"] is None
+    assert debugg_ai_trace_data["baggage"] is None
 
 
-def test_get_trace_data_with_sentry_trace():
+def test_get_trace_data_with_debugg_ai_trace():
     otel_span = MagicMock()
     span_context = SpanContext(
         trace_id=int("1234567890abcdef1234567890abcdef", 16),
@@ -113,39 +113,39 @@ def test_get_trace_data_with_sentry_trace():
     with mock.patch(
         "debugg_ai_sdk.integrations.opentelemetry.span_processor.get_value",
         side_effect=[
-            extract_sentrytrace_data(
+            extract_debugg_ai_trace_data(
                 "1234567890abcdef1234567890abcdef-1234567890abcdef-1"
             ),
             None,
         ],
     ):
-        span_processor = SentrySpanProcessor()
-        sentry_trace_data = span_processor._get_trace_data(otel_span, parent_context)
-        assert sentry_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
-        assert sentry_trace_data["span_id"] == "1234567890abcdef"
-        assert sentry_trace_data["parent_span_id"] == "abcdef1234567890"
-        assert sentry_trace_data["parent_sampled"] is True
-        assert sentry_trace_data["baggage"] is None
+        span_processor = DebuggAISpanProcessor()
+        debugg_ai_trace_data = span_processor._get_trace_data(otel_span, parent_context)
+        assert debugg_ai_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
+        assert debugg_ai_trace_data["span_id"] == "1234567890abcdef"
+        assert debugg_ai_trace_data["parent_span_id"] == "abcdef1234567890"
+        assert debugg_ai_trace_data["parent_sampled"] is True
+        assert debugg_ai_trace_data["baggage"] is None
 
     with mock.patch(
         "debugg_ai_sdk.integrations.opentelemetry.span_processor.get_value",
         side_effect=[
-            extract_sentrytrace_data(
+            extract_debugg_ai_trace_data(
                 "1234567890abcdef1234567890abcdef-1234567890abcdef-0"
             ),
             None,
         ],
     ):
-        span_processor = SentrySpanProcessor()
-        sentry_trace_data = span_processor._get_trace_data(otel_span, parent_context)
-        assert sentry_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
-        assert sentry_trace_data["span_id"] == "1234567890abcdef"
-        assert sentry_trace_data["parent_span_id"] == "abcdef1234567890"
-        assert sentry_trace_data["parent_sampled"] is False
-        assert sentry_trace_data["baggage"] is None
+        span_processor = DebuggAISpanProcessor()
+        debugg_ai_trace_data = span_processor._get_trace_data(otel_span, parent_context)
+        assert debugg_ai_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
+        assert debugg_ai_trace_data["span_id"] == "1234567890abcdef"
+        assert debugg_ai_trace_data["parent_span_id"] == "abcdef1234567890"
+        assert debugg_ai_trace_data["parent_sampled"] is False
+        assert debugg_ai_trace_data["baggage"] is None
 
 
-def test_get_trace_data_with_sentry_trace_and_baggage():
+def test_get_trace_data_with_debugg_ai_trace_and_baggage():
     otel_span = MagicMock()
     span_context = SpanContext(
         trace_id=int("1234567890abcdef1234567890abcdef", 16),
@@ -159,31 +159,31 @@ def test_get_trace_data_with_sentry_trace_and_baggage():
     parent_context = {}
 
     baggage = (
-        "sentry-trace_id=771a43a4192642f0b136d5159a501700,"
-        "sentry-public_key=49d0f7386ad645858ae85020e393bef3,"
-        "sentry-sample_rate=0.01337,sentry-user_id=Am%C3%A9lie"
+        "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700,"
+        "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3,"
+        "debugg-ai-sample_rate=0.01337,debugg-ai-user_id=Am%C3%A9lie"
     )
 
     with mock.patch(
         "debugg_ai_sdk.integrations.opentelemetry.span_processor.get_value",
         side_effect=[
-            extract_sentrytrace_data(
+            extract_debugg_ai_trace_data(
                 "1234567890abcdef1234567890abcdef-1234567890abcdef-1"
             ),
             baggage,
         ],
     ):
-        span_processor = SentrySpanProcessor()
-        sentry_trace_data = span_processor._get_trace_data(otel_span, parent_context)
-        assert sentry_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
-        assert sentry_trace_data["span_id"] == "1234567890abcdef"
-        assert sentry_trace_data["parent_span_id"] == "abcdef1234567890"
-        assert sentry_trace_data["parent_sampled"]
-        assert sentry_trace_data["baggage"] == baggage
+        span_processor = DebuggAISpanProcessor()
+        debugg_ai_trace_data = span_processor._get_trace_data(otel_span, parent_context)
+        assert debugg_ai_trace_data["trace_id"] == "1234567890abcdef1234567890abcdef"
+        assert debugg_ai_trace_data["span_id"] == "1234567890abcdef"
+        assert debugg_ai_trace_data["parent_span_id"] == "abcdef1234567890"
+        assert debugg_ai_trace_data["parent_sampled"]
+        assert debugg_ai_trace_data["baggage"] == baggage
 
 
 def test_update_span_with_otel_data_http_method():
-    sentry_span = Span()
+    debugg_ai_span = Span()
 
     otel_span = MagicMock()
     otel_span.name = "Test OTel Span"
@@ -197,19 +197,19 @@ def test_update_span_with_otel_data_http_method():
         "http.target": "/",
     }
 
-    span_processor = SentrySpanProcessor()
-    span_processor._update_span_with_otel_data(sentry_span, otel_span)
+    span_processor = DebuggAISpanProcessor()
+    span_processor._update_span_with_otel_data(debugg_ai_span, otel_span)
 
-    assert sentry_span.op == "http.client"
-    assert sentry_span.description == "GET example.com /"
-    assert sentry_span.status == "resource_exhausted"
+    assert debugg_ai_span.op == "http.client"
+    assert debugg_ai_span.description == "GET example.com /"
+    assert debugg_ai_span.status == "resource_exhausted"
 
-    assert sentry_span._data["http.method"] == "GET"
-    assert sentry_span._data["http.response.status_code"] == 429
-    assert sentry_span._data["http.status_text"] == "xxx"
-    assert sentry_span._data["http.user_agent"] == "curl/7.64.1"
-    assert sentry_span._data["net.peer.name"] == "example.com"
-    assert sentry_span._data["http.target"] == "/"
+    assert debugg_ai_span._data["http.method"] == "GET"
+    assert debugg_ai_span._data["http.response.status_code"] == 429
+    assert debugg_ai_span._data["http.status_text"] == "xxx"
+    assert debugg_ai_span._data["http.user_agent"] == "curl/7.64.1"
+    assert debugg_ai_span._data["net.peer.name"] == "example.com"
+    assert debugg_ai_span._data["http.target"] == "/"
 
 
 @pytest.mark.parametrize(
@@ -221,21 +221,21 @@ def test_update_span_with_otel_data_http_method():
     ],
 )
 def test_update_span_with_otel_status(otel_status, expected_status):
-    sentry_span = Span()
+    debugg_ai_span = Span()
 
     otel_span = MagicMock()
     otel_span.name = "Test OTel Span"
     otel_span.kind = SpanKind.INTERNAL
     otel_span.status = otel_status
 
-    span_processor = SentrySpanProcessor()
-    span_processor._update_span_with_otel_status(sentry_span, otel_span)
+    span_processor = DebuggAISpanProcessor()
+    span_processor._update_span_with_otel_status(debugg_ai_span, otel_span)
 
-    assert sentry_span.get_trace_context().get("status") == expected_status
+    assert debugg_ai_span.get_trace_context().get("status") == expected_status
 
 
 def test_update_span_with_otel_data_http_method2():
-    sentry_span = Span()
+    debugg_ai_span = Span()
 
     otel_span = MagicMock()
     otel_span.name = "Test OTel Span"
@@ -248,25 +248,25 @@ def test_update_span_with_otel_data_http_method2():
         "http.url": "https://example.com/status/403?password=123&username=test@example.com&author=User123&auth=1234567890abcdef",
     }
 
-    span_processor = SentrySpanProcessor()
-    span_processor._update_span_with_otel_data(sentry_span, otel_span)
+    span_processor = DebuggAISpanProcessor()
+    span_processor._update_span_with_otel_data(debugg_ai_span, otel_span)
 
-    assert sentry_span.op == "http.server"
-    assert sentry_span.description == "GET https://example.com/status/403"
-    assert sentry_span.status == "resource_exhausted"
+    assert debugg_ai_span.op == "http.server"
+    assert debugg_ai_span.description == "GET https://example.com/status/403"
+    assert debugg_ai_span.status == "resource_exhausted"
 
-    assert sentry_span._data["http.method"] == "GET"
-    assert sentry_span._data["http.response.status_code"] == 429
-    assert sentry_span._data["http.status_text"] == "xxx"
-    assert sentry_span._data["http.user_agent"] == "curl/7.64.1"
+    assert debugg_ai_span._data["http.method"] == "GET"
+    assert debugg_ai_span._data["http.response.status_code"] == 429
+    assert debugg_ai_span._data["http.status_text"] == "xxx"
+    assert debugg_ai_span._data["http.user_agent"] == "curl/7.64.1"
     assert (
-        sentry_span._data["http.url"]
+        debugg_ai_span._data["http.url"]
         == "https://example.com/status/403?password=123&username=test@example.com&author=User123&auth=1234567890abcdef"
     )
 
 
 def test_update_span_with_otel_data_db_query():
-    sentry_span = Span()
+    debugg_ai_span = Span()
 
     otel_span = MagicMock()
     otel_span.name = "Test OTel Span"
@@ -275,15 +275,15 @@ def test_update_span_with_otel_data_db_query():
         "db.statement": "SELECT * FROM table where pwd = '123456'",
     }
 
-    span_processor = SentrySpanProcessor()
-    span_processor._update_span_with_otel_data(sentry_span, otel_span)
+    span_processor = DebuggAISpanProcessor()
+    span_processor._update_span_with_otel_data(debugg_ai_span, otel_span)
 
-    assert sentry_span.op == "db"
-    assert sentry_span.description == "SELECT * FROM table where pwd = '123456'"
+    assert debugg_ai_span.op == "db"
+    assert debugg_ai_span.description == "SELECT * FROM table where pwd = '123456'"
 
-    assert sentry_span._data["db.system"] == "postgresql"
+    assert debugg_ai_span._data["db.system"] == "postgresql"
     assert (
-        sentry_span._data["db.statement"] == "SELECT * FROM table where pwd = '123456'"
+        debugg_ai_span._data["db.statement"] == "SELECT * FROM table where pwd = '123456'"
     )
 
 
@@ -306,14 +306,14 @@ def test_on_start_transaction():
 
     fake_client = MagicMock()
     fake_client.options = {"instrumenter": "otel"}
-    fake_client.dsn = "https://1234567890abcdef@o123456.ingest.sentry.io/123456"
+    fake_client.dsn = "https://1234567890abcdef@o123456.ingest.debugg.ai/123456"
     debugg_ai_sdk.get_global_scope().set_client(fake_client)
 
     with mock.patch(
         "debugg_ai_sdk.integrations.opentelemetry.span_processor.start_transaction",
         fake_start_transaction,
     ):
-        span_processor = SentrySpanProcessor()
+        span_processor = DebuggAISpanProcessor()
         span_processor.on_start(otel_span, parent_context)
 
         fake_start_transaction.assert_called_once_with(
@@ -350,12 +350,12 @@ def test_on_start_child():
 
     fake_client = MagicMock()
     fake_client.options = {"instrumenter": "otel"}
-    fake_client.dsn = "https://1234567890abcdef@o123456.ingest.sentry.io/123456"
+    fake_client.dsn = "https://1234567890abcdef@o123456.ingest.debugg.ai/123456"
     debugg_ai_sdk.get_global_scope().set_client(fake_client)
 
     fake_span = MagicMock()
 
-    span_processor = SentrySpanProcessor()
+    span_processor = DebuggAISpanProcessor()
     span_processor.otel_span_map["abcdef1234567890"] = fake_span
     span_processor.on_start(otel_span, parent_context)
 
@@ -374,7 +374,7 @@ def test_on_start_child():
     assert "1234567890abcdef" in span_processor.otel_span_map.keys()
 
 
-def test_on_end_no_sentry_span():
+def test_on_end_no_debugg_ai_span():
     """
     If on_end is called on a span that is not in the otel_span_map, it should be a no-op.
     """
@@ -388,7 +388,7 @@ def test_on_end_no_sentry_span():
     )
     otel_span.get_span_context.return_value = span_context
 
-    span_processor = SentrySpanProcessor()
+    span_processor = DebuggAISpanProcessor()
     span_processor.otel_span_map = {}
     span_processor._get_otel_context = MagicMock()
     span_processor._update_span_with_otel_data = MagicMock()
@@ -399,9 +399,9 @@ def test_on_end_no_sentry_span():
     span_processor._update_span_with_otel_data.assert_not_called()
 
 
-def test_on_end_sentry_transaction():
+def test_on_end_debugg_ai_transaction():
     """
-    Test on_end for a sentry Transaction.
+    Test on_end for a debugg-ai Transaction.
     """
     otel_span = MagicMock()
     otel_span.name = "Sample OTel Span"
@@ -418,26 +418,26 @@ def test_on_end_sentry_transaction():
     fake_client.options = {"instrumenter": "otel"}
     debugg_ai_sdk.get_global_scope().set_client(fake_client)
 
-    fake_sentry_span = MagicMock(spec=Transaction)
-    fake_sentry_span.set_context = MagicMock()
-    fake_sentry_span.finish = MagicMock()
+    fake_debugg_ai_span = MagicMock(spec=Transaction)
+    fake_debugg_ai_span.set_context = MagicMock()
+    fake_debugg_ai_span.finish = MagicMock()
 
-    span_processor = SentrySpanProcessor()
+    span_processor = DebuggAISpanProcessor()
     span_processor._get_otel_context = MagicMock()
     span_processor._update_span_with_otel_data = MagicMock()
-    span_processor.otel_span_map["1234567890abcdef"] = fake_sentry_span
+    span_processor.otel_span_map["1234567890abcdef"] = fake_debugg_ai_span
 
     span_processor.on_end(otel_span)
 
-    fake_sentry_span.set_context.assert_called_once()
+    fake_debugg_ai_span.set_context.assert_called_once()
     span_processor._update_span_with_otel_data.assert_not_called()
-    fake_sentry_span.set_status.assert_called_once_with("ok")
-    fake_sentry_span.finish.assert_called_once()
+    fake_debugg_ai_span.set_status.assert_called_once_with("ok")
+    fake_debugg_ai_span.finish.assert_called_once()
 
 
-def test_on_end_sentry_span():
+def test_on_end_debugg_ai_span():
     """
-    Test on_end for a sentry Span.
+    Test on_end for a debugg-ai Span.
     """
     otel_span = MagicMock()
     otel_span.name = "Sample OTel Span"
@@ -454,23 +454,23 @@ def test_on_end_sentry_span():
     fake_client.options = {"instrumenter": "otel"}
     debugg_ai_sdk.get_global_scope().set_client(fake_client)
 
-    fake_sentry_span = MagicMock(spec=Span)
-    fake_sentry_span.set_context = MagicMock()
-    fake_sentry_span.finish = MagicMock()
+    fake_debugg_ai_span = MagicMock(spec=Span)
+    fake_debugg_ai_span.set_context = MagicMock()
+    fake_debugg_ai_span.finish = MagicMock()
 
-    span_processor = SentrySpanProcessor()
+    span_processor = DebuggAISpanProcessor()
     span_processor._get_otel_context = MagicMock()
     span_processor._update_span_with_otel_data = MagicMock()
-    span_processor.otel_span_map["1234567890abcdef"] = fake_sentry_span
+    span_processor.otel_span_map["1234567890abcdef"] = fake_debugg_ai_span
 
     span_processor.on_end(otel_span)
 
-    fake_sentry_span.set_context.assert_not_called()
+    fake_debugg_ai_span.set_context.assert_not_called()
     span_processor._update_span_with_otel_data.assert_called_once_with(
-        fake_sentry_span, otel_span
+        fake_debugg_ai_span, otel_span
     )
-    fake_sentry_span.set_status.assert_called_once_with("ok")
-    fake_sentry_span.finish.assert_called_once()
+    fake_debugg_ai_span.set_status.assert_called_once_with("ok")
+    fake_debugg_ai_span.finish.assert_called_once()
 
 
 def test_link_trace_context_to_error_event():
@@ -490,11 +490,11 @@ def test_link_trace_context_to_error_event():
         "baz": 123,
     }
 
-    sentry_span = MagicMock()
-    sentry_span.get_trace_context = MagicMock(return_value=fake_trace_context)
+    debugg_ai_span = MagicMock()
+    debugg_ai_span.get_trace_context = MagicMock(return_value=fake_trace_context)
 
     otel_span_map = {
-        span_id: sentry_span,
+        span_id: debugg_ai_span,
     }
 
     span_context = SpanContext(
@@ -536,10 +536,10 @@ def test_pruning_old_spans_on_start():
     parent_context = {}
     fake_client = MagicMock()
     fake_client.options = {"instrumenter": "otel", "debug": False}
-    fake_client.dsn = "https://1234567890abcdef@o123456.ingest.sentry.io/123456"
+    fake_client.dsn = "https://1234567890abcdef@o123456.ingest.debugg.ai/123456"
     debugg_ai_sdk.get_global_scope().set_client(fake_client)
 
-    span_processor = SentrySpanProcessor()
+    span_processor = DebuggAISpanProcessor()
 
     span_processor.otel_span_map = {
         "111111111abcdef": MagicMock(),  # should stay
@@ -581,11 +581,11 @@ def test_pruning_old_spans_on_end():
     fake_client.options = {"instrumenter": "otel"}
     debugg_ai_sdk.get_global_scope().set_client(fake_client)
 
-    fake_sentry_span = MagicMock(spec=Span)
-    fake_sentry_span.set_context = MagicMock()
-    fake_sentry_span.finish = MagicMock()
+    fake_debugg_ai_span = MagicMock(spec=Span)
+    fake_debugg_ai_span.set_context = MagicMock()
+    fake_debugg_ai_span.finish = MagicMock()
 
-    span_processor = SentrySpanProcessor()
+    span_processor = DebuggAISpanProcessor()
     span_processor._get_otel_context = MagicMock()
     span_processor._update_span_with_otel_data = MagicMock()
 
@@ -593,7 +593,7 @@ def test_pruning_old_spans_on_end():
         "111111111abcdef": MagicMock(),  # should stay
         "2222222222abcdef": MagicMock(),  # should go
         "3333333333abcdef": MagicMock(),  # should go
-        "1234567890abcdef": fake_sentry_span,  # should go (because it is closed)
+        "1234567890abcdef": fake_debugg_ai_span,  # should go (because it is closed)
     }
     current_time_minutes = int(time.time() / 60)
     span_processor.open_spans = {

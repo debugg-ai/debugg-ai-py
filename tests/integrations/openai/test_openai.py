@@ -55,9 +55,9 @@ async def async_iterator(values):
     [(True, True), (True, False), (False, True), (False, False)],
 )
 def test_nonstreaming_chat_completion(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[OpenAIIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -100,9 +100,9 @@ def test_nonstreaming_chat_completion(
     [(True, True), (True, False), (False, True), (False, False)],
 )
 async def test_nonstreaming_chat_completion_async(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[OpenAIIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -151,9 +151,9 @@ def tiktoken_encoding_if_installed():
     [(True, True), (True, False), (False, True), (False, False)],
 )
 def test_streaming_chat_completion(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             OpenAIIntegration(
                 include_prompts=include_prompts,
@@ -241,9 +241,9 @@ def test_streaming_chat_completion(
     [(True, True), (True, False), (False, True), (False, False)],
 )
 async def test_streaming_chat_completion_async(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             OpenAIIntegration(
                 include_prompts=include_prompts,
@@ -330,8 +330,8 @@ async def test_streaming_chat_completion_async(
         pass  # if tiktoken is not installed, we can't guarantee token usage will be calculated properly
 
 
-def test_bad_chat_completion(sentry_init, capture_events):
-    sentry_init(integrations=[OpenAIIntegration()], traces_sample_rate=1.0)
+def test_bad_chat_completion(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[OpenAIIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     client = OpenAI(api_key="z")
@@ -348,8 +348,8 @@ def test_bad_chat_completion(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_bad_chat_completion_async(sentry_init, capture_events):
-    sentry_init(integrations=[OpenAIIntegration()], traces_sample_rate=1.0)
+async def test_bad_chat_completion_async(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[OpenAIIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     client = AsyncOpenAI(api_key="z")
@@ -370,9 +370,9 @@ async def test_bad_chat_completion_async(sentry_init, capture_events):
     [(True, True), (True, False), (False, True), (False, False)],
 )
 def test_embeddings_create(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[OpenAIIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -418,9 +418,9 @@ def test_embeddings_create(
     [(True, True), (True, False), (False, True), (False, False)],
 )
 async def test_embeddings_create_async(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[OpenAIIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -465,9 +465,9 @@ async def test_embeddings_create_async(
     [(True, True), (True, False), (False, True), (False, False)],
 )
 def test_embeddings_create_raises_error(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[OpenAIIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -493,9 +493,9 @@ def test_embeddings_create_raises_error(
     [(True, True), (True, False), (False, True), (False, False)],
 )
 async def test_embeddings_create_raises_error_async(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[OpenAIIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -515,8 +515,8 @@ async def test_embeddings_create_raises_error_async(
     assert event["level"] == "error"
 
 
-def test_span_origin_nonstreaming_chat(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin_nonstreaming_chat(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[OpenAIIntegration()],
         traces_sample_rate=1.0,
     )
@@ -537,8 +537,8 @@ def test_span_origin_nonstreaming_chat(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_span_origin_nonstreaming_chat_async(sentry_init, capture_events):
-    sentry_init(
+async def test_span_origin_nonstreaming_chat_async(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[OpenAIIntegration()],
         traces_sample_rate=1.0,
     )
@@ -558,8 +558,8 @@ async def test_span_origin_nonstreaming_chat_async(sentry_init, capture_events):
     assert event["spans"][0]["origin"] == "auto.ai.openai"
 
 
-def test_span_origin_streaming_chat(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin_streaming_chat(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[OpenAIIntegration()],
         traces_sample_rate=1.0,
     )
@@ -618,8 +618,8 @@ def test_span_origin_streaming_chat(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_span_origin_streaming_chat_async(sentry_init, capture_events):
-    sentry_init(
+async def test_span_origin_streaming_chat_async(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[OpenAIIntegration()],
         traces_sample_rate=1.0,
     )
@@ -683,8 +683,8 @@ async def test_span_origin_streaming_chat_async(sentry_init, capture_events):
     assert event["spans"][0]["origin"] == "auto.ai.openai"
 
 
-def test_span_origin_embeddings(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin_embeddings(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[OpenAIIntegration()],
         traces_sample_rate=1.0,
     )
@@ -713,8 +713,8 @@ def test_span_origin_embeddings(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_span_origin_embeddings_async(sentry_init, capture_events):
-    sentry_init(
+async def test_span_origin_embeddings_async(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[OpenAIIntegration()],
         traces_sample_rate=1.0,
     )

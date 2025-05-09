@@ -12,11 +12,11 @@ The tests use the following credentials to establish a database connection.
 import os
 
 
-PG_HOST = os.getenv("SENTRY_PYTHON_TEST_POSTGRES_HOST", "localhost")
-PG_PORT = int(os.getenv("SENTRY_PYTHON_TEST_POSTGRES_PORT", "5432"))
-PG_USER = os.getenv("SENTRY_PYTHON_TEST_POSTGRES_USER", "postgres")
-PG_PASSWORD = os.getenv("SENTRY_PYTHON_TEST_POSTGRES_PASSWORD", "sentry")
-PG_NAME = os.getenv("SENTRY_PYTHON_TEST_POSTGRES_NAME", "postgres")
+PG_HOST = os.getenv("DEBUGG_AI_PYTHON_TEST_POSTGRES_HOST", "localhost")
+PG_PORT = int(os.getenv("DEBUGG_AI_PYTHON_TEST_POSTGRES_PORT", "5432"))
+PG_USER = os.getenv("DEBUGG_AI_PYTHON_TEST_POSTGRES_USER", "postgres")
+PG_PASSWORD = os.getenv("DEBUGG_AI_PYTHON_TEST_POSTGRES_PASSWORD", "debugg-ai")
+PG_NAME = os.getenv("DEBUGG_AI_PYTHON_TEST_POSTGRES_NAME", "postgres")
 
 import datetime
 from contextlib import contextmanager
@@ -71,8 +71,8 @@ async def _clean_pg():
 
 
 @pytest.mark.asyncio
-async def test_connect(sentry_init, capture_events) -> None:
-    sentry_init(
+async def test_connect(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         _experiments={"record_sql_params": True},
     )
@@ -93,8 +93,8 @@ async def test_connect(sentry_init, capture_events) -> None:
 
 
 @pytest.mark.asyncio
-async def test_execute(sentry_init, capture_events) -> None:
-    sentry_init(
+async def test_execute(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         _experiments={"record_sql_params": True},
     )
@@ -158,8 +158,8 @@ async def test_execute(sentry_init, capture_events) -> None:
 
 
 @pytest.mark.asyncio
-async def test_execute_many(sentry_init, capture_events) -> None:
-    sentry_init(
+async def test_execute_many(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         _experiments={"record_sql_params": True},
     )
@@ -196,8 +196,8 @@ async def test_execute_many(sentry_init, capture_events) -> None:
 
 
 @pytest.mark.asyncio
-async def test_record_params(sentry_init, capture_events) -> None:
-    sentry_init(
+async def test_record_params(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[AsyncPGIntegration(record_params=True)],
         _experiments={"record_sql_params": True},
     )
@@ -236,8 +236,8 @@ async def test_record_params(sentry_init, capture_events) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cursor(sentry_init, capture_events) -> None:
-    sentry_init(
+async def test_cursor(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         _experiments={"record_sql_params": True},
     )
@@ -290,8 +290,8 @@ async def test_cursor(sentry_init, capture_events) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cursor_manual(sentry_init, capture_events) -> None:
-    sentry_init(
+async def test_cursor_manual(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         _experiments={"record_sql_params": True},
     )
@@ -348,8 +348,8 @@ async def test_cursor_manual(sentry_init, capture_events) -> None:
 
 
 @pytest.mark.asyncio
-async def test_prepared_stmt(sentry_init, capture_events) -> None:
-    sentry_init(
+async def test_prepared_stmt(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         _experiments={"record_sql_params": True},
     )
@@ -397,8 +397,8 @@ async def test_prepared_stmt(sentry_init, capture_events) -> None:
 
 
 @pytest.mark.asyncio
-async def test_connection_pool(sentry_init, capture_events) -> None:
-    sentry_init(
+async def test_connection_pool(debugg_ai_init, capture_events) -> None:
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         _experiments={"record_sql_params": True},
     )
@@ -468,15 +468,15 @@ async def test_connection_pool(sentry_init, capture_events) -> None:
 
 
 @pytest.mark.asyncio
-async def test_query_source_disabled(sentry_init, capture_events):
-    sentry_options = {
+async def test_query_source_disabled(debugg_ai_init, capture_events):
+    debugg_ai_options = {
         "integrations": [AsyncPGIntegration()],
         "enable_tracing": True,
         "enable_db_query_source": False,
         "db_query_source_threshold_ms": 0,
     }
 
-    sentry_init(**sentry_options)
+    debugg_ai_init(**debugg_ai_options)
 
     events = capture_events()
 
@@ -505,17 +505,17 @@ async def test_query_source_disabled(sentry_init, capture_events):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("enable_db_query_source", [None, True])
 async def test_query_source_enabled(
-    sentry_init, capture_events, enable_db_query_source
+    debugg_ai_init, capture_events, enable_db_query_source
 ):
-    sentry_options = {
+    debugg_ai_options = {
         "integrations": [AsyncPGIntegration()],
         "enable_tracing": True,
         "db_query_source_threshold_ms": 0,
     }
     if enable_db_query_source is not None:
-        sentry_options["enable_db_query_source"] = enable_db_query_source
+        debugg_ai_options["enable_db_query_source"] = enable_db_query_source
 
-    sentry_init(**sentry_options)
+    debugg_ai_init(**debugg_ai_options)
 
     events = capture_events()
 
@@ -542,8 +542,8 @@ async def test_query_source_enabled(
 
 
 @pytest.mark.asyncio
-async def test_query_source(sentry_init, capture_events):
-    sentry_init(
+async def test_query_source(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         enable_tracing=True,
         enable_db_query_source=True,
@@ -589,11 +589,11 @@ async def test_query_source(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_query_source_with_module_in_search_path(sentry_init, capture_events):
+async def test_query_source_with_module_in_search_path(debugg_ai_init, capture_events):
     """
     Test that query source is relative to the path of the module it ran in
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         enable_tracing=True,
         enable_db_query_source=True,
@@ -638,8 +638,8 @@ async def test_query_source_with_module_in_search_path(sentry_init, capture_even
 
 
 @pytest.mark.asyncio
-async def test_no_query_source_if_duration_too_short(sentry_init, capture_events):
-    sentry_init(
+async def test_no_query_source_if_duration_too_short(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         enable_tracing=True,
         enable_db_query_source=True,
@@ -683,8 +683,8 @@ async def test_no_query_source_if_duration_too_short(sentry_init, capture_events
 
 
 @pytest.mark.asyncio
-async def test_query_source_if_duration_over_threshold(sentry_init, capture_events):
-    sentry_init(
+async def test_query_source_if_duration_over_threshold(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         enable_tracing=True,
         enable_db_query_source=True,
@@ -745,8 +745,8 @@ async def test_query_source_if_duration_over_threshold(sentry_init, capture_even
 
 
 @pytest.mark.asyncio
-async def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+async def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[AsyncPGIntegration()],
         traces_sample_rate=1.0,
     )

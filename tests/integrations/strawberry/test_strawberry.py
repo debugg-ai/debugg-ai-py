@@ -19,19 +19,19 @@ from debugg_ai_sdk.integrations.flask import FlaskIntegration
 from debugg_ai_sdk.integrations.starlette import StarletteIntegration
 from debugg_ai_sdk.integrations.strawberry import (
     StrawberryIntegration,
-    SentryAsyncExtension,
-    SentrySyncExtension,
+    DebuggAIAsyncExtension,
+    DebuggAISyncExtension,
 )
 from tests.conftest import ApproxDict
 
 try:
     from strawberry.extensions.tracing import (
-        SentryTracingExtension,
-        SentryTracingExtensionSync,
+        DebuggAITracingExtension,
+        DebuggAITracingExtensionSync,
     )
 except ImportError:
-    SentryTracingExtension = None
-    SentryTracingExtensionSync = None
+    DebuggAITracingExtension = None
+    DebuggAITracingExtensionSync = None
 
 parameterize_strawberry_test = pytest.mark.parametrize(
     "client_factory,async_execution,framework_integrations",
@@ -100,8 +100,8 @@ def sync_app_client_factory():
     return create_app
 
 
-def test_async_execution_uses_async_extension(sentry_init):
-    sentry_init(integrations=[StrawberryIntegration(async_execution=True)])
+def test_async_execution_uses_async_extension(debugg_ai_init):
+    debugg_ai_init(integrations=[StrawberryIntegration(async_execution=True)])
 
     with mock.patch(
         "debugg_ai_sdk.integrations.strawberry._get_installed_modules",
@@ -110,11 +110,11 @@ def test_async_execution_uses_async_extension(sentry_init):
         # actual installed modules should not matter, the explicit option takes
         # precedence
         schema = strawberry.Schema(Query)
-        assert SentryAsyncExtension in schema.extensions
+        assert DebuggAIAsyncExtension in schema.extensions
 
 
-def test_sync_execution_uses_sync_extension(sentry_init):
-    sentry_init(integrations=[StrawberryIntegration(async_execution=False)])
+def test_sync_execution_uses_sync_extension(debugg_ai_init):
+    debugg_ai_init(integrations=[StrawberryIntegration(async_execution=False)])
 
     with mock.patch(
         "debugg_ai_sdk.integrations.strawberry._get_installed_modules",
@@ -123,67 +123,67 @@ def test_sync_execution_uses_sync_extension(sentry_init):
         # actual installed modules should not matter, the explicit option takes
         # precedence
         schema = strawberry.Schema(Query)
-        assert SentrySyncExtension in schema.extensions
+        assert DebuggAISyncExtension in schema.extensions
 
 
-def test_infer_execution_type_from_installed_packages_async(sentry_init):
-    sentry_init(integrations=[StrawberryIntegration()])
+def test_infer_execution_type_from_installed_packages_async(debugg_ai_init):
+    debugg_ai_init(integrations=[StrawberryIntegration()])
 
     with mock.patch(
         "debugg_ai_sdk.integrations.strawberry._get_installed_modules",
         return_value={"fastapi": "0.103.1", "starlette": "0.27.0"},
     ):
         schema = strawberry.Schema(Query)
-        assert SentryAsyncExtension in schema.extensions
+        assert DebuggAIAsyncExtension in schema.extensions
 
 
-def test_infer_execution_type_from_installed_packages_sync(sentry_init):
-    sentry_init(integrations=[StrawberryIntegration()])
+def test_infer_execution_type_from_installed_packages_sync(debugg_ai_init):
+    debugg_ai_init(integrations=[StrawberryIntegration()])
 
     with mock.patch(
         "debugg_ai_sdk.integrations.strawberry._get_installed_modules",
         return_value={"flask": "2.3.3"},
     ):
         schema = strawberry.Schema(Query)
-        assert SentrySyncExtension in schema.extensions
+        assert DebuggAISyncExtension in schema.extensions
 
 
 @pytest.mark.skipif(
-    SentryTracingExtension is None,
-    reason="SentryTracingExtension no longer available in this Strawberry version",
+    DebuggAITracingExtension is None,
+    reason="DebuggAITracingExtension no longer available in this Strawberry version",
 )
-def test_replace_existing_sentry_async_extension(sentry_init):
-    sentry_init(integrations=[StrawberryIntegration()])
+def test_replace_existing_debugg_ai_async_extension(debugg_ai_init):
+    debugg_ai_init(integrations=[StrawberryIntegration()])
 
-    schema = strawberry.Schema(Query, extensions=[SentryTracingExtension])
-    assert SentryTracingExtension not in schema.extensions
-    assert SentrySyncExtension not in schema.extensions
-    assert SentryAsyncExtension in schema.extensions
+    schema = strawberry.Schema(Query, extensions=[DebuggAITracingExtension])
+    assert DebuggAITracingExtension not in schema.extensions
+    assert DebuggAISyncExtension not in schema.extensions
+    assert DebuggAIAsyncExtension in schema.extensions
 
 
 @pytest.mark.skipif(
-    SentryTracingExtensionSync is None,
-    reason="SentryTracingExtensionSync no longer available in this Strawberry version",
+    DebuggAITracingExtensionSync is None,
+    reason="DebuggAITracingExtensionSync no longer available in this Strawberry version",
 )
-def test_replace_existing_sentry_sync_extension(sentry_init):
-    sentry_init(integrations=[StrawberryIntegration()])
+def test_replace_existing_debugg_ai_sync_extension(debugg_ai_init):
+    debugg_ai_init(integrations=[StrawberryIntegration()])
 
-    schema = strawberry.Schema(Query, extensions=[SentryTracingExtensionSync])
-    assert SentryTracingExtensionSync not in schema.extensions
-    assert SentryAsyncExtension not in schema.extensions
-    assert SentrySyncExtension in schema.extensions
+    schema = strawberry.Schema(Query, extensions=[DebuggAITracingExtensionSync])
+    assert DebuggAITracingExtensionSync not in schema.extensions
+    assert DebuggAIAsyncExtension not in schema.extensions
+    assert DebuggAISyncExtension in schema.extensions
 
 
 @parameterize_strawberry_test
 def test_capture_request_if_available_and_send_pii_is_on(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
     framework_integrations,
 ):
-    sentry_init(
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
@@ -233,13 +233,13 @@ def test_capture_request_if_available_and_send_pii_is_on(
 @parameterize_strawberry_test
 def test_do_not_capture_request_if_send_pii_is_off(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
     framework_integrations,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
         ]
@@ -273,13 +273,13 @@ def test_do_not_capture_request_if_send_pii_is_off(
 @parameterize_strawberry_test
 def test_breadcrumb_no_operation_name(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
     framework_integrations,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
         ]
@@ -310,13 +310,13 @@ def test_breadcrumb_no_operation_name(
 @parameterize_strawberry_test
 def test_capture_transaction_on_error(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
     framework_integrations,
 ):
-    sentry_init(
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
@@ -388,13 +388,13 @@ def test_capture_transaction_on_error(
 @parameterize_strawberry_test
 def test_capture_transaction_on_success(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
     framework_integrations,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
         ]
@@ -465,13 +465,13 @@ def test_capture_transaction_on_success(
 @parameterize_strawberry_test
 def test_transaction_no_operation_name(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
     framework_integrations,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
         ]
@@ -545,13 +545,13 @@ def test_transaction_no_operation_name(
 @parameterize_strawberry_test
 def test_transaction_mutation(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
     framework_integrations,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
         ]
@@ -622,13 +622,13 @@ def test_transaction_mutation(
 @parameterize_strawberry_test
 def test_handle_none_query_gracefully(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
     framework_integrations,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
         ]
@@ -643,13 +643,13 @@ def test_handle_none_query_gracefully(
 
     client.post("/graphql", json={})
 
-    assert len(events) == 0, "expected no events to be sent to Sentry"
+    assert len(events) == 0, "expected no events to be sent to DebuggAI"
 
 
 @parameterize_strawberry_test
 def test_span_origin(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
@@ -658,7 +658,7 @@ def test_span_origin(
     """
     Tests for OP.GRAPHQL_MUTATION, OP.GRAPHQL_PARSE, OP.GRAPHQL_VALIDATE, OP.GRAPHQL_RESOLVE,
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
         ]
@@ -691,7 +691,7 @@ def test_span_origin(
 @parameterize_strawberry_test
 def test_span_origin2(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
@@ -700,7 +700,7 @@ def test_span_origin2(
     """
     Tests for OP.GRAPHQL_QUERY
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
         ]
@@ -733,7 +733,7 @@ def test_span_origin2(
 @parameterize_strawberry_test
 def test_span_origin3(
     request,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     client_factory,
     async_execution,
@@ -742,7 +742,7 @@ def test_span_origin3(
     """
     Tests for OP.GRAPHQL_SUBSCRIPTION
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             StrawberryIntegration(async_execution=async_execution),
         ]

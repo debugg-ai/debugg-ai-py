@@ -21,7 +21,7 @@ from tests.conftest import ApproxDict
     (False, True),
 )
 def test_launchdarkly_integration(
-    sentry_init, use_global_client, capture_events, uninstall_integration
+    debugg_ai_init, use_global_client, capture_events, uninstall_integration
 ):
     td = TestData.data_source()
     td.update(td.flag("hello").variation_for_all(True))
@@ -34,11 +34,11 @@ def test_launchdarkly_integration(
     uninstall_integration(LaunchDarklyIntegration.identifier)
     if use_global_client:
         ldclient.set_config(config)
-        sentry_init(integrations=[LaunchDarklyIntegration()])
+        debugg_ai_init(integrations=[LaunchDarklyIntegration()])
         client = ldclient.get()
     else:
         client = LDClient(config=config)
-        sentry_init(integrations=[LaunchDarklyIntegration(ld_client=client)])
+        debugg_ai_init(integrations=[LaunchDarklyIntegration(ld_client=client)])
 
     # Evaluate
     client.variation("hello", Context.create("my-org", "organization"), False)
@@ -59,7 +59,7 @@ def test_launchdarkly_integration(
 
 
 def test_launchdarkly_integration_threaded(
-    sentry_init, capture_events, uninstall_integration
+    debugg_ai_init, capture_events, uninstall_integration
 ):
     td = TestData.data_source()
     td.update(td.flag("hello").variation_for_all(True))
@@ -75,7 +75,7 @@ def test_launchdarkly_integration_threaded(
     context = Context.create("user1")
 
     uninstall_integration(LaunchDarklyIntegration.identifier)
-    sentry_init(integrations=[LaunchDarklyIntegration(ld_client=client)])
+    debugg_ai_init(integrations=[LaunchDarklyIntegration(ld_client=client)])
     events = capture_events()
 
     def task(flag_key):
@@ -121,7 +121,7 @@ def test_launchdarkly_integration_threaded(
 
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
 def test_launchdarkly_integration_asyncio(
-    sentry_init, capture_events, uninstall_integration
+    debugg_ai_init, capture_events, uninstall_integration
 ):
     """Assert concurrently evaluated flags do not pollute one another."""
 
@@ -141,7 +141,7 @@ def test_launchdarkly_integration_asyncio(
     context = Context.create("user1")
 
     uninstall_integration(LaunchDarklyIntegration.identifier)
-    sentry_init(integrations=[LaunchDarklyIntegration(ld_client=client)])
+    debugg_ai_init(integrations=[LaunchDarklyIntegration(ld_client=client)])
     events = capture_events()
 
     async def task(flag_key):
@@ -211,7 +211,7 @@ def test_launchdarkly_integration_did_not_enable(monkeypatch):
     (False, True),
 )
 def test_launchdarkly_span_integration(
-    sentry_init, use_global_client, capture_events, uninstall_integration
+    debugg_ai_init, use_global_client, capture_events, uninstall_integration
 ):
     td = TestData.data_source()
     td.update(td.flag("hello").variation_for_all(True))
@@ -223,11 +223,11 @@ def test_launchdarkly_span_integration(
     uninstall_integration(LaunchDarklyIntegration.identifier)
     if use_global_client:
         ldclient.set_config(config)
-        sentry_init(traces_sample_rate=1.0, integrations=[LaunchDarklyIntegration()])
+        debugg_ai_init(traces_sample_rate=1.0, integrations=[LaunchDarklyIntegration()])
         client = ldclient.get()
     else:
         client = LDClient(config=config)
-        sentry_init(
+        debugg_ai_init(
             traces_sample_rate=1.0,
             integrations=[LaunchDarklyIntegration(ld_client=client)],
         )

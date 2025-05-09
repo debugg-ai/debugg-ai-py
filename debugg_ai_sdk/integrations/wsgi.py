@@ -46,7 +46,7 @@ if TYPE_CHECKING:
             pass
 
 
-_wsgi_middleware_applied = ContextVar("sentry_wsgi_middleware_applied")
+_wsgi_middleware_applied = ContextVar("debugg_ai_wsgi_middleware_applied")
 
 
 def wsgi_decoding_dance(s, charset="utf-8", errors="replace"):
@@ -69,7 +69,7 @@ def get_request_url(environ, use_x_forwarded_for=False):
     )
 
 
-class SentryWsgiMiddleware:
+class DebuggAIWsgiMiddleware:
     __slots__ = (
         "app",
         "use_x_forwarded_for",
@@ -131,7 +131,7 @@ class SentryWsgiMiddleware:
                             response = self.app(
                                 environ,
                                 partial(
-                                    _sentry_start_response, start_response, transaction
+                                    _debugg_ai_start_response, start_response, transaction
                                 ),
                             )
                         except BaseException:
@@ -142,7 +142,7 @@ class SentryWsgiMiddleware:
         return _ScopedResponse(scope, response)
 
 
-def _sentry_start_response(  # type: ignore
+def _debugg_ai_start_response(  # type: ignore
     old_start_response,  # type: StartResponse
     transaction,  # type: Optional[Transaction]
     status,  # type: str
@@ -204,7 +204,7 @@ def get_client_ip(environ):
 def _capture_exception():
     # type: () -> ExcInfo
     """
-    Captures the current exception and sends it to Sentry.
+    Captures the current exception and sends it to DebuggAI.
     Returns the ExcInfo tuple to it can be reraised afterwards.
     """
     exc_info = sys.exc_info()

@@ -23,9 +23,9 @@ from debugg_ai_sdk.integrations.sys_exit import SysExitIntegration
     ),
 )
 def test_sys_exit(
-    sentry_init, capture_events, integration_params, exit_status, should_capture
+    debugg_ai_init, capture_events, integration_params, exit_status, should_capture
 ):
-    sentry_init(integrations=[SysExitIntegration(**integration_params)])
+    debugg_ai_init(integrations=[SysExitIntegration(**integration_params)])
 
     events = capture_events()
 
@@ -50,8 +50,8 @@ def test_sys_exit(
         assert len(events) == 0
 
 
-def test_sys_exit_integration_not_auto_enabled(sentry_init, capture_events):
-    sentry_init()  # No SysExitIntegration
+def test_sys_exit_integration_not_auto_enabled(debugg_ai_init, capture_events):
+    debugg_ai_init()  # No SysExitIntegration
 
     events = capture_events()
 

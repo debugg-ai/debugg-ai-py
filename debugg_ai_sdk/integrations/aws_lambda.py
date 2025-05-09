@@ -36,14 +36,14 @@ if TYPE_CHECKING:
     F = TypeVar("F", bound=Callable[..., Any])
 
 # Constants
-TIMEOUT_WARNING_BUFFER = 1500  # Buffer time required to send timeout warning to Sentry
+TIMEOUT_WARNING_BUFFER = 1500  # Buffer time required to send timeout warning to DebuggAI
 MILLIS_TO_SECONDS = 1000.0
 
 
 def _wrap_init_error(init_error):
     # type: (F) -> F
     @ensure_integration_enabled(AwsLambdaIntegration, init_error)
-    def sentry_init_error(*args, **kwargs):
+    def debugg_ai_init_error(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         client = debugg_ai_sdk.get_client()
 
@@ -52,30 +52,30 @@ def _wrap_init_error(init_error):
 
             exc_info = sys.exc_info()
             if exc_info and all(exc_info):
-                sentry_event, hint = event_from_exception(
+                debugg_ai_event, hint = event_from_exception(
                     exc_info,
                     client_options=client.options,
                     mechanism={"type": "aws_lambda", "handled": False},
                 )
-                debugg_ai_sdk.capture_event(sentry_event, hint=hint)
+                debugg_ai_sdk.capture_event(debugg_ai_event, hint=hint)
 
             else:
                 # Fall back to AWS lambdas JSON representation of the error
                 error_info = args[1]
                 if isinstance(error_info, str):
                     error_info = json.loads(error_info)
-                sentry_event = _event_from_error_json(error_info)
-                debugg_ai_sdk.capture_event(sentry_event)
+                debugg_ai_event = _event_from_error_json(error_info)
+                debugg_ai_sdk.capture_event(debugg_ai_event)
 
         return init_error(*args, **kwargs)
 
-    return sentry_init_error  # type: ignore
+    return debugg_ai_init_error  # type: ignore
 
 
 def _wrap_handler(handler):
     # type: (F) -> F
     @functools.wraps(handler)
-    def sentry_handler(aws_event, aws_context, *args, **kwargs):
+    def debugg_ai_handler(aws_event, aws_context, *args, **kwargs):
         # type: (Any, Any, *Any, **Any) -> Any
 
         # Per https://docs.aws.amazon.com/lambda/latest/dg/python-handler.html,
@@ -167,18 +167,18 @@ def _wrap_handler(handler):
                     return handler(aws_event, aws_context, *args, **kwargs)
                 except Exception:
                     exc_info = sys.exc_info()
-                    sentry_event, hint = event_from_exception(
+                    debugg_ai_event, hint = event_from_exception(
                         exc_info,
                         client_options=client.options,
                         mechanism={"type": "aws_lambda", "handled": False},
                     )
-                    debugg_ai_sdk.capture_event(sentry_event, hint=hint)
+                    debugg_ai_sdk.capture_event(debugg_ai_event, hint=hint)
                     reraise(*exc_info)
                 finally:
                     if timeout_thread:
                         timeout_thread.stop()
 
-    return sentry_handler  # type: ignore
+    return debugg_ai_handler  # type: ignore
 
 
 def _drain_queue():
@@ -224,33 +224,33 @@ class AwsLambdaIntegration(Integration):
         if pre_37:
             old_handle_event_request = lambda_bootstrap.handle_event_request
 
-            def sentry_handle_event_request(request_handler, *args, **kwargs):
+            def debugg_ai_handle_event_request(request_handler, *args, **kwargs):
                 # type: (Any, *Any, **Any) -> Any
                 request_handler = _wrap_handler(request_handler)
                 return old_handle_event_request(request_handler, *args, **kwargs)
 
-            lambda_bootstrap.handle_event_request = sentry_handle_event_request
+            lambda_bootstrap.handle_event_request = debugg_ai_handle_event_request
 
             old_handle_http_request = lambda_bootstrap.handle_http_request
 
-            def sentry_handle_http_request(request_handler, *args, **kwargs):
+            def debugg_ai_handle_http_request(request_handler, *args, **kwargs):
                 # type: (Any, *Any, **Any) -> Any
                 request_handler = _wrap_handler(request_handler)
                 return old_handle_http_request(request_handler, *args, **kwargs)
 
-            lambda_bootstrap.handle_http_request = sentry_handle_http_request
+            lambda_bootstrap.handle_http_request = debugg_ai_handle_http_request
 
             # Patch to_json to drain the queue. This should work even when the
             # SDK is initialized inside of the handler
 
             old_to_json = lambda_bootstrap.to_json
 
-            def sentry_to_json(*args, **kwargs):
+            def debugg_ai_to_json(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
                 _drain_queue()
                 return old_to_json(*args, **kwargs)
 
-            lambda_bootstrap.to_json = sentry_to_json
+            lambda_bootstrap.to_json = debugg_ai_to_json
         else:
             lambda_bootstrap.LambdaRuntimeClient.post_init_error = _wrap_init_error(
                 lambda_bootstrap.LambdaRuntimeClient.post_init_error
@@ -258,7 +258,7 @@ class AwsLambdaIntegration(Integration):
 
             old_handle_event_request = lambda_bootstrap.handle_event_request
 
-            def sentry_handle_event_request(  # type: ignore
+            def debugg_ai_handle_event_request(  # type: ignore
                 lambda_runtime_client, request_handler, *args, **kwargs
             ):
                 request_handler = _wrap_handler(request_handler)
@@ -266,7 +266,7 @@ class AwsLambdaIntegration(Integration):
                     lambda_runtime_client, request_handler, *args, **kwargs
                 )
 
-            lambda_bootstrap.handle_event_request = sentry_handle_event_request
+            lambda_bootstrap.handle_event_request = debugg_ai_handle_event_request
 
             # Patch the runtime client to drain the queue. This should work
             # even when the SDK is initialized inside of the handler
@@ -333,12 +333,12 @@ def _make_request_event_processor(aws_event, aws_context, configured_timeout):
     # type: (Any, Any, Any) -> EventProcessor
     start_time = datetime.now(timezone.utc)
 
-    def event_processor(sentry_event, hint, start_time=start_time):
+    def event_processor(debugg_ai_event, hint, start_time=start_time):
         # type: (Event, Hint, datetime) -> Optional[Event]
         remaining_time_in_milis = aws_context.get_remaining_time_in_millis()
         exec_duration = configured_timeout - remaining_time_in_milis
 
-        extra = sentry_event.setdefault("extra", {})
+        extra = debugg_ai_event.setdefault("extra", {})
         extra["lambda"] = {
             "function_name": aws_context.function_name,
             "function_version": aws_context.function_version,
@@ -354,7 +354,7 @@ def _make_request_event_processor(aws_event, aws_context, configured_timeout):
             "log_stream": aws_context.log_stream_name,
         }
 
-        request = sentry_event.get("request", {})
+        request = debugg_ai_event.get("request", {})
 
         if "httpMethod" in aws_event:
             request["method"] = aws_event["httpMethod"]
@@ -368,7 +368,7 @@ def _make_request_event_processor(aws_event, aws_context, configured_timeout):
             request["headers"] = _filter_headers(aws_event["headers"])
 
         if should_send_default_pii():
-            user_info = sentry_event.setdefault("user", {})
+            user_info = debugg_ai_event.setdefault("user", {})
 
             identity = aws_event.get("identity")
             if identity is None:
@@ -390,9 +390,9 @@ def _make_request_event_processor(aws_event, aws_context, configured_timeout):
                 # event. Meaning every body is unstructured to us.
                 request["data"] = AnnotatedValue.removed_because_raw_data()
 
-        sentry_event["request"] = deepcopy(request)
+        debugg_ai_event["request"] = deepcopy(request)
 
-        return sentry_event
+        return debugg_ai_event
 
     return event_processor
 
@@ -469,7 +469,7 @@ def _parse_formatted_traceback(formatted_tb):
 def _event_from_error_json(error_json):
     # type: (dict[str, Any]) -> Event
     """
-    Converts the error JSON from AWS Lambda into a Sentry error event.
+    Converts the error JSON from AWS Lambda into a DebuggAI error event.
     This is not a full fletched event, but better than nothing.
 
     This is an example of where AWS creates the error JSON:

@@ -14,8 +14,8 @@ from debugg_ai_sdk.utils import Dsn
 from tests.conftest import ApproxDict
 
 
-def test_span_trimming(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, _experiments={"max_spans": 3})
+def test_span_trimming(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, _experiments={"max_spans": 3})
     events = capture_events()
 
     with start_transaction(name="hi"):
@@ -37,8 +37,8 @@ def test_span_trimming(sentry_init, capture_events):
     assert "dropped_spans" not in event
 
 
-def test_span_data_scrubbing_and_trimming(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, _experiments={"max_spans": 3})
+def test_span_data_scrubbing_and_trimming(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, _experiments={"max_spans": 3})
     events = capture_events()
 
     with start_transaction(name="hi"):
@@ -60,8 +60,8 @@ def test_span_data_scrubbing_and_trimming(sentry_init, capture_events):
     }
 
 
-def test_transaction_naming(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_transaction_naming(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     # default name in event if no name is passed
@@ -83,8 +83,8 @@ def test_transaction_naming(sentry_init, capture_events):
     assert events[2]["transaction"] == "a"
 
 
-def test_transaction_data(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_transaction_data(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction(name="test-transaction"):
@@ -110,8 +110,8 @@ def test_transaction_data(sentry_init, capture_events):
     assert span_data.items() >= {"spanfoo": "spanbar"}.items()
 
 
-def test_start_transaction(sentry_init):
-    sentry_init(traces_sample_rate=1.0)
+def test_start_transaction(debugg_ai_init):
+    debugg_ai_init(traces_sample_rate=1.0)
 
     # you can have it start a transaction for you
     result1 = start_transaction(
@@ -129,8 +129,8 @@ def test_start_transaction(sentry_init):
     assert result2 is preexisting_transaction
 
 
-def test_finds_transaction_on_scope(sentry_init):
-    sentry_init(traces_sample_rate=1.0)
+def test_finds_transaction_on_scope(debugg_ai_init):
+    debugg_ai_init(traces_sample_rate=1.0)
 
     transaction = start_transaction(name="dogpark")
 
@@ -156,9 +156,9 @@ def test_finds_transaction_on_scope(sentry_init):
 
 
 def test_finds_transaction_when_descendent_span_is_on_scope(
-    sentry_init,
+    debugg_ai_init,
 ):
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
 
     transaction = start_transaction(name="dogpark")
     child_span = transaction.start_child(op="sniffing")
@@ -179,10 +179,10 @@ def test_finds_transaction_when_descendent_span_is_on_scope(
     assert scope._span.op == "sniffing"
 
 
-def test_finds_orphan_span_on_scope(sentry_init):
+def test_finds_orphan_span_on_scope(debugg_ai_init):
     # this is deprecated behavior which may be removed at some point (along with
     # the start_span function)
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
 
     span = start_span(op="sniffing")
 
@@ -194,8 +194,8 @@ def test_finds_orphan_span_on_scope(sentry_init):
     assert scope._span.op == "sniffing"
 
 
-def test_finds_non_orphan_span_on_scope(sentry_init):
-    sentry_init(traces_sample_rate=1.0)
+def test_finds_non_orphan_span_on_scope(debugg_ai_init):
+    debugg_ai_init(traces_sample_rate=1.0)
 
     transaction = start_transaction(name="dogpark")
     child_span = transaction.start_child(op="sniffing")
@@ -208,7 +208,7 @@ def test_finds_non_orphan_span_on_scope(sentry_init):
     assert scope._span.op == "sniffing"
 
 
-def test_circular_references(monkeypatch, sentry_init, request):
+def test_circular_references(monkeypatch, debugg_ai_init, request):
     # TODO: We discovered while writing this test about transaction/span
     # reference cycles that there's actually also a circular reference in
     # `serializer.py`, between the functions `_serialize_node` and
@@ -249,7 +249,7 @@ def test_circular_references(monkeypatch, sentry_init, request):
     gc.disable()
     request.addfinalizer(gc.enable)
 
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
 
     # Make sure that we're starting with a clean slate before we start creating
     # transaction/span reference cycles
@@ -281,8 +281,8 @@ def test_circular_references(monkeypatch, sentry_init, request):
     assert gc.collect() == 0
 
 
-def test_set_meaurement(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_set_meaurement(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
 
     events = capture_events()
 
@@ -309,8 +309,8 @@ def test_set_meaurement(sentry_init, capture_events):
     assert event["measurements"]["metric.foobar"] == {"value": 17.99, "unit": "percent"}
 
 
-def test_set_meaurement_public_api(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_set_meaurement_public_api(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
 
     events = capture_events()
 
@@ -323,8 +323,8 @@ def test_set_meaurement_public_api(sentry_init, capture_events):
     assert event["measurements"]["metric.bar"] == {"value": 456, "unit": "second"}
 
 
-def test_set_measurement_deprecated(sentry_init):
-    sentry_init(traces_sample_rate=1.0)
+def test_set_measurement_deprecated(debugg_ai_init):
+    debugg_ai_init(traces_sample_rate=1.0)
 
     with start_transaction(name="measuring stuff") as trx:
         with pytest.warns(DeprecationWarning):
@@ -338,12 +338,12 @@ def test_set_measurement_deprecated(sentry_init):
                 span.set_measurement("metric.baz", 420.69, unit="custom")
 
 
-def test_set_meaurement_compared_to_set_data(sentry_init, capture_events):
+def test_set_meaurement_compared_to_set_data(debugg_ai_init, capture_events):
     """
     This is just a test to see the difference
     between measurements and data in the resulting event payload.
     """
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
 
     events = capture_events()
 
@@ -392,12 +392,12 @@ def test_should_propagate_trace(
 ):
     client = MagicMock()
 
-    # This test assumes the urls are not Sentry URLs. Use test_should_propagate_trace_to_sentry for sentry URLs.
-    client.is_sentry_url = lambda _: False
+    # This test assumes the urls are not DebuggAI URLs. Use test_should_propagate_trace_to_debugg-ai for debugg-ai URLs.
+    client.is_debugg_ai_url = lambda _: False
 
     client.options = {"trace_propagation_targets": trace_propagation_targets}
     client.transport = MagicMock()
-    client.transport.parsed_dsn = Dsn("https://bla@xxx.sentry.io/12312012")
+    client.transport.parsed_dsn = Dsn("https://bla@xxx.debugg.ai/12312012")
 
     assert should_propagate_trace(client, url) == expected_propagation_decision
 
@@ -406,36 +406,36 @@ def test_should_propagate_trace(
     "dsn,url,expected_propagation_decision",
     [
         (
-            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.sentry.io/12312012",
+            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.debugg.ai/12312012",
             "http://example.com",
             True,
         ),
         (
-            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.sentry.io/12312012",
-            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.sentry.io/12312012",
+            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.debugg.ai/12312012",
+            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.debugg.ai/12312012",
             False,
         ),
         (
-            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.sentry.io/12312012",
-            "http://squirrelchasers.ingest.sentry.io/12312012",
+            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.debugg.ai/12312012",
+            "http://squirrelchasers.ingest.debugg.ai/12312012",
             False,
         ),
         (
-            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.sentry.io/12312012",
-            "http://ingest.sentry.io/12312012",
+            "https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.debugg.ai/12312012",
+            "http://ingest.debugg.ai/12312012",
             True,
         ),
         (
-            "https://abc@localsentry.example.com/12312012",
-            "http://localsentry.example.com",
+            "https://abc@localdebugg-ai.example.com/12312012",
+            "http://localdebugg-ai.example.com",
             False,
         ),
     ],
 )
-def test_should_propagate_trace_to_sentry(
-    sentry_init, dsn, url, expected_propagation_decision
+def test_should_propagate_trace_to_debugg-ai(
+    debugg_ai_init, dsn, url, expected_propagation_decision
 ):
-    sentry_init(
+    debugg_ai_init(
         dsn=dsn,
         traces_sample_rate=1.0,
     )
@@ -446,8 +446,8 @@ def test_should_propagate_trace_to_sentry(
     assert should_propagate_trace(client, url) == expected_propagation_decision
 
 
-def test_start_transaction_updates_scope_name_source(sentry_init):
-    sentry_init(traces_sample_rate=1.0)
+def test_start_transaction_updates_scope_name_source(debugg_ai_init):
+    debugg_ai_init(traces_sample_rate=1.0)
 
     scope = debugg_ai_sdk.get_current_scope()
 
@@ -457,8 +457,8 @@ def test_start_transaction_updates_scope_name_source(sentry_init):
 
 
 @pytest.mark.parametrize("sampled", (True, None))
-def test_transaction_dropped_debug_not_started(sentry_init, sampled):
-    sentry_init(enable_tracing=True)
+def test_transaction_dropped_debug_not_started(debugg_ai_init, sampled):
+    debugg_ai_init(enable_tracing=True)
 
     tx = Transaction(sampled=sampled)
 
@@ -477,8 +477,8 @@ def test_transaction_dropped_debug_not_started(sentry_init, sampled):
         )
 
 
-def test_transaction_dropeed_sampled_false(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_transaction_dropeed_sampled_false(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     tx = Transaction(sampled=False)
 
@@ -495,8 +495,8 @@ def test_transaction_dropeed_sampled_false(sentry_init):
         )
 
 
-def test_transaction_not_started_warning(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_transaction_not_started_warning(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     tx = Transaction()
 
@@ -506,6 +506,6 @@ def test_transaction_not_started_warning(sentry_init):
 
     mock_logger.debug.assert_any_call(
         "Transaction was entered without being started with debugg_ai_sdk.start_transaction."
-        "The transaction will not be sent to Sentry. To fix, start the transaction by"
+        "The transaction will not be sent to DebuggAI. To fix, start the transaction by"
         "passing it to debugg_ai_sdk.start_transaction."
     )

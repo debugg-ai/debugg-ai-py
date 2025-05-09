@@ -84,7 +84,7 @@ def starlite_app_factory(middleware=None, debug=True, exception_handlers=None):
     ],
 )
 def test_catch_exceptions(
-    sentry_init,
+    debugg_ai_init,
     capture_exceptions,
     capture_events,
     test_url,
@@ -92,7 +92,7 @@ def test_catch_exceptions(
     expected_message,
     expected_tx_name,
 ):
-    sentry_init(integrations=[StarliteIntegration()])
+    debugg_ai_init(integrations=[StarliteIntegration()])
     starlite_app = starlite_app_factory()
     exceptions = capture_exceptions()
     events = capture_events()
@@ -112,8 +112,8 @@ def test_catch_exceptions(
     assert event["exception"]["values"][0]["mechanism"]["type"] == "starlite"
 
 
-def test_middleware_spans(sentry_init, capture_events):
-    sentry_init(
+def test_middleware_spans(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarliteIntegration()],
     )
@@ -154,7 +154,7 @@ def test_middleware_spans(sentry_init, capture_events):
         assert span["description"] == span["tags"]["starlite.middleware_name"]
 
 
-def test_middleware_callback_spans(sentry_init, capture_events):
+def test_middleware_callback_spans(debugg_ai_init, capture_events):
     class SampleMiddleware(AbstractMiddleware):
         async def __call__(self, scope, receive, send) -> None:
             async def do_stuff(message):
@@ -165,7 +165,7 @@ def test_middleware_callback_spans(sentry_init, capture_events):
 
             await self.app(scope, receive, do_stuff)
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarliteIntegration()],
     )
@@ -185,12 +185,12 @@ def test_middleware_callback_spans(sentry_init, capture_events):
         },
         {
             "op": "middleware.starlite.send",
-            "description": "SentryAsgiMiddleware._run_app.<locals>._sentry_wrapped_send",
+            "description": "DebuggAIAsgiMiddleware._run_app.<locals>._debugg_ai_wrapped_send",
             "tags": {"starlite.middleware_name": "SampleMiddleware"},
         },
         {
             "op": "middleware.starlite.send",
-            "description": "SentryAsgiMiddleware._run_app.<locals>._sentry_wrapped_send",
+            "description": "DebuggAIAsgiMiddleware._run_app.<locals>._debugg_ai_wrapped_send",
             "tags": {"starlite.middleware_name": "SampleMiddleware"},
         },
     ]
@@ -216,7 +216,7 @@ def test_middleware_callback_spans(sentry_init, capture_events):
         )
 
 
-def test_middleware_receive_send(sentry_init, capture_events):
+def test_middleware_receive_send(debugg_ai_init, capture_events):
     class SampleReceiveSendMiddleware(AbstractMiddleware):
         async def __call__(self, scope, receive, send):
             message = await receive()
@@ -228,7 +228,7 @@ def test_middleware_receive_send(sentry_init, capture_events):
 
             await self.app(scope, receive, send)
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarliteIntegration()],
     )
@@ -239,7 +239,7 @@ def test_middleware_receive_send(sentry_init, capture_events):
     client.get("/message")
 
 
-def test_middleware_partial_receive_send(sentry_init, capture_events):
+def test_middleware_partial_receive_send(debugg_ai_init, capture_events):
     class SamplePartialReceiveSendMiddleware(AbstractMiddleware):
         async def __call__(self, scope, receive, send):
             message = await receive()
@@ -260,7 +260,7 @@ def test_middleware_partial_receive_send(sentry_init, capture_events):
 
             await self.app(scope, partial_receive, partial_send)
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[StarliteIntegration()],
     )
@@ -286,7 +286,7 @@ def test_middleware_partial_receive_send(sentry_init, capture_events):
         },
         {
             "op": "middleware.starlite.send",
-            "description": "SentryAsgiMiddleware._run_app.<locals>._sentry_wrapped_send",
+            "description": "DebuggAIAsgiMiddleware._run_app.<locals>._debugg_ai_wrapped_send",
             "tags": {"starlite.middleware_name": "SamplePartialReceiveSendMiddleware"},
         },
     ]
@@ -312,8 +312,8 @@ def test_middleware_partial_receive_send(sentry_init, capture_events):
         )
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[StarliteIntegration()],
         traces_sample_rate=1.0,
     )
@@ -355,7 +355,7 @@ def test_span_origin(sentry_init, capture_events):
     ],
 )
 def test_starlite_scope_user_on_exception_event(
-    sentry_init, capture_exceptions, capture_events, is_send_default_pii
+    debugg_ai_init, capture_exceptions, capture_events, is_send_default_pii
 ):
     class TestUserMiddleware(AbstractMiddleware):
         async def __call__(self, scope, receive, send):
@@ -366,7 +366,7 @@ def test_starlite_scope_user_on_exception_event(
             }
             await self.app(scope, receive, send)
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[StarliteIntegration()], send_default_pii=is_send_default_pii
     )
     starlite_app = starlite_app_factory(middleware=[TestUserMiddleware])

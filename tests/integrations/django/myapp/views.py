@@ -87,18 +87,18 @@ def view_with_cached_template_fragment(request):
     return HttpResponse(rendered)
 
 
-# This is a "class based view" as previously found in the sentry codebase. The
+# This is a "class based view" as previously found in the debugg-ai codebase. The
 # interesting property of this one is that csrf_exempt, as a class attribute,
 # is not in __dict__, so regular use of functools.wraps will not forward the
 # attribute.
-class SentryClassBasedView:
+class DebuggAIClassBasedView:
     csrf_exempt = True
 
     def __call__(self, request):
         return HttpResponse("ok")
 
 
-class SentryClassBasedViewWithCsrf:
+class DebuggAIClassBasedViewWithCsrf:
     def __call__(self, request):
         return HttpResponse("ok")
 
@@ -137,7 +137,7 @@ def mylogin(request):
 
 @csrf_exempt
 def handler500(request):
-    return HttpResponseServerError("Sentry error.")
+    return HttpResponseServerError("DebuggAI error.")
 
 
 class ClassBasedView(ListView):

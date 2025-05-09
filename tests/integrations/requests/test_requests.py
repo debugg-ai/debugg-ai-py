@@ -12,8 +12,8 @@ from tests.conftest import ApproxDict, create_mock_http_server
 PORT = create_mock_http_server()
 
 
-def test_crumb_capture(sentry_init, capture_events):
-    sentry_init(integrations=[StdlibIntegration()])
+def test_crumb_capture(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[StdlibIntegration()])
     events = capture_events()
 
     url = f"http://localhost:{PORT}/hello-world"  # noqa:E231
@@ -50,8 +50,8 @@ def test_crumb_capture(sentry_init, capture_events):
         (500, "error"),
     ],
 )
-def test_crumb_capture_client_error(sentry_init, capture_events, status_code, level):
-    sentry_init(integrations=[StdlibIntegration()])
+def test_crumb_capture_client_error(debugg_ai_init, capture_events, status_code, level):
+    debugg_ai_init(integrations=[StdlibIntegration()])
 
     events = capture_events()
 
@@ -85,8 +85,8 @@ def test_crumb_capture_client_error(sentry_init, capture_events, status_code, le
 
 
 @pytest.mark.tests_internal_exceptions
-def test_omit_url_data_if_parsing_fails(sentry_init, capture_events):
-    sentry_init(integrations=[StdlibIntegration()])
+def test_omit_url_data_if_parsing_fails(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[StdlibIntegration()])
 
     events = capture_events()
 

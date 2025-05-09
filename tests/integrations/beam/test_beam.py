@@ -174,9 +174,9 @@ class _OutputHandler(OutputHandler):
 
 
 @pytest.fixture
-def init_beam(sentry_init):
+def init_beam(debugg_ai_init):
     def inner(fn):
-        sentry_init(default_integrations=False, integrations=[BeamIntegration()])
+        debugg_ai_init(default_integrations=False, integrations=[BeamIntegration()])
         # Little hack to avoid having to run the whole pipeline.
         pardo = ParDo(fn)
         signature = pardo._signature

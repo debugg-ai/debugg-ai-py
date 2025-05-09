@@ -15,7 +15,7 @@ from django.core.handlers.wsgi import WSGIRequest
 import debugg_ai_sdk
 from debugg_ai_sdk.consts import OP
 
-from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.integrations.asgi import DebuggAIAsgiMiddleware
 from debugg_ai_sdk.scope import should_send_default_pii
 from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
@@ -88,13 +88,13 @@ def patch_django_asgi_handler_impl(cls):
 
     old_app = cls.__call__
 
-    async def sentry_patched_asgi_handler(self, scope, receive, send):
+    async def debugg_ai_patched_asgi_handler(self, scope, receive, send):
         # type: (Any, Any, Any, Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
         if integration is None:
             return await old_app(self, scope, receive, send)
 
-        middleware = SentryAsgiMiddleware(
+        middleware = DebuggAIAsgiMiddleware(
             old_app.__get__(self, cls),
             unsafe_context_data=True,
             span_origin=DjangoIntegration.origin,
@@ -103,14 +103,14 @@ def patch_django_asgi_handler_impl(cls):
 
         return await middleware(scope, receive, send)
 
-    cls.__call__ = sentry_patched_asgi_handler
+    cls.__call__ = debugg_ai_patched_asgi_handler
 
     modern_django_asgi_support = hasattr(cls, "create_request")
     if modern_django_asgi_support:
         old_create_request = cls.create_request
 
         @ensure_integration_enabled(DjangoIntegration, old_create_request)
-        def sentry_patched_create_request(self, *args, **kwargs):
+        def debugg_ai_patched_create_request(self, *args, **kwargs):
             # type: (Any, *Any, **Any) -> Any
             request, error_response = old_create_request(self, *args, **kwargs)
             scope = debugg_ai_sdk.get_isolation_scope()
@@ -118,19 +118,19 @@ def patch_django_asgi_handler_impl(cls):
 
             return request, error_response
 
-        cls.create_request = sentry_patched_create_request
+        cls.create_request = debugg_ai_patched_create_request
 
 
 def patch_get_response_async(cls, _before_get_response):
     # type: (Any, Any) -> None
     old_get_response_async = cls.get_response_async
 
-    async def sentry_patched_get_response_async(self, request):
+    async def debugg_ai_patched_get_response_async(self, request):
         # type: (Any, Any) -> Union[HttpResponse, BaseException]
         _before_get_response(request)
         return await old_get_response_async(self, request)
 
-    cls.get_response_async = sentry_patched_get_response_async
+    cls.get_response_async = debugg_ai_patched_get_response_async
 
 
 def patch_channels_asgi_handler_impl(cls):
@@ -142,13 +142,13 @@ def patch_channels_asgi_handler_impl(cls):
     if channels.__version__ < "3.0.0":
         old_app = cls.__call__
 
-        async def sentry_patched_asgi_handler(self, receive, send):
+        async def debugg_ai_patched_asgi_handler(self, receive, send):
             # type: (Any, Any, Any) -> Any
             integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
             if integration is None:
                 return await old_app(self, receive, send)
 
-            middleware = SentryAsgiMiddleware(
+            middleware = DebuggAIAsgiMiddleware(
                 lambda _scope: old_app.__get__(self, cls),
                 unsafe_context_data=True,
                 span_origin=DjangoIntegration.origin,
@@ -157,7 +157,7 @@ def patch_channels_asgi_handler_impl(cls):
 
             return await middleware(self.scope)(receive, send)
 
-        cls.__call__ = sentry_patched_asgi_handler
+        cls.__call__ = debugg_ai_patched_asgi_handler
 
     else:
         # The ASGI handler in Channels >= 3 has the same signature as
@@ -170,15 +170,15 @@ def wrap_async_view(callback):
     from debugg_ai_sdk.integrations.django import DjangoIntegration
 
     @functools.wraps(callback)
-    async def sentry_wrapped_callback(request, *args, **kwargs):
+    async def debugg_ai_wrapped_callback(request, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Any
         current_scope = debugg_ai_sdk.get_current_scope()
         if current_scope.transaction is not None:
             current_scope.transaction.update_active_thread()
 
-        sentry_scope = debugg_ai_sdk.get_isolation_scope()
-        if sentry_scope.profile is not None:
-            sentry_scope.profile.update_active_thread_id()
+        debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
+        if debugg_ai_scope.profile is not None:
+            debugg_ai_scope.profile.update_active_thread_id()
 
         with debugg_ai_sdk.start_span(
             op=OP.VIEW_RENDER,
@@ -187,7 +187,7 @@ def wrap_async_view(callback):
         ):
             return await callback(request, *args, **kwargs)
 
-    return sentry_wrapped_callback
+    return debugg_ai_wrapped_callback
 
 
 def _asgi_middleware_mixin_factory(_check_middleware_span):
@@ -197,7 +197,7 @@ def _asgi_middleware_mixin_factory(_check_middleware_span):
     in async mode.
     """
 
-    class SentryASGIMixin:
+    class DebuggAIASGIMixin:
         if TYPE_CHECKING:
             _inner = None
 
@@ -242,4 +242,4 @@ def _asgi_middleware_mixin_factory(_check_middleware_span):
             with middleware_span:
                 return await f(*args, **kwargs)
 
-    return SentryASGIMixin
+    return DebuggAIASGIMixin

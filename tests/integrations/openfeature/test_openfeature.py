@@ -12,9 +12,9 @@ from debugg_ai_sdk.integrations.openfeature import OpenFeatureIntegration
 from tests.conftest import ApproxDict
 
 
-def test_openfeature_integration(sentry_init, capture_events, uninstall_integration):
+def test_openfeature_integration(debugg_ai_init, capture_events, uninstall_integration):
     uninstall_integration(OpenFeatureIntegration.identifier)
-    sentry_init(integrations=[OpenFeatureIntegration()])
+    debugg_ai_init(integrations=[OpenFeatureIntegration()])
 
     flags = {
         "hello": InMemoryFlag("on", {"on": True, "off": False}),
@@ -41,10 +41,10 @@ def test_openfeature_integration(sentry_init, capture_events, uninstall_integrat
 
 
 def test_openfeature_integration_threaded(
-    sentry_init, capture_events, uninstall_integration
+    debugg_ai_init, capture_events, uninstall_integration
 ):
     uninstall_integration(OpenFeatureIntegration.identifier)
-    sentry_init(integrations=[OpenFeatureIntegration()])
+    debugg_ai_init(integrations=[OpenFeatureIntegration()])
     events = capture_events()
 
     flags = {
@@ -97,14 +97,14 @@ def test_openfeature_integration_threaded(
 
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
 def test_openfeature_integration_asyncio(
-    sentry_init, capture_events, uninstall_integration
+    debugg_ai_init, capture_events, uninstall_integration
 ):
     """Assert concurrently evaluated flags do not pollute one another."""
 
     asyncio = pytest.importorskip("asyncio")
 
     uninstall_integration(OpenFeatureIntegration.identifier)
-    sentry_init(integrations=[OpenFeatureIntegration()])
+    debugg_ai_init(integrations=[OpenFeatureIntegration()])
     events = capture_events()
 
     async def task(flag):
@@ -156,10 +156,10 @@ def test_openfeature_integration_asyncio(
 
 
 def test_openfeature_span_integration(
-    sentry_init, capture_events, uninstall_integration
+    debugg_ai_init, capture_events, uninstall_integration
 ):
     uninstall_integration(OpenFeatureIntegration.identifier)
-    sentry_init(traces_sample_rate=1.0, integrations=[OpenFeatureIntegration()])
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[OpenFeatureIntegration()])
 
     api.set_provider(
         InMemoryProvider({"hello": InMemoryFlag("on", {"on": True, "off": False})})

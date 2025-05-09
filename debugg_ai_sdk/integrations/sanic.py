@@ -64,7 +64,7 @@ class SanicIntegration(Integration):
         # type: (Optional[Container[int]]) -> None
         """
         The unsampled_statuses parameter can be used to specify for which HTTP statuses the
-        transactions should not be sent to Sentry. By default, transactions are sent for all
+        transactions should not be sent to DebuggAI. By default, transactions are sent for all
         HTTP statuses, except 404. Set unsampled_statuses to None to send transactions for all
         HTTP statuses, including 404.
         """
@@ -80,7 +80,7 @@ class SanicIntegration(Integration):
             # We better have contextvars or we're going to leak state between
             # requests.
             raise DidNotEnable(
-                "The sanic integration for Sentry requires Python 3.7+ "
+                "The sanic integration for DebuggAI requires Python 3.7+ "
                 " or the aiocontextvars package." + CONTEXTVARS_ERROR_MESSAGE
             )
 
@@ -142,14 +142,14 @@ class SanicRequestExtractor(RequestExtractor):
 def _setup_sanic():
     # type: () -> None
     Sanic._startup = _startup
-    ErrorHandler.lookup = _sentry_error_handler_lookup
+    ErrorHandler.lookup = _debugg_ai_error_handler_lookup
 
 
 def _setup_legacy_sanic():
     # type: () -> None
     Sanic.handle_request = _legacy_handle_request
     Router.get = _legacy_router_get
-    ErrorHandler.lookup = _sentry_error_handler_lookup
+    ErrorHandler.lookup = _debugg_ai_error_handler_lookup
 
 
 async def _startup(self):
@@ -174,16 +174,16 @@ async def _startup(self):
 
 async def _context_enter(request):
     # type: (Request) -> None
-    request.ctx._sentry_do_integration = (
+    request.ctx._debugg_ai_do_integration = (
         debugg_ai_sdk.get_client().get_integration(SanicIntegration) is not None
     )
 
-    if not request.ctx._sentry_do_integration:
+    if not request.ctx._debugg_ai_do_integration:
         return
 
     weak_request = weakref.ref(request)
-    request.ctx._sentry_scope = debugg_ai_sdk.isolation_scope()
-    scope = request.ctx._sentry_scope.__enter__()
+    request.ctx._debugg_ai_scope = debugg_ai_sdk.isolation_scope()
+    scope = request.ctx._debugg_ai_scope.__enter__()
     scope.clear_breadcrumbs()
     scope.add_event_processor(_make_request_processor(weak_request))
 
@@ -195,7 +195,7 @@ async def _context_enter(request):
         source=TransactionSource.URL,
         origin=SanicIntegration.origin,
     )
-    request.ctx._sentry_transaction = debugg_ai_sdk.start_transaction(
+    request.ctx._debugg_ai_transaction = debugg_ai_sdk.start_transaction(
         transaction
     ).__enter__()
 
@@ -203,7 +203,7 @@ async def _context_enter(request):
 async def _context_exit(request, response=None):
     # type: (Request, Optional[BaseHTTPResponse]) -> None
     with capture_internal_exceptions():
-        if not request.ctx._sentry_do_integration:
+        if not request.ctx._debugg_ai_do_integration:
             return
 
         integration = debugg_ai_sdk.get_client().get_integration(SanicIntegration)
@@ -213,26 +213,26 @@ async def _context_exit(request, response=None):
         # This capture_internal_exceptions block has been intentionally nested here, so that in case an exception
         # happens while trying to end the transaction, we still attempt to exit the hub.
         with capture_internal_exceptions():
-            request.ctx._sentry_transaction.set_http_status(response_status)
-            request.ctx._sentry_transaction.sampled &= (
+            request.ctx._debugg_ai_transaction.set_http_status(response_status)
+            request.ctx._debugg_ai_transaction.sampled &= (
                 isinstance(integration, SanicIntegration)
                 and response_status not in integration._unsampled_statuses
             )
-            request.ctx._sentry_transaction.__exit__(None, None, None)
+            request.ctx._debugg_ai_transaction.__exit__(None, None, None)
 
-        request.ctx._sentry_scope.__exit__(None, None, None)
+        request.ctx._debugg_ai_scope.__exit__(None, None, None)
 
 
 async def _set_transaction(request, route, **_):
     # type: (Request, Route, **Any) -> None
-    if request.ctx._sentry_do_integration:
+    if request.ctx._debugg_ai_do_integration:
         with capture_internal_exceptions():
             scope = debugg_ai_sdk.get_current_scope()
             route_name = route.name.replace(request.app.name, "").strip(".")
             scope.set_transaction_name(route_name, source=TransactionSource.COMPONENT)
 
 
-def _sentry_error_handler_lookup(self, exception, *args, **kwargs):
+def _debugg_ai_error_handler_lookup(self, exception, *args, **kwargs):
     # type: (Any, Exception, *Any, **Any) -> Optional[object]
     _capture_exception(exception)
     old_error_handler = old_error_handler_lookup(self, exception, *args, **kwargs)
@@ -243,7 +243,7 @@ def _sentry_error_handler_lookup(self, exception, *args, **kwargs):
     if debugg_ai_sdk.get_client().get_integration(SanicIntegration) is None:
         return old_error_handler
 
-    async def sentry_wrapped_error_handler(request, exception):
+    async def debugg_ai_wrapped_error_handler(request, exception):
         # type: (Request, Exception) -> Any
         try:
             response = old_error_handler(request, exception)
@@ -263,7 +263,7 @@ def _sentry_error_handler_lookup(self, exception, *args, **kwargs):
             if SanicIntegration.version and SanicIntegration.version == (21, 9):
                 await _context_exit(request)
 
-    return sentry_wrapped_error_handler
+    return debugg_ai_wrapped_error_handler
 
 
 async def _legacy_handle_request(self, request, *args, **kwargs):

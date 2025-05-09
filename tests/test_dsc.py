@@ -2,7 +2,7 @@
 This tests test for the correctness of the dynamic sampling context (DSC) in the trace header of envelopes.
 
 The DSC is defined here:
-https://develop.sentry.dev/sdk/telemetry/traces/dynamic-sampling-context/#dsc-specification
+https://develop.debugg-ai.dev/sdk/telemetry/traces/dynamic-sampling-context/#dsc-specification
 
 The DSC is propagated between service using a header called "baggage".
 This is not tested in this file.
@@ -16,13 +16,13 @@ import debugg_ai_sdk
 import debugg_ai_sdk.client
 
 
-def test_dsc_head_of_trace(sentry_init, capture_envelopes):
+def test_dsc_head_of_trace(debugg_ai_init, capture_envelopes):
     """
     Our service is the head of the trace (it starts a new trace)
-    and sends a transaction event to Sentry.
+    and sends a transaction event to DebuggAI.
     """
-    sentry_init(
-        dsn="https://mysecret@bla.ingest.sentry.io/12312012",
+    debugg_ai_init(
+        dsn="https://mysecret@bla.ingest.debugg.ai/12312012",
         release="myapp@0.0.1",
         environment="canary",
         traces_sample_rate=1.0,
@@ -66,13 +66,13 @@ def test_dsc_head_of_trace(sentry_init, capture_envelopes):
     assert envelope_trace_header["transaction"] == "foo"
 
 
-def test_dsc_continuation_of_trace(sentry_init, capture_envelopes):
+def test_dsc_continuation_of_trace(debugg_ai_init, capture_envelopes):
     """
     Another service calls our service and passes tracing information to us.
-    Our service is continuing the trace and sends a transaction event to Sentry.
+    Our service is continuing the trace and sends a transaction event to DebuggAI.
     """
-    sentry_init(
-        dsn="https://mysecret@bla.ingest.sentry.io/12312012",
+    debugg_ai_init(
+        dsn="https://mysecret@bla.ingest.debugg.ai/12312012",
         release="myapp@0.0.1",
         environment="canary",
         traces_sample_rate=1.0,
@@ -80,20 +80,20 @@ def test_dsc_continuation_of_trace(sentry_init, capture_envelopes):
     envelopes = capture_envelopes()
 
     # This is what the upstream service sends us
-    sentry_trace = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
+    debugg_ai_trace = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
     baggage = (
         "other-vendor-value-1=foo;bar;baz, "
-        "sentry-trace_id=771a43a4192642f0b136d5159a501700, "
-        "sentry-public_key=frontendpublickey, "
-        "sentry-sample_rate=0.01337, "
-        "sentry-sampled=true, "
-        "sentry-release=myfrontend@1.2.3, "
-        "sentry-environment=bird, "
-        "sentry-transaction=bar, "
+        "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700, "
+        "debugg-ai-public_key=frontendpublickey, "
+        "debugg-ai-sample_rate=0.01337, "
+        "debugg-ai-sampled=true, "
+        "debugg-ai-release=myfrontend@1.2.3, "
+        "debugg-ai-environment=bird, "
+        "debugg-ai-transaction=bar, "
         "other-vendor-value-2=foo;bar;"
     )
     incoming_http_headers = {
-        "HTTP_SENTRY_TRACE": sentry_trace,
+        "HTTP_DEBUGG_AI_TRACE": debugg_ai_trace,
         "HTTP_BAGGAGE": baggage,
     }
 
@@ -137,7 +137,7 @@ def test_dsc_continuation_of_trace(sentry_init, capture_envelopes):
 
 
 def test_dsc_continuation_of_trace_sample_rate_changed_in_traces_sampler(
-    sentry_init, capture_envelopes
+    debugg_ai_init, capture_envelopes
 ):
     """
     Another service calls our service and passes tracing information to us.
@@ -148,8 +148,8 @@ def test_dsc_continuation_of_trace_sample_rate_changed_in_traces_sampler(
     def my_traces_sampler(sampling_context):
         return 0.25
 
-    sentry_init(
-        dsn="https://mysecret@bla.ingest.sentry.io/12312012",
+    debugg_ai_init(
+        dsn="https://mysecret@bla.ingest.debugg.ai/12312012",
         release="myapp@0.0.1",
         environment="canary",
         traces_sampler=my_traces_sampler,
@@ -157,20 +157,20 @@ def test_dsc_continuation_of_trace_sample_rate_changed_in_traces_sampler(
     envelopes = capture_envelopes()
 
     # This is what the upstream service sends us
-    sentry_trace = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
+    debugg_ai_trace = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
     baggage = (
         "other-vendor-value-1=foo;bar;baz, "
-        "sentry-trace_id=771a43a4192642f0b136d5159a501700, "
-        "sentry-public_key=frontendpublickey, "
-        "sentry-sample_rate=1.0, "
-        "sentry-sampled=true, "
-        "sentry-release=myfrontend@1.2.3, "
-        "sentry-environment=bird, "
-        "sentry-transaction=bar, "
+        "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700, "
+        "debugg-ai-public_key=frontendpublickey, "
+        "debugg-ai-sample_rate=1.0, "
+        "debugg-ai-sampled=true, "
+        "debugg-ai-release=myfrontend@1.2.3, "
+        "debugg-ai-environment=bird, "
+        "debugg-ai-transaction=bar, "
         "other-vendor-value-2=foo;bar;"
     )
     incoming_http_headers = {
-        "HTTP_SENTRY_TRACE": sentry_trace,
+        "HTTP_DEBUGG_AI_TRACE": debugg_ai_trace,
         "HTTP_BAGGAGE": baggage,
     }
 
@@ -214,12 +214,12 @@ def test_dsc_continuation_of_trace_sample_rate_changed_in_traces_sampler(
     assert envelope_trace_header["transaction"] == "bar"
 
 
-def test_dsc_issue(sentry_init, capture_envelopes):
+def test_dsc_issue(debugg_ai_init, capture_envelopes):
     """
-    Our service is a standalone service that does not have tracing enabled. Just uses Sentry for error reporting.
+    Our service is a standalone service that does not have tracing enabled. Just uses DebuggAI for error reporting.
     """
-    sentry_init(
-        dsn="https://mysecret@bla.ingest.sentry.io/12312012",
+    debugg_ai_init(
+        dsn="https://mysecret@bla.ingest.debugg.ai/12312012",
         release="myapp@0.0.1",
         environment="canary",
     )
@@ -259,13 +259,13 @@ def test_dsc_issue(sentry_init, capture_envelopes):
     assert "transaction" not in envelope_trace_header
 
 
-def test_dsc_issue_with_tracing(sentry_init, capture_envelopes):
+def test_dsc_issue_with_tracing(debugg_ai_init, capture_envelopes):
     """
     Our service has tracing enabled and an error occurs in an transaction.
     Envelopes containing errors also have the same DSC than the transaction envelopes.
     """
-    sentry_init(
-        dsn="https://mysecret@bla.ingest.sentry.io/12312012",
+    debugg_ai_init(
+        dsn="https://mysecret@bla.ingest.debugg.ai/12312012",
         release="myapp@0.0.1",
         environment="canary",
         traces_sample_rate=1.0,
@@ -322,17 +322,17 @@ def test_dsc_issue_with_tracing(sentry_init, capture_envelopes):
         None,  # no tracing at all. This service will never create transactions.
     ],
 )
-def test_dsc_issue_twp(sentry_init, capture_envelopes, traces_sample_rate):
+def test_dsc_issue_twp(debugg_ai_init, capture_envelopes, traces_sample_rate):
     """
     Our service does not have tracing enabled, but we receive tracing information from an upstream service.
     Error envelopes still contain a DCS. This is called "tracing without performance" or TWP for short.
 
     This way if I have three services A, B, and C, and A and C have tracing enabled, but B does not,
-    we still can see the full trace in Sentry, and associate errors send by service B to Sentry.
+    we still can see the full trace in DebuggAI, and associate errors send by service B to DebuggAI.
     (This test would be service B in this scenario)
     """
-    sentry_init(
-        dsn="https://mysecret@bla.ingest.sentry.io/12312012",
+    debugg_ai_init(
+        dsn="https://mysecret@bla.ingest.debugg.ai/12312012",
         release="myapp@0.0.1",
         environment="canary",
         traces_sample_rate=traces_sample_rate,
@@ -340,20 +340,20 @@ def test_dsc_issue_twp(sentry_init, capture_envelopes, traces_sample_rate):
     envelopes = capture_envelopes()
 
     # This is what the upstream service sends us
-    sentry_trace = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
+    debugg_ai_trace = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
     baggage = (
         "other-vendor-value-1=foo;bar;baz, "
-        "sentry-trace_id=771a43a4192642f0b136d5159a501700, "
-        "sentry-public_key=frontendpublickey, "
-        "sentry-sample_rate=0.01337, "
-        "sentry-sampled=true, "
-        "sentry-release=myfrontend@1.2.3, "
-        "sentry-environment=bird, "
-        "sentry-transaction=bar, "
+        "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700, "
+        "debugg-ai-public_key=frontendpublickey, "
+        "debugg-ai-sample_rate=0.01337, "
+        "debugg-ai-sampled=true, "
+        "debugg-ai-release=myfrontend@1.2.3, "
+        "debugg-ai-environment=bird, "
+        "debugg-ai-transaction=bar, "
         "other-vendor-value-2=foo;bar;"
     )
     incoming_http_headers = {
-        "HTTP_SENTRY_TRACE": sentry_trace,
+        "HTTP_DEBUGG_AI_TRACE": debugg_ai_trace,
         "HTTP_BAGGAGE": baggage,
     }
 

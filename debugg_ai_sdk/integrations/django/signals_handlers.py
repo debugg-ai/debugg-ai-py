@@ -50,7 +50,7 @@ def patch_signals():
 
     old_live_receivers = Signal._live_receivers
 
-    def _sentry_live_receivers(self, sender):
+    def _debugg_ai_live_receivers(self, sender):
         # type: (Signal, Any) -> Union[tuple[list[Callable[..., Any]], list[Callable[..., Any]]], list[Callable[..., Any]]]
         if DJANGO_VERSION >= (5, 0):
             sync_receivers, async_receivers = old_live_receivers(self, sender)
@@ -58,7 +58,7 @@ def patch_signals():
             sync_receivers = old_live_receivers(self, sender)
             async_receivers = []
 
-        def sentry_sync_receiver_wrapper(receiver):
+        def debugg_ai_sync_receiver_wrapper(receiver):
             # type: (Callable[..., Any]) -> Callable[..., Any]
             @wraps(receiver)
             def wrapper(*args, **kwargs):
@@ -81,11 +81,11 @@ def patch_signals():
             and self not in integration.signals_denylist
         ):
             for idx, receiver in enumerate(sync_receivers):
-                sync_receivers[idx] = sentry_sync_receiver_wrapper(receiver)
+                sync_receivers[idx] = debugg_ai_sync_receiver_wrapper(receiver)
 
         if DJANGO_VERSION >= (5, 0):
             return sync_receivers, async_receivers
         else:
             return sync_receivers
 
-    Signal._live_receivers = _sentry_live_receivers
+    Signal._live_receivers = _debugg_ai_live_receivers

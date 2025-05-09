@@ -15,7 +15,7 @@ from debugg_ai_sdk.integrations import (
     _DEFAULT_FAILED_REQUEST_STATUS_CODES,
     _check_minimum_version,
 )
-from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.integrations.wsgi import DebuggAIWsgiMiddleware
 from debugg_ai_sdk.integrations._wsgi_common import RequestExtractor
 
 from typing import TYPE_CHECKING
@@ -78,16 +78,16 @@ class BottleIntegration(Integration):
         old_app = Bottle.__call__
 
         @ensure_integration_enabled(BottleIntegration, old_app)
-        def sentry_patched_wsgi_app(self, environ, start_response):
+        def debugg_ai_patched_wsgi_app(self, environ, start_response):
             # type: (Any, Dict[str, str], Callable[..., Any]) -> _ScopedResponse
-            middleware = SentryWsgiMiddleware(
+            middleware = DebuggAIWsgiMiddleware(
                 lambda *a, **kw: old_app(self, *a, **kw),
                 span_origin=BottleIntegration.origin,
             )
 
             return middleware(environ, start_response)
 
-        Bottle.__call__ = sentry_patched_wsgi_app
+        Bottle.__call__ = debugg_ai_patched_wsgi_app
 
         old_handle = Bottle._handle
 

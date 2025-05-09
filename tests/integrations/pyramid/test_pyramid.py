@@ -73,9 +73,9 @@ def get_client(pyramid_config):
 
 
 def test_view_exceptions(
-    get_client, route, sentry_init, capture_events, capture_exceptions
+    get_client, route, debugg_ai_init, capture_events, capture_exceptions
 ):
-    sentry_init(integrations=[PyramidIntegration()])
+    debugg_ai_init(integrations=[PyramidIntegration()])
     events = capture_events()
     exceptions = capture_exceptions()
 
@@ -102,8 +102,8 @@ def test_view_exceptions(
     assert event["exception"]["values"][-1]["type"] == "ZeroDivisionError"
 
 
-def test_has_context(route, get_client, sentry_init, capture_events):
-    sentry_init(integrations=[PyramidIntegration()])
+def test_has_context(route, get_client, debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[PyramidIntegration()])
     events = capture_events()
 
     @route("/context_message/{msg}")
@@ -136,7 +136,7 @@ def test_has_context(route, get_client, sentry_init, capture_events):
     ],
 )
 def test_transaction_style(
-    sentry_init,
+    debugg_ai_init,
     get_client,
     capture_events,
     url,
@@ -144,7 +144,7 @@ def test_transaction_style(
     expected_transaction,
     expected_source,
 ):
-    sentry_init(integrations=[PyramidIntegration(transaction_style=transaction_style)])
+    debugg_ai_init(integrations=[PyramidIntegration(transaction_style=transaction_style)])
 
     events = capture_events()
     client = get_client()
@@ -155,8 +155,8 @@ def test_transaction_style(
     assert event["transaction_info"] == {"source": expected_source}
 
 
-def test_large_json_request(sentry_init, capture_events, route, get_client):
-    sentry_init(integrations=[PyramidIntegration()])
+def test_large_json_request(debugg_ai_init, capture_events, route, get_client):
+    debugg_ai_init(integrations=[PyramidIntegration()])
 
     data = {"foo": {"bar": "a" * 2000}}
 
@@ -181,8 +181,8 @@ def test_large_json_request(sentry_init, capture_events, route, get_client):
 
 
 @pytest.mark.parametrize("data", [{}, []], ids=["empty-dict", "empty-list"])
-def test_flask_empty_json_request(sentry_init, capture_events, route, get_client, data):
-    sentry_init(integrations=[PyramidIntegration()])
+def test_flask_empty_json_request(debugg_ai_init, capture_events, route, get_client, data):
+    debugg_ai_init(integrations=[PyramidIntegration()])
 
     @route("/")
     def index(request):
@@ -203,9 +203,9 @@ def test_flask_empty_json_request(sentry_init, capture_events, route, get_client
 
 
 def test_json_not_truncated_if_max_request_body_size_is_always(
-    sentry_init, capture_events, route, get_client
+    debugg_ai_init, capture_events, route, get_client
 ):
-    sentry_init(integrations=[PyramidIntegration()], max_request_body_size="always")
+    debugg_ai_init(integrations=[PyramidIntegration()], max_request_body_size="always")
 
     data = {
         "key{}".format(i): "value{}".format(i) for i in range(MAX_DATABAG_BREADTH + 10)
@@ -227,8 +227,8 @@ def test_json_not_truncated_if_max_request_body_size_is_always(
     assert event["request"]["data"] == data
 
 
-def test_files_and_form(sentry_init, capture_events, route, get_client):
-    sentry_init(integrations=[PyramidIntegration()], max_request_body_size="always")
+def test_files_and_form(debugg_ai_init, capture_events, route, get_client):
+    debugg_ai_init(integrations=[PyramidIntegration()], max_request_body_size="always")
 
     data = {"foo": "a" * 2000, "file": (BytesIO(b"hello"), "hello.txt")}
 
@@ -253,11 +253,11 @@ def test_files_and_form(sentry_init, capture_events, route, get_client):
 
 
 def test_bad_request_not_captured(
-    sentry_init, pyramid_config, capture_events, route, get_client
+    debugg_ai_init, pyramid_config, capture_events, route, get_client
 ):
     import pyramid.httpexceptions as exc
 
-    sentry_init(integrations=[PyramidIntegration()])
+    debugg_ai_init(integrations=[PyramidIntegration()])
     events = capture_events()
 
     @route("/")
@@ -276,9 +276,9 @@ def test_bad_request_not_captured(
 
 
 def test_errorhandler_ok(
-    sentry_init, pyramid_config, capture_exceptions, route, get_client
+    debugg_ai_init, pyramid_config, capture_exceptions, route, get_client
 ):
-    sentry_init(integrations=[PyramidIntegration()])
+    debugg_ai_init(integrations=[PyramidIntegration()])
     errors = capture_exceptions()
 
     @route("/")
@@ -301,9 +301,9 @@ def test_errorhandler_ok(
     reason="We don't have the right hooks in older Pyramid versions",
 )
 def test_errorhandler_500(
-    sentry_init, pyramid_config, capture_exceptions, route, get_client
+    debugg_ai_init, pyramid_config, capture_exceptions, route, get_client
 ):
-    sentry_init(integrations=[PyramidIntegration()])
+    debugg_ai_init(integrations=[PyramidIntegration()])
     errors = capture_exceptions()
 
     @route("/")
@@ -326,9 +326,9 @@ def test_errorhandler_500(
 
 
 def test_error_in_errorhandler(
-    sentry_init, pyramid_config, capture_events, route, get_client
+    debugg_ai_init, pyramid_config, capture_events, route, get_client
 ):
-    sentry_init(integrations=[PyramidIntegration()])
+    debugg_ai_init(integrations=[PyramidIntegration()])
 
     @route("/")
     def index(request):
@@ -353,11 +353,11 @@ def test_error_in_errorhandler(
 
 
 def test_error_in_authenticated_userid(
-    sentry_init, pyramid_config, capture_events, route, get_client
+    debugg_ai_init, pyramid_config, capture_events, route, get_client
 ):
     from debugg_ai_sdk.integrations.logging import LoggingIntegration
 
-    sentry_init(
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[
             PyramidIntegration(),
@@ -381,7 +381,7 @@ def test_error_in_authenticated_userid(
     assert len(events) == 1
 
     # In `authenticated_userid` there used to be a call to `logging.error`. This would print this error in the
-    # event processor of the Pyramid integration and the logging integration would capture this and send it to Sentry.
+    # event processor of the Pyramid integration and the logging integration would capture this and send it to DebuggAI.
     # This is not possible anymore, because capturing that error in the logging integration would again run all the
     # event processors (from the global, isolation and current scope) and thus would again run the same pyramid
     # event processor that raised the error in the first place, leading on an infinite loop.
@@ -404,8 +404,8 @@ def tween_factory(handler, registry):
     return tween
 
 
-def test_tween_ok(sentry_init, pyramid_config, capture_exceptions, route, get_client):
-    sentry_init(integrations=[PyramidIntegration()])
+def test_tween_ok(debugg_ai_init, pyramid_config, capture_exceptions, route, get_client):
+    debugg_ai_init(integrations=[PyramidIntegration()])
     errors = capture_exceptions()
 
     @route("/")
@@ -423,8 +423,8 @@ def test_tween_ok(sentry_init, pyramid_config, capture_exceptions, route, get_cl
     assert not errors
 
 
-def test_span_origin(sentry_init, capture_events, get_client):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events, get_client):
+    debugg_ai_init(
         integrations=[PyramidIntegration()],
         traces_sample_rate=1.0,
     )

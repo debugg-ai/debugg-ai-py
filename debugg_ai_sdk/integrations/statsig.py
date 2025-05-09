@@ -28,10 +28,10 @@ class StatsigIntegration(Integration):
         old_check_gate = statsig_module.check_gate
 
         @wraps(old_check_gate)
-        def sentry_check_gate(user, gate, *args, **kwargs):
+        def debugg_ai_check_gate(user, gate, *args, **kwargs):
             # type: (StatsigUser, str, *Any, **Any) -> Any
             enabled = old_check_gate(user, gate, *args, **kwargs)
             add_feature_flag(gate, enabled)
             return enabled
 
-        statsig_module.check_gate = sentry_check_gate
+        statsig_module.check_gate = debugg_ai_check_gate

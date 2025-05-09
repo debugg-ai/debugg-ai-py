@@ -75,7 +75,7 @@ def patch_get_request_handler():
     # type: () -> None
     old_get_request_handler = fastapi.routing.get_request_handler
 
-    def _sentry_get_request_handler(*args, **kwargs):
+    def _debugg_ai_get_request_handler(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         dependant = kwargs.get("dependant")
         if (
@@ -86,23 +86,23 @@ def patch_get_request_handler():
             old_call = dependant.call
 
             @wraps(old_call)
-            def _sentry_call(*args, **kwargs):
+            def _debugg_ai_call(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
                 current_scope = debugg_ai_sdk.get_current_scope()
                 if current_scope.transaction is not None:
                     current_scope.transaction.update_active_thread()
 
-                sentry_scope = debugg_ai_sdk.get_isolation_scope()
-                if sentry_scope.profile is not None:
-                    sentry_scope.profile.update_active_thread_id()
+                debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
+                if debugg_ai_scope.profile is not None:
+                    debugg_ai_scope.profile.update_active_thread_id()
 
                 return old_call(*args, **kwargs)
 
-            dependant.call = _sentry_call
+            dependant.call = _debugg_ai_call
 
         old_app = old_get_request_handler(*args, **kwargs)
 
-        async def _sentry_app(*args, **kwargs):
+        async def _debugg_ai_app(*args, **kwargs):
             # type: (*Any, **Any) -> Any
             integration = debugg_ai_sdk.get_client().get_integration(FastApiIntegration)
             if integration is None:
@@ -113,7 +113,7 @@ def patch_get_request_handler():
             _set_transaction_name_and_source(
                 debugg_ai_sdk.get_current_scope(), integration.transaction_style, request
             )
-            sentry_scope = debugg_ai_sdk.get_isolation_scope()
+            debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
             extractor = StarletteRequestExtractor(request)
             info = await extractor.extract_request_info()
 
@@ -135,13 +135,13 @@ def patch_get_request_handler():
 
                 return event_processor
 
-            sentry_scope._name = FastApiIntegration.identifier
-            sentry_scope.add_event_processor(
+            debugg_ai_scope._name = FastApiIntegration.identifier
+            debugg_ai_scope.add_event_processor(
                 _make_request_event_processor(request, integration)
             )
 
             return await old_app(*args, **kwargs)
 
-        return _sentry_app
+        return _debugg_ai_app
 
-    fastapi.routing.get_request_handler = _sentry_get_request_handler
+    fastapi.routing.get_request_handler = _debugg_ai_get_request_handler

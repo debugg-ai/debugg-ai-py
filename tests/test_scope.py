@@ -65,8 +65,8 @@ def test_scope_flags_copy():
     ]
 
 
-def test_merging(sentry_init, capture_events):
-    sentry_init()
+def test_merging(debugg_ai_init, capture_events):
+    debugg_ai_init()
 
     s = Scope()
     s.set_user({"id": "42"})
@@ -112,12 +112,12 @@ def test_common_args():
 
 
 BAGGAGE_VALUE = (
-    "other-vendor-value-1=foo;bar;baz, sentry-trace_id=771a43a4192642f0b136d5159a501700, "
-    "sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=0.01337, "
-    "sentry-user_id=Am%C3%A9lie, other-vendor-value-2=foo;bar;"
+    "other-vendor-value-1=foo;bar;baz, debugg-ai-trace_id=771a43a4192642f0b136d5159a501700, "
+    "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3, debugg-ai-sample_rate=0.01337, "
+    "debugg-ai-user_id=Am%C3%A9lie, other-vendor-value-2=foo;bar;"
 )
 
-SENTRY_TRACE_VALUE = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
+DEBUGG_AI_TRACE_VALUE = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
 
 
 @pytest.mark.parametrize(
@@ -125,15 +125,15 @@ SENTRY_TRACE_VALUE = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
     [
         (
             {
-                "SENTRY_TRACE": SENTRY_TRACE_VALUE,
+                "DEBUGG_AI_TRACE": DEBUGG_AI_TRACE_VALUE,
             },
             {
-                "sentry-trace": SENTRY_TRACE_VALUE,
+                "debugg-ai-trace": DEBUGG_AI_TRACE_VALUE,
             },
         ),
         (
             {
-                "SENTRY_BAGGAGE": BAGGAGE_VALUE,
+                "DEBUGG_AI_BAGGAGE": BAGGAGE_VALUE,
             },
             {
                 "baggage": BAGGAGE_VALUE,
@@ -141,49 +141,49 @@ SENTRY_TRACE_VALUE = "771a43a4192642f0b136d5159a501700-1234567890abcdef-1"
         ),
         (
             {
-                "SENTRY_TRACE": SENTRY_TRACE_VALUE,
-                "SENTRY_BAGGAGE": BAGGAGE_VALUE,
+                "DEBUGG_AI_TRACE": DEBUGG_AI_TRACE_VALUE,
+                "DEBUGG_AI_BAGGAGE": BAGGAGE_VALUE,
             },
             {
-                "sentry-trace": SENTRY_TRACE_VALUE,
+                "debugg-ai-trace": DEBUGG_AI_TRACE_VALUE,
                 "baggage": BAGGAGE_VALUE,
             },
         ),
         (
             {
-                "SENTRY_USE_ENVIRONMENT": "",
-                "SENTRY_TRACE": SENTRY_TRACE_VALUE,
-                "SENTRY_BAGGAGE": BAGGAGE_VALUE,
+                "DEBUGG_AI_USE_ENVIRONMENT": "",
+                "DEBUGG_AI_TRACE": DEBUGG_AI_TRACE_VALUE,
+                "DEBUGG_AI_BAGGAGE": BAGGAGE_VALUE,
             },
             {
-                "sentry-trace": SENTRY_TRACE_VALUE,
+                "debugg-ai-trace": DEBUGG_AI_TRACE_VALUE,
                 "baggage": BAGGAGE_VALUE,
             },
         ),
         (
             {
-                "SENTRY_USE_ENVIRONMENT": "True",
-                "SENTRY_TRACE": SENTRY_TRACE_VALUE,
-                "SENTRY_BAGGAGE": BAGGAGE_VALUE,
+                "DEBUGG_AI_USE_ENVIRONMENT": "True",
+                "DEBUGG_AI_TRACE": DEBUGG_AI_TRACE_VALUE,
+                "DEBUGG_AI_BAGGAGE": BAGGAGE_VALUE,
             },
             {
-                "sentry-trace": SENTRY_TRACE_VALUE,
+                "debugg-ai-trace": DEBUGG_AI_TRACE_VALUE,
                 "baggage": BAGGAGE_VALUE,
             },
         ),
         (
             {
-                "SENTRY_USE_ENVIRONMENT": "no",
-                "SENTRY_TRACE": SENTRY_TRACE_VALUE,
-                "SENTRY_BAGGAGE": BAGGAGE_VALUE,
+                "DEBUGG_AI_USE_ENVIRONMENT": "no",
+                "DEBUGG_AI_TRACE": DEBUGG_AI_TRACE_VALUE,
+                "DEBUGG_AI_BAGGAGE": BAGGAGE_VALUE,
             },
             None,
         ),
         (
             {
-                "SENTRY_USE_ENVIRONMENT": "True",
+                "DEBUGG_AI_USE_ENVIRONMENT": "True",
                 "MY_OTHER_VALUE": "asdf",
-                "SENTRY_RELEASE": "1.0.0",
+                "DEBUGG_AI_RELEASE": "1.0.0",
             },
             None,
         ),
@@ -787,8 +787,8 @@ def test_with_use_scope_data():
     }
 
 
-def test_nested_scopes_with_tags(sentry_init, capture_envelopes):
-    sentry_init(traces_sample_rate=1.0)
+def test_nested_scopes_with_tags(debugg_ai_init, capture_envelopes):
+    debugg_ai_init(traces_sample_rate=1.0)
     envelopes = capture_envelopes()
 
     with debugg_ai_sdk.isolation_scope() as scope1:
@@ -817,32 +817,32 @@ def test_nested_scopes_with_tags(sentry_init, capture_envelopes):
     assert transaction["spans"][1]["tags"] == {"b": 1}
 
 
-def test_should_send_default_pii_true(sentry_init):
-    sentry_init(send_default_pii=True)
+def test_should_send_default_pii_true(debugg_ai_init):
+    debugg_ai_init(send_default_pii=True)
 
     assert should_send_default_pii() is True
 
 
-def test_should_send_default_pii_false(sentry_init):
-    sentry_init(send_default_pii=False)
+def test_should_send_default_pii_false(debugg_ai_init):
+    debugg_ai_init(send_default_pii=False)
 
     assert should_send_default_pii() is False
 
 
-def test_should_send_default_pii_default_false(sentry_init):
-    sentry_init()
+def test_should_send_default_pii_default_false(debugg_ai_init):
+    debugg_ai_init()
 
     assert should_send_default_pii() is False
 
 
-def test_should_send_default_pii_false_with_dsn_and_spotlight(sentry_init):
-    sentry_init(dsn="http://key@localhost/1", spotlight=True)
+def test_should_send_default_pii_false_with_dsn_and_spotlight(debugg_ai_init):
+    debugg_ai_init(dsn="http://key@localhost/1", spotlight=True)
 
     assert should_send_default_pii() is False
 
 
-def test_should_send_default_pii_true_without_dsn_and_spotlight(sentry_init):
-    sentry_init(spotlight=True)
+def test_should_send_default_pii_true_without_dsn_and_spotlight(debugg_ai_init):
+    debugg_ai_init(spotlight=True)
 
     assert should_send_default_pii() is True
 
@@ -873,8 +873,8 @@ def test_set_tags():
     }, "Updating tags with empty dict changed tags"
 
 
-def test_last_event_id(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_last_event_id(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     assert Scope.last_event_id() is None
 
@@ -883,8 +883,8 @@ def test_last_event_id(sentry_init):
     assert Scope.last_event_id() is not None
 
 
-def test_last_event_id_transaction(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_last_event_id_transaction(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     assert Scope.last_event_id() is None
 
@@ -894,8 +894,8 @@ def test_last_event_id_transaction(sentry_init):
     assert Scope.last_event_id() is None, "Transaction should not set last_event_id"
 
 
-def test_last_event_id_cleared(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_last_event_id_cleared(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     # Make sure last_event_id is set
     debugg_ai_sdk.capture_exception(Exception("test"))

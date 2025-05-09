@@ -31,7 +31,7 @@ class LoggingLevels(enum.IntEnum):
     CRITICAL = 50
 
 
-SENTRY_LEVEL_FROM_LOGURU_LEVEL = {
+DEBUGG_AI_LEVEL_FROM_LOGURU_LEVEL = {
     "TRACE": "DEBUG",
     "DEBUG": "DEBUG",
     "INFO": "INFO",
@@ -97,7 +97,7 @@ class _LoguruBaseHandler(_BaseHandler):
     def _logging_to_event_level(self, record):
         # type: (LogRecord) -> str
         try:
-            return SENTRY_LEVEL_FROM_LOGURU_LEVEL[
+            return DEBUGG_AI_LEVEL_FROM_LOGURU_LEVEL[
                 LoggingLevels(record.levelno).name
             ].lower()
         except (ValueError, KeyError):
@@ -110,7 +110,7 @@ class LoguruEventHandler(_LoguruBaseHandler, EventHandler):
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         if kwargs.get("level"):
-            kwargs["level"] = SENTRY_LEVEL_FROM_LOGURU_LEVEL.get(
+            kwargs["level"] = DEBUGG_AI_LEVEL_FROM_LOGURU_LEVEL.get(
                 kwargs.get("level", ""), DEFAULT_LEVEL
             )
 
@@ -123,7 +123,7 @@ class LoguruBreadcrumbHandler(_LoguruBaseHandler, BreadcrumbHandler):
     def __init__(self, *args, **kwargs):
         # type: (*Any, **Any) -> None
         if kwargs.get("level"):
-            kwargs["level"] = SENTRY_LEVEL_FROM_LOGURU_LEVEL.get(
+            kwargs["level"] = DEBUGG_AI_LEVEL_FROM_LOGURU_LEVEL.get(
                 kwargs.get("level", ""), DEFAULT_LEVEL
             )
 

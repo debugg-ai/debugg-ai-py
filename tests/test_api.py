@@ -35,8 +35,8 @@ def test_get_current_span():
 
 
 @pytest.mark.forked
-def test_get_current_span_default_hub(sentry_init):
-    sentry_init()
+def test_get_current_span_default_hub(debugg_ai_init):
+    debugg_ai_init()
 
     assert get_current_span() is None
 
@@ -48,8 +48,8 @@ def test_get_current_span_default_hub(sentry_init):
 
 
 @pytest.mark.forked
-def test_get_current_span_default_hub_with_transaction(sentry_init):
-    sentry_init()
+def test_get_current_span_default_hub_with_transaction(debugg_ai_init):
+    debugg_ai_init()
 
     assert get_current_span() is None
 
@@ -58,8 +58,8 @@ def test_get_current_span_default_hub_with_transaction(sentry_init):
 
 
 @pytest.mark.forked
-def test_traceparent_with_tracing_enabled(sentry_init):
-    sentry_init(traces_sample_rate=1.0)
+def test_traceparent_with_tracing_enabled(debugg_ai_init):
+    debugg_ai_init(traces_sample_rate=1.0)
 
     with start_transaction() as transaction:
         expected_traceparent = "%s-%s-1" % (
@@ -70,8 +70,8 @@ def test_traceparent_with_tracing_enabled(sentry_init):
 
 
 @pytest.mark.forked
-def test_traceparent_with_tracing_disabled(sentry_init):
-    sentry_init()
+def test_traceparent_with_tracing_disabled(debugg_ai_init):
+    debugg_ai_init()
 
     propagation_context = get_isolation_scope()._propagation_context
     expected_traceparent = "%s-%s" % (
@@ -82,11 +82,11 @@ def test_traceparent_with_tracing_disabled(sentry_init):
 
 
 @pytest.mark.forked
-def test_baggage_with_tracing_disabled(sentry_init):
-    sentry_init(release="1.0.0", environment="dev")
+def test_baggage_with_tracing_disabled(debugg_ai_init):
+    debugg_ai_init(release="1.0.0", environment="dev")
     propagation_context = get_isolation_scope()._propagation_context
     expected_baggage = (
-        "sentry-trace_id={},sentry-environment=dev,sentry-release=1.0.0".format(
+        "debugg-ai-trace_id={},debugg-ai-environment=dev,debugg-ai-release=1.0.0".format(
             propagation_context.trace_id
         )
     )
@@ -94,26 +94,26 @@ def test_baggage_with_tracing_disabled(sentry_init):
 
 
 @pytest.mark.forked
-def test_baggage_with_tracing_enabled(sentry_init):
-    sentry_init(traces_sample_rate=1.0, release="1.0.0", environment="dev")
+def test_baggage_with_tracing_enabled(debugg_ai_init):
+    debugg_ai_init(traces_sample_rate=1.0, release="1.0.0", environment="dev")
     with start_transaction() as transaction:
-        expected_baggage_re = r"^sentry-trace_id={},sentry-sample_rand=0\.\d{{6}},sentry-environment=dev,sentry-release=1\.0\.0,sentry-sample_rate=1\.0,sentry-sampled={}$".format(
+        expected_baggage_re = r"^debugg-ai-trace_id={},debugg-ai-sample_rand=0\.\d{{6}},debugg-ai-environment=dev,debugg-ai-release=1\.0\.0,debugg-ai-sample_rate=1\.0,debugg-ai-sampled={}$".format(
             transaction.trace_id, "true" if transaction.sampled else "false"
         )
         assert re.match(expected_baggage_re, get_baggage())
 
 
 @pytest.mark.forked
-def test_continue_trace(sentry_init):
-    sentry_init()
+def test_continue_trace(debugg_ai_init):
+    debugg_ai_init()
 
     trace_id = "471a43a4192642f0b136d5159a501701"
     parent_span_id = "6e8f22c393e68f19"
     parent_sampled = 1
     transaction = continue_trace(
         {
-            "sentry-trace": "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled),
-            "baggage": "sentry-trace_id=566e3688a61d4bc888951642d6f14a19,sentry-sample_rand=0.123456",
+            "debugg-ai-trace": "{}-{}-{}".format(trace_id, parent_span_id, parent_sampled),
+            "baggage": "debugg-ai-trace_id=566e3688a61d4bc888951642d6f14a19,debugg-ai-sample_rand=0.123456",
         },
         name="some name",
     )
@@ -158,8 +158,8 @@ def raise_and_capture():
         capture_exception()
 
 
-def test_set_tags(sentry_init, capture_events):
-    sentry_init()
+def test_set_tags(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     set_tags({"tag1": "value1", "tag2": "value2"})

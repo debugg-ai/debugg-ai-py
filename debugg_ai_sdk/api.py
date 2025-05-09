@@ -114,11 +114,11 @@ def is_initialized():
     """
     .. versionadded:: 2.0.0
 
-    Returns whether Sentry has been initialized or not.
+    Returns whether DebuggAI has been initialized or not.
 
     If a client is available and the client is active
     (meaning it is configured to send data) then
-    Sentry is initialized.
+    DebuggAI is initialized.
     """
     return get_client().is_active()
 
@@ -237,7 +237,7 @@ def configure_scope(  # noqa: F811
     warnings.warn(
         "debugg_ai_sdk.configure_scope is deprecated and will be removed in the next major version. "
         "Please consult our migration guide to learn how to migrate to the new API: "
-        "https://docs.sentry.io/platforms/python/migration/1.x-to-2.x#scope-configuring",
+        "https://docs.debugg.ai/platforms/python/migration/1.x-to-2.x#scope-configuring",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -289,7 +289,7 @@ def push_scope(  # noqa: F811
     warnings.warn(
         "debugg_ai_sdk.push_scope is deprecated and will be removed in the next major version. "
         "Please consult our migration guide to learn how to migrate to the new API: "
-        "https://docs.sentry.io/platforms/python/migration/1.x-to-2.x#scope-pushing",
+        "https://docs.debugg.ai/platforms/python/migration/1.x-to-2.x#scope-pushing",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -360,7 +360,7 @@ def start_span(
 @scopemethod
 def start_transaction(
     transaction=None,  # type: Optional[Transaction]
-    instrumenter=INSTRUMENTER.SENTRY,  # type: str
+    instrumenter=INSTRUMENTER.DEBUGG_AI,  # type: str
     custom_sampling_context=None,  # type: Optional[SamplingContext]
     **kwargs,  # type: Unpack[TransactionKwargs]
 ):
@@ -384,7 +384,7 @@ def start_transaction(
     finished at the end of the `with` block. If not using context managers,
     call the `.finish()` method.
 
-    When the transaction is finished, it will be sent to Sentry with all its
+    When the transaction is finished, it will be sent to DebuggAI with all its
     finished child spans.
 
     :param transaction: The transaction to start. If omitted, we create and

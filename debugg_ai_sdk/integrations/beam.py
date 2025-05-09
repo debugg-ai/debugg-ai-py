@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 WRAPPED_FUNC = "_wrapped_{}_"
 INSPECT_FUNC = "_inspect_{}"  # Required format per apache_beam/transforms/core.py
-USED_FUNC = "_sentry_used_"
+USED_FUNC = "_debugg_ai_used_"
 
 
 class BeamIntegration(Integration):
@@ -52,10 +52,10 @@ class BeamIntegration(Integration):
 
         old_init = ParDo.__init__
 
-        def sentry_init_pardo(self, fn, *args, **kwargs):
+        def debugg_ai_init_pardo(self, fn, *args, **kwargs):
             # type: (ParDo, Any, *Any, **Any) -> Any
             # Do not monkey patch init twice
-            if not getattr(self, "_sentry_is_patched", False):
+            if not getattr(self, "_debugg_ai_is_patched", False):
                 for func_name in function_patches:
                     if not hasattr(fn, func_name):
                         continue
@@ -73,10 +73,10 @@ class BeamIntegration(Integration):
                         setattr(fn, wrapped_func, process_func)
                         setattr(fn, func_name, _wrap_task_call(process_func))
 
-                self._sentry_is_patched = True
+                self._debugg_ai_is_patched = True
             old_init(self, fn, *args, **kwargs)
 
-        ParDo.__init__ = sentry_init_pardo
+        ParDo.__init__ = debugg_ai_init_pardo
 
 
 def _wrap_inspect_call(cls, func_name):
@@ -139,7 +139,7 @@ def _wrap_task_call(func):
 def _capture_exception(exc_info):
     # type: (ExcInfo) -> None
     """
-    Send Beam exception to Sentry.
+    Send Beam exception to DebuggAI.
     """
     client = debugg_ai_sdk.get_client()
 

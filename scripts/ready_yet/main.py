@@ -15,7 +15,7 @@ from tox.config.source.tox_ini import ToxIni
 
 PYTHON_VERSION = "3.13"
 
-MATCH_LIB_SENTRY_REGEX = r"py[\d\.]*-(.*)-.*"
+MATCH_LIB_DEBUGG_AI_REGEX = r"py[\d\.]*-(.*)-.*"
 
 PYPI_PROJECT_URL = "https://pypi.python.org/pypi/{project}/json"
 PYPI_VERSION_URL = "https://pypi.python.org/pypi/{project}/{version}/json"
@@ -63,7 +63,7 @@ def main():
 
     tox_ini = Path(__file__).parent.parent.parent.joinpath("tox.ini")
 
-    libs = get_libs(tox_ini, MATCH_LIB_SENTRY_REGEX)
+    libs = get_libs(tox_ini, MATCH_LIB_DEBUGG_AI_REGEX)
 
     for lib in libs:
         print(".", end="")

@@ -14,8 +14,8 @@ import debugg_ai_sdk
 FAKEREDIS_VERSION = parse_version(fakeredis.__version__)
 
 
-def test_no_cache_basic(sentry_init, capture_events):
-    sentry_init(
+def test_no_cache_basic(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             RedisIntegration(),
         ],
@@ -33,8 +33,8 @@ def test_no_cache_basic(sentry_init, capture_events):
     assert spans[0]["op"] == "db.redis"
 
 
-def test_cache_basic(sentry_init, capture_events):
-    sentry_init(
+def test_cache_basic(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             RedisIntegration(
                 cache_prefixes=["mycache"],
@@ -77,8 +77,8 @@ def test_cache_basic(sentry_init, capture_events):
     assert spans[8]["tags"]["redis.command"] == "MGET"
 
 
-def test_cache_keys(sentry_init, capture_events):
-    sentry_init(
+def test_cache_keys(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             RedisIntegration(
                 cache_prefixes=["bla", "blub"],
@@ -115,8 +115,8 @@ def test_cache_keys(sentry_init, capture_events):
     assert spans[5]["description"] == "GET 'bl'"
 
 
-def test_cache_data(sentry_init, capture_events):
-    sentry_init(
+def test_cache_data(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             RedisIntegration(
                 cache_prefixes=["mycache"],
@@ -198,8 +198,8 @@ def test_cache_data(sentry_init, capture_events):
     assert spans[5]["op"] == "db.redis"  # we ignore db spans in this test.
 
 
-def test_cache_prefixes(sentry_init, capture_events):
-    sentry_init(
+def test_cache_prefixes(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             RedisIntegration(
                 cache_prefixes=["yes"],

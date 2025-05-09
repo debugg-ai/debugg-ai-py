@@ -43,7 +43,7 @@ def _make_excepthook(old_excepthook):
 
         # Note: If we replace this with ensure_integration_enabled then
         # we break the exceptiongroup backport;
-        # See: https://github.com/getsentry/sentry-python/issues/3097
+        # See: https://github.com/debugg-ai/debugg-ai-py/issues/3097
         if integration is None:
             return old_excepthook(type_, value, traceback)
 

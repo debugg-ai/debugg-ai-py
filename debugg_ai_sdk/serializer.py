@@ -281,7 +281,7 @@ def serialize(event, **kwargs):
                 if result is not NotImplemented:
                     return _flatten_annotated(result)
 
-        sentry_repr = getattr(type(obj), "__sentry_repr__", None)
+        debugg_ai_repr = getattr(type(obj), "__debugg_ai_repr__", None)
 
         if obj is None or isinstance(obj, (bool, int, float)):
             if should_repr_strings or (
@@ -291,8 +291,8 @@ def serialize(event, **kwargs):
             else:
                 return obj
 
-        elif callable(sentry_repr):
-            return sentry_repr(obj)
+        elif callable(debugg_ai_repr):
+            return debugg_ai_repr(obj)
 
         elif isinstance(obj, datetime):
             return (

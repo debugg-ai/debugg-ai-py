@@ -60,7 +60,7 @@ class ThreadingIntegration(Integration):
             channels_version = None
 
         @wraps(old_start)
-        def sentry_start(self, *a, **kw):
+        def debugg_ai_start(self, *a, **kw):
             # type: (Thread, *Any, **Any) -> Any
             integration = debugg_ai_sdk.get_client().get_integration(ThreadingIntegration)
             if integration is None:
@@ -77,7 +77,7 @@ class ThreadingIntegration(Integration):
                 ):
                     warnings.warn(
                         "There is a known issue with Django channels 2.x and 3.x when using Python 3.8 or older. "
-                        "(Async support is emulated using threads and some Sentry data may be leaked between those threads.) "
+                        "(Async support is emulated using threads and some DebuggAI data may be leaked between those threads.) "
                         "Please either upgrade to Django channels 4.0+, use Django's async features "
                         "available in Django 3.1+ instead of Django channels, or upgrade to Python 3.9+.",
                         stacklevel=2,
@@ -94,7 +94,7 @@ class ThreadingIntegration(Integration):
 
             # Patching instance methods in `start()` creates a reference cycle if
             # done in a naive way. See
-            # https://github.com/getsentry/sentry-python/pull/434
+            # https://github.com/debugg-ai/debugg-ai-py/pull/434
             #
             # In threading module, using current_thread API will access current thread instance
             # without holding it to avoid a reference cycle in an easier way.
@@ -108,7 +108,7 @@ class ThreadingIntegration(Integration):
 
             return old_start(self, *a, **kw)
 
-        Thread.start = sentry_start  # type: ignore
+        Thread.start = debugg_ai_start  # type: ignore
 
 
 def _wrap_run(isolation_scope_to_use, current_scope_to_use, old_run_func):
@@ -116,26 +116,29 @@ def _wrap_run(isolation_scope_to_use, current_scope_to_use, old_run_func):
     @wraps(old_run_func)
     def run(*a, **kw):
         # type: (*Any, **Any) -> Any
-        def _run_old_run_func():
-            # type: () -> Any
+        def _run_old_run_func(*args, **kwargs):
+            # type: (*Any, **Any) -> Any
             try:
                 self = current_thread()
-                return old_run_func(self, *a, **kw)
+                if (hasattr(self, "_args") and not self._args) and (hasattr(self, "_kwargs") and not self._kwargs):
+                    self._args = a
+                    self._kwargs = kw
+                return old_run_func(self)
             except Exception:
-                reraise(*_capture_exception())
+                reraise(*_capture_exception(*args, **kwargs))
 
         if isolation_scope_to_use is not None and current_scope_to_use is not None:
             with use_isolation_scope(isolation_scope_to_use):
                 with use_scope(current_scope_to_use):
-                    return _run_old_run_func()
+                    return _run_old_run_func(*a, **kw)
         else:
-            return _run_old_run_func()
+            return _run_old_run_func(*a, **kw)
 
     return run  # type: ignore
 
 
-def _capture_exception():
-    # type: () -> ExcInfo
+def _capture_exception(*args, **kwargs):
+    # type: (*Any, **Any) -> ExcInfo
     exc_info = sys.exc_info()
 
     client = debugg_ai_sdk.get_client()

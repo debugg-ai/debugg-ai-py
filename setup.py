@@ -9,7 +9,7 @@ QA engineer to log and track errors, metrics, and events in your
 application.** 
 
 Check out `GitHub <https://github.com/debugg-ai/debugg-ai-python>` to find out more.
-Built on top of `Sentry-Python <https://github.com/getsentry/sentry-python>`_
+Built on top of `DebuggAI-Python <https://github.com/debugg-ai/debugg-ai-py>`_
 """
 
 import os
@@ -25,7 +25,7 @@ def get_file_text(file_name):
 
 setup(
     name="debugg-ai-sdk",
-    version="0.1.3",
+    version="0.1.8",
     description="Debugg AI's official Python sdk for connecting your personal AI QA engineer",
     author="Debugg AI Team",
     author_email="support@debugg.ai",

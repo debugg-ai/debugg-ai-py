@@ -4,14 +4,14 @@ import pytest
 
 
 @pytest.mark.forked
-def test_integration_enabled_if_option_is_on(sentry_init, reset_integrations):
+def test_integration_enabled_if_option_is_on(debugg_ai_init, reset_integrations):
     mocked_setup_once = MagicMock()
 
     with patch(
         "debugg_ai_sdk.integrations.opentelemetry.integration.OpenTelemetryIntegration.setup_once",
         mocked_setup_once,
     ):
-        sentry_init(
+        debugg_ai_init(
             _experiments={
                 "otel_powered_performance": True,
             },
@@ -20,14 +20,14 @@ def test_integration_enabled_if_option_is_on(sentry_init, reset_integrations):
 
 
 @pytest.mark.forked
-def test_integration_not_enabled_if_option_is_off(sentry_init, reset_integrations):
+def test_integration_not_enabled_if_option_is_off(debugg_ai_init, reset_integrations):
     mocked_setup_once = MagicMock()
 
     with patch(
         "debugg_ai_sdk.integrations.opentelemetry.integration.OpenTelemetryIntegration.setup_once",
         mocked_setup_once,
     ):
-        sentry_init(
+        debugg_ai_init(
             _experiments={
                 "otel_powered_performance": False,
             },
@@ -36,12 +36,12 @@ def test_integration_not_enabled_if_option_is_off(sentry_init, reset_integration
 
 
 @pytest.mark.forked
-def test_integration_not_enabled_if_option_is_missing(sentry_init, reset_integrations):
+def test_integration_not_enabled_if_option_is_missing(debugg_ai_init, reset_integrations):
     mocked_setup_once = MagicMock()
 
     with patch(
         "debugg_ai_sdk.integrations.opentelemetry.integration.OpenTelemetryIntegration.setup_once",
         mocked_setup_once,
     ):
-        sentry_init()
+        debugg_ai_init()
         mocked_setup_once.assert_not_called()

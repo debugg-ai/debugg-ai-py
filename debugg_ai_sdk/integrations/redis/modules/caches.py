@@ -1,5 +1,5 @@
 """
-Code used for the Caches module in Sentry
+Code used for the Caches module in DebuggAI
 """
 
 from debugg_ai_sdk.consts import OP, SPANDATA

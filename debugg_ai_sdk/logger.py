@@ -1,4 +1,4 @@
-# NOTE: this is the logger sentry exposes to users, not some generic logger.
+# NOTE: this is the logger debugg-ai exposes to users, not some generic logger.
 import functools
 import time
 from typing import Any
@@ -13,12 +13,12 @@ def _capture_log(severity_text, severity_number, template, **kwargs):
     scope = get_current_scope()
 
     attrs = {
-        "sentry.message.template": template,
+        "debugg-ai.message.template": template,
     }  # type: dict[str, str | bool | float | int]
     if "attributes" in kwargs:
         attrs.update(kwargs.pop("attributes"))
     for k, v in kwargs.items():
-        attrs[f"sentry.message.parameters.{k}"] = v
+        attrs[f"debugg-ai.message.parameters.{k}"] = v
 
     attrs = {
         k: (

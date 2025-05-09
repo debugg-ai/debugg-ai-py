@@ -39,8 +39,8 @@ def monkeypatch_rediscluster_classes(reset_integrations):
 
 
 @pytest.mark.parametrize("rediscluster_cls", rediscluster_classes)
-def test_rediscluster_basic(rediscluster_cls, sentry_init, capture_events):
-    sentry_init(integrations=[RedisIntegration()])
+def test_rediscluster_basic(rediscluster_cls, debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[RedisIntegration()])
     events = capture_events()
 
     rc = rediscluster_cls(connection_pool=MOCK_CONNECTION_POOL)
@@ -74,9 +74,9 @@ def test_rediscluster_basic(rediscluster_cls, sentry_init, capture_events):
     ],
 )
 def test_rediscluster_pipeline(
-    sentry_init, capture_events, send_default_pii, expected_first_ten
+    debugg_ai_init, capture_events, send_default_pii, expected_first_ten
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -114,8 +114,8 @@ def test_rediscluster_pipeline(
 
 
 @pytest.mark.parametrize("rediscluster_cls", rediscluster_classes)
-def test_db_connection_attributes_client(sentry_init, capture_events, rediscluster_cls):
-    sentry_init(
+def test_db_connection_attributes_client(debugg_ai_init, capture_events, rediscluster_cls):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[RedisIntegration()],
     )
@@ -140,9 +140,9 @@ def test_db_connection_attributes_client(sentry_init, capture_events, redisclust
 
 @pytest.mark.parametrize("rediscluster_cls", rediscluster_classes)
 def test_db_connection_attributes_pipeline(
-    sentry_init, capture_events, rediscluster_cls
+    debugg_ai_init, capture_events, rediscluster_cls
 ):
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[RedisIntegration()],
     )

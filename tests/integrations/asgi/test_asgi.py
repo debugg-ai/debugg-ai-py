@@ -5,7 +5,7 @@ import debugg_ai_sdk
 from debugg_ai_sdk import capture_message
 from debugg_ai_sdk.tracing import TransactionSource
 from debugg_ai_sdk.integrations._asgi_common import _get_ip, _get_headers
-from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware, _looks_like_asgi3
+from debugg_ai_sdk.integrations.asgi import DebuggAIAsgiMiddleware, _looks_like_asgi3
 
 from async_asgi_testclient import TestClient
 
@@ -155,7 +155,7 @@ def asgi3_custom_transaction_app():
 
 def test_invalid_transaction_style(asgi3_app):
     with pytest.raises(ValueError) as exp:
-        SentryAsgiMiddleware(asgi3_app, transaction_style="URL")
+        DebuggAIAsgiMiddleware(asgi3_app, transaction_style="URL")
 
     assert (
         str(exp.value)
@@ -165,12 +165,12 @@ def test_invalid_transaction_style(asgi3_app):
 
 @pytest.mark.asyncio
 async def test_capture_transaction(
-    sentry_init,
+    debugg_ai_init,
     asgi3_app,
     capture_events,
 ):
-    sentry_init(send_default_pii=True, traces_sample_rate=1.0)
-    app = SentryAsgiMiddleware(asgi3_app)
+    debugg_ai_init(send_default_pii=True, traces_sample_rate=1.0)
+    app = DebuggAIAsgiMiddleware(asgi3_app)
 
     async with TestClient(app) as client:
         events = capture_events()
@@ -196,13 +196,13 @@ async def test_capture_transaction(
 
 @pytest.mark.asyncio
 async def test_capture_transaction_with_error(
-    sentry_init,
+    debugg_ai_init,
     asgi3_app_with_error,
     capture_events,
     DictionaryContaining,  # noqa: N803
 ):
-    sentry_init(send_default_pii=True, traces_sample_rate=1.0)
-    app = SentryAsgiMiddleware(asgi3_app_with_error)
+    debugg_ai_init(send_default_pii=True, traces_sample_rate=1.0)
+    app = DebuggAIAsgiMiddleware(asgi3_app_with_error)
 
     events = capture_events()
     with pytest.raises(ZeroDivisionError):
@@ -233,12 +233,12 @@ async def test_capture_transaction_with_error(
 
 @pytest.mark.asyncio
 async def test_has_trace_if_performance_enabled(
-    sentry_init,
+    debugg_ai_init,
     asgi3_app_with_error_and_msg,
     capture_events,
 ):
-    sentry_init(traces_sample_rate=1.0)
-    app = SentryAsgiMiddleware(asgi3_app_with_error_and_msg)
+    debugg_ai_init(traces_sample_rate=1.0)
+    app = DebuggAIAsgiMiddleware(asgi3_app_with_error_and_msg)
 
     with pytest.raises(ZeroDivisionError):
         async with TestClient(app) as client:
@@ -265,12 +265,12 @@ async def test_has_trace_if_performance_enabled(
 
 @pytest.mark.asyncio
 async def test_has_trace_if_performance_disabled(
-    sentry_init,
+    debugg_ai_init,
     asgi3_app_with_error_and_msg,
     capture_events,
 ):
-    sentry_init()
-    app = SentryAsgiMiddleware(asgi3_app_with_error_and_msg)
+    debugg_ai_init()
+    app = DebuggAIAsgiMiddleware(asgi3_app_with_error_and_msg)
 
     with pytest.raises(ZeroDivisionError):
         async with TestClient(app) as client:
@@ -288,20 +288,20 @@ async def test_has_trace_if_performance_disabled(
 
 @pytest.mark.asyncio
 async def test_trace_from_headers_if_performance_enabled(
-    sentry_init,
+    debugg_ai_init,
     asgi3_app_with_error_and_msg,
     capture_events,
 ):
-    sentry_init(traces_sample_rate=1.0)
-    app = SentryAsgiMiddleware(asgi3_app_with_error_and_msg)
+    debugg_ai_init(traces_sample_rate=1.0)
+    app = DebuggAIAsgiMiddleware(asgi3_app_with_error_and_msg)
 
     trace_id = "582b43a4192642f0b136d5159a501701"
-    sentry_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
 
     with pytest.raises(ZeroDivisionError):
         async with TestClient(app) as client:
             events = capture_events()
-            await client.get("/", headers={"sentry-trace": sentry_trace_header})
+            await client.get("/", headers={"debugg-ai-trace": debugg_ai_trace_header})
 
     msg_event, error_event, transaction_event = events
 
@@ -321,20 +321,20 @@ async def test_trace_from_headers_if_performance_enabled(
 
 @pytest.mark.asyncio
 async def test_trace_from_headers_if_performance_disabled(
-    sentry_init,
+    debugg_ai_init,
     asgi3_app_with_error_and_msg,
     capture_events,
 ):
-    sentry_init()
-    app = SentryAsgiMiddleware(asgi3_app_with_error_and_msg)
+    debugg_ai_init()
+    app = DebuggAIAsgiMiddleware(asgi3_app_with_error_and_msg)
 
     trace_id = "582b43a4192642f0b136d5159a501701"
-    sentry_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
 
     with pytest.raises(ZeroDivisionError):
         async with TestClient(app) as client:
             events = capture_events()
-            await client.get("/", headers={"sentry-trace": sentry_trace_header})
+            await client.get("/", headers={"debugg-ai-trace": debugg_ai_trace_header})
 
     msg_event, error_event = events
 
@@ -348,12 +348,12 @@ async def test_trace_from_headers_if_performance_disabled(
 
 
 @pytest.mark.asyncio
-async def test_websocket(sentry_init, asgi3_ws_app, capture_events, request):
-    sentry_init(send_default_pii=True, traces_sample_rate=1.0)
+async def test_websocket(debugg_ai_init, asgi3_ws_app, capture_events, request):
+    debugg_ai_init(send_default_pii=True, traces_sample_rate=1.0)
 
     events = capture_events()
 
-    asgi3_ws_app = SentryAsgiMiddleware(asgi3_ws_app)
+    asgi3_ws_app = DebuggAIAsgiMiddleware(asgi3_ws_app)
 
     request_url = "/ws"
 
@@ -378,10 +378,10 @@ async def test_websocket(sentry_init, asgi3_ws_app, capture_events, request):
 
 @pytest.mark.asyncio
 async def test_auto_session_tracking_with_aggregates(
-    sentry_init, asgi3_app, capture_envelopes
+    debugg_ai_init, asgi3_app, capture_envelopes
 ):
-    sentry_init(send_default_pii=True, traces_sample_rate=1.0)
-    app = SentryAsgiMiddleware(asgi3_app)
+    debugg_ai_init(send_default_pii=True, traces_sample_rate=1.0)
+    app = DebuggAIAsgiMiddleware(asgi3_app)
 
     scope = {
         "endpoint": asgi3_app,
@@ -433,7 +433,7 @@ async def test_auto_session_tracking_with_aggregates(
 )
 @pytest.mark.asyncio
 async def test_transaction_style(
-    sentry_init,
+    debugg_ai_init,
     asgi3_app,
     capture_events,
     url,
@@ -441,8 +441,8 @@ async def test_transaction_style(
     expected_transaction,
     expected_source,
 ):
-    sentry_init(send_default_pii=True, traces_sample_rate=1.0)
-    app = SentryAsgiMiddleware(asgi3_app, transaction_style=transaction_style)
+    debugg_ai_init(send_default_pii=True, traces_sample_rate=1.0)
+    app = DebuggAIAsgiMiddleware(asgi3_app, transaction_style=transaction_style)
 
     scope = {
         "endpoint": asgi3_app,
@@ -623,7 +623,7 @@ def test_get_headers():
     ],
 )
 async def test_transaction_name(
-    sentry_init,
+    debugg_ai_init,
     request_url,
     transaction_style,
     expected_transaction_name,
@@ -634,13 +634,13 @@ async def test_transaction_name(
     """
     Tests that the transaction name is something meaningful.
     """
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
     )
 
     envelopes = capture_envelopes()
 
-    app = SentryAsgiMiddleware(asgi3_app, transaction_style=transaction_style)
+    app = DebuggAIAsgiMiddleware(asgi3_app, transaction_style=transaction_style)
 
     async with TestClient(app) as client:
         await client.get(request_url)
@@ -673,7 +673,7 @@ async def test_transaction_name(
     ],
 )
 async def test_transaction_name_in_traces_sampler(
-    sentry_init,
+    debugg_ai_init,
     request_url,
     transaction_style,
     expected_transaction_name,
@@ -694,12 +694,12 @@ async def test_transaction_name_in_traces_sampler(
             == expected_transaction_source
         )
 
-    sentry_init(
+    debugg_ai_init(
         traces_sampler=dummy_traces_sampler,
         traces_sample_rate=1.0,
     )
 
-    app = SentryAsgiMiddleware(asgi3_app, transaction_style=transaction_style)
+    app = DebuggAIAsgiMiddleware(asgi3_app, transaction_style=transaction_style)
 
     async with TestClient(app) as client:
         await client.get(request_url)
@@ -707,11 +707,11 @@ async def test_transaction_name_in_traces_sampler(
 
 @pytest.mark.asyncio
 async def test_custom_transaction_name(
-    sentry_init, asgi3_custom_transaction_app, capture_events
+    debugg_ai_init, asgi3_custom_transaction_app, capture_events
 ):
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
-    app = SentryAsgiMiddleware(asgi3_custom_transaction_app)
+    app = DebuggAIAsgiMiddleware(asgi3_custom_transaction_app)
 
     async with TestClient(app) as client:
         await client.get("/test")

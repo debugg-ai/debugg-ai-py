@@ -6,7 +6,7 @@ import weakref
 import debugg_ai_sdk
 from debugg_ai_sdk.integrations import Integration, DidNotEnable
 from debugg_ai_sdk.integrations._wsgi_common import RequestExtractor
-from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.integrations.wsgi import DebuggAIWsgiMiddleware
 from debugg_ai_sdk.scope import should_send_default_pii
 from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE
 from debugg_ai_sdk.utils import (
@@ -75,7 +75,7 @@ class PyramidIntegration(Integration):
         old_call_view = router._call_view
 
         @functools.wraps(old_call_view)
-        def sentry_patched_call_view(registry, request, *args, **kwargs):
+        def debugg_ai_patched_call_view(registry, request, *args, **kwargs):
             # type: (Any, Request, *Any, **Any) -> Response
             integration = debugg_ai_sdk.get_client().get_integration(PyramidIntegration)
             if integration is None:
@@ -91,12 +91,12 @@ class PyramidIntegration(Integration):
 
             return old_call_view(registry, request, *args, **kwargs)
 
-        router._call_view = sentry_patched_call_view
+        router._call_view = debugg_ai_patched_call_view
 
         if hasattr(Request, "invoke_exception_view"):
             old_invoke_exception_view = Request.invoke_exception_view
 
-            def sentry_patched_invoke_exception_view(self, *args, **kwargs):
+            def debugg_ai_patched_invoke_exception_view(self, *args, **kwargs):
                 # type: (Request, *Any, **Any) -> Any
                 rv = old_invoke_exception_view(self, *args, **kwargs)
 
@@ -111,14 +111,14 @@ class PyramidIntegration(Integration):
 
                 return rv
 
-            Request.invoke_exception_view = sentry_patched_invoke_exception_view
+            Request.invoke_exception_view = debugg_ai_patched_invoke_exception_view
 
         old_wsgi_call = router.Router.__call__
 
         @ensure_integration_enabled(PyramidIntegration, old_wsgi_call)
-        def sentry_patched_wsgi_call(self, environ, start_response):
+        def debugg_ai_patched_wsgi_call(self, environ, start_response):
             # type: (Any, Dict[str, str], Callable[..., Any]) -> _ScopedResponse
-            def sentry_patched_inner_wsgi_call(environ, start_response):
+            def debugg_ai_patched_inner_wsgi_call(environ, start_response):
                 # type: (Dict[str, Any], Callable[..., Any]) -> Any
                 try:
                     return old_wsgi_call(self, environ, start_response)
@@ -127,13 +127,13 @@ class PyramidIntegration(Integration):
                     _capture_exception(einfo)
                     reraise(*einfo)
 
-            middleware = SentryWsgiMiddleware(
-                sentry_patched_inner_wsgi_call,
+            middleware = DebuggAIWsgiMiddleware(
+                debugg_ai_patched_inner_wsgi_call,
                 span_origin=PyramidIntegration.origin,
             )
             return middleware(environ, start_response)
 
-        router.Router.__call__ = sentry_patched_wsgi_call
+        router.Router.__call__ = debugg_ai_patched_wsgi_call
 
 
 @ensure_integration_enabled(PyramidIntegration)

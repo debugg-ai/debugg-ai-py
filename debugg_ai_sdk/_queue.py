@@ -11,7 +11,7 @@ https://bugs.python.org/issue14976
 https://github.com/sqlalchemy/sqlalchemy/blob/4eb747b61f0c1b1c25bdee3856d7195d10a0c227/lib/sqlalchemy/queue.py#L1
 
 We also vendor the code to evade eventlet's broken monkeypatching, see
-https://github.com/getsentry/sentry-python/pull/484
+https://github.com/debugg-ai/debugg-ai-py/pull/484
 
 
 Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,

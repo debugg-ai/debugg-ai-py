@@ -21,8 +21,8 @@ def monkeypatch_rediscluster_class(reset_integrations):
     redis.RedisCluster.execute_command = lambda *_, **__: []
 
 
-def test_rediscluster_breadcrumb(sentry_init, capture_events):
-    sentry_init(integrations=[RedisIntegration()])
+def test_rediscluster_breadcrumb(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[RedisIntegration()])
     events = capture_events()
 
     rc = redis.RedisCluster(host="localhost", port=6379)
@@ -60,8 +60,8 @@ def test_rediscluster_breadcrumb(sentry_init, capture_events):
         (True, "SET 'bar' 1"),
     ],
 )
-def test_rediscluster_basic(sentry_init, capture_events, send_default_pii, description):
-    sentry_init(
+def test_rediscluster_basic(debugg_ai_init, capture_events, send_default_pii, description):
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -107,9 +107,9 @@ def test_rediscluster_basic(sentry_init, capture_events, send_default_pii, descr
     ],
 )
 def test_rediscluster_pipeline(
-    sentry_init, capture_events, send_default_pii, expected_first_ten
+    debugg_ai_init, capture_events, send_default_pii, expected_first_ten
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -146,8 +146,8 @@ def test_rediscluster_pipeline(
     }
 
 
-def test_rediscluster_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_rediscluster_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[RedisIntegration()],
         traces_sample_rate=1.0,
     )

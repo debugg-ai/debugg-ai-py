@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Resources:
-  SentryLambdaFunction:
+  DebuggAILambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: lambda_deployment_package.zip
@@ -10,7 +10,7 @@ Resources:
       Timeout: 30
       Environment:
         Variables:
-          DEBUGGAI_INGEST_URL: !Ref SentryDsn
+          DEBUGGAI_INGEST_URL: !Ref DebuggAIDsn
       Events:
         ApiEventGet:
           Type: Api
@@ -24,6 +24,6 @@ Resources:
             Method: post
 
 Parameters:
-  SentryDsn:
+  DebuggAIDsn:
     Type: String
     Default: ''

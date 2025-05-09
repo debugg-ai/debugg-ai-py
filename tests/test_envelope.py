@@ -78,15 +78,15 @@ def test_add_and_get_session():
             assert item.payload.json == expected.to_json()
 
 
-def test_envelope_headers(sentry_init, capture_envelopes, monkeypatch):
+def test_envelope_headers(debugg_ai_init, capture_envelopes, monkeypatch):
     monkeypatch.setattr(
         debugg_ai_sdk.client,
         "format_timestamp",
         lambda x: "2012-11-21T12:31:12.415908Z",
     )
 
-    sentry_init(
-        dsn="https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.sentry.io/12312012",
+    debugg_ai_init(
+        dsn="https://dogsarebadatkeepingsecrets@squirrelchasers.ingest.debugg.ai/12312012",
         traces_sample_rate=1.0,
     )
     envelopes = capture_envelopes()
@@ -185,7 +185,7 @@ def test_envelope_with_two_attachments():
     Test that items are correctly parsed in an envelope with to size specified items
     """
     two_attachments = (
-        b'{"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","dsn":"https://e12d836b15bb49d7bbf99e64295d995b:@sentry.io/42"}\n'
+        b'{"event_id":"9ec79c33ec9942ab8353589fcb2e04dc","dsn":"https://e12d836b15bb49d7bbf99e64295d995b:@debugg.ai/42"}\n'
         + b'{"type":"attachment","length":10,"content_type":"text/plain","filename":"hello.txt"}\n'
         + b"\xef\xbb\xbfHello\r\n\n"
         + b'{"type":"event","length":41,"content_type":"application/json","filename":"application.log"}\n'

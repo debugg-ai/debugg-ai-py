@@ -9,8 +9,8 @@ from debugg_ai_sdk.integrations.dramatiq import DramatiqIntegration
 
 
 @pytest.fixture
-def broker(sentry_init):
-    sentry_init(integrations=[DramatiqIntegration()])
+def broker(debugg_ai_init):
+    debugg_ai_init(integrations=[DramatiqIntegration()])
     broker = StubBroker()
     broker.emit_after("process_boot")
     dramatiq.set_broker(broker)

@@ -85,16 +85,16 @@ def test_filename():
     "given,expected_envelope",
     [
         (
-            "https://foobar@sentry.io/123",
-            "https://sentry.io/api/123/envelope/",
+            "https://foobar@debugg.ai/123",
+            "https://debugg.ai/api/123/envelope/",
         ),
         (
-            "https://foobar@sentry.io/bam/123",
-            "https://sentry.io/bam/api/123/envelope/",
+            "https://foobar@debugg.ai/bam/123",
+            "https://debugg.ai/bam/api/123/envelope/",
         ),
         (
-            "https://foobar@sentry.io/bam/baz/123",
-            "https://sentry.io/bam/baz/api/123/envelope/",
+            "https://foobar@debugg.ai/bam/baz/123",
+            "https://debugg.ai/bam/baz/api/123/envelope/",
         ),
     ],
 )
@@ -108,11 +108,11 @@ def test_parse_dsn_paths(given, expected_envelope):
 @pytest.mark.parametrize(
     "dsn",
     [
-        "https://foobar@sentry.io"
-        "https://foobar@sentry.io/"
-        "https://foobar@sentry.io/asdf"
-        "https://foobar@sentry.io/asdf/"
-        "https://foobar@sentry.io/asdf/123/"
+        "https://foobar@debugg.ai"
+        "https://foobar@debugg.ai/"
+        "https://foobar@debugg.ai/asdf"
+        "https://foobar@debugg.ai/asdf/"
+        "https://foobar@debugg.ai/asdf/123/"
     ],
 )
 def test_parse_invalid_dsn(dsn):

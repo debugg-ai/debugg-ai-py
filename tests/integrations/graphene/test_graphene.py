@@ -22,9 +22,9 @@ class Query(ObjectType):
 
 
 def test_capture_request_if_available_and_send_pii_is_on_async(
-    sentry_init, capture_events
+    debugg_ai_init, capture_events
 ):
-    sentry_init(
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[
             GrapheneIntegration(),
@@ -57,9 +57,9 @@ def test_capture_request_if_available_and_send_pii_is_on_async(
 
 
 def test_capture_request_if_available_and_send_pii_is_on_sync(
-    sentry_init, capture_events
+    debugg_ai_init, capture_events
 ):
-    sentry_init(
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[GrapheneIntegration(), FlaskIntegration()],
     )
@@ -87,8 +87,8 @@ def test_capture_request_if_available_and_send_pii_is_on_sync(
     assert event["request"]["data"] == query
 
 
-def test_do_not_capture_request_if_send_pii_is_off_async(sentry_init, capture_events):
-    sentry_init(
+def test_do_not_capture_request_if_send_pii_is_off_async(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             GrapheneIntegration(),
             FastApiIntegration(),
@@ -119,8 +119,8 @@ def test_do_not_capture_request_if_send_pii_is_off_async(sentry_init, capture_ev
     assert "response" not in event["contexts"]
 
 
-def test_do_not_capture_request_if_send_pii_is_off_sync(sentry_init, capture_events):
-    sentry_init(
+def test_do_not_capture_request_if_send_pii_is_off_sync(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[GrapheneIntegration(), FlaskIntegration()],
     )
     events = capture_events()
@@ -147,8 +147,8 @@ def test_do_not_capture_request_if_send_pii_is_off_sync(sentry_init, capture_eve
     assert "response" not in event["contexts"]
 
 
-def test_no_event_if_no_errors_async(sentry_init, capture_events):
-    sentry_init(
+def test_no_event_if_no_errors_async(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             GrapheneIntegration(),
             FastApiIntegration(),
@@ -176,8 +176,8 @@ def test_no_event_if_no_errors_async(sentry_init, capture_events):
     assert len(events) == 0
 
 
-def test_no_event_if_no_errors_sync(sentry_init, capture_events):
-    sentry_init(
+def test_no_event_if_no_errors_sync(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             GrapheneIntegration(),
             FlaskIntegration(),
@@ -204,8 +204,8 @@ def test_no_event_if_no_errors_sync(sentry_init, capture_events):
     assert len(events) == 0
 
 
-def test_graphql_span_holds_query_information(sentry_init, capture_events):
-    sentry_init(
+def test_graphql_span_holds_query_information(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[GrapheneIntegration(), FlaskIntegration()],
         enable_tracing=True,
         default_integrations=False,
@@ -242,8 +242,8 @@ def test_graphql_span_holds_query_information(sentry_init, capture_events):
     assert span["data"]["graphql.operation.type"] == "query"
 
 
-def test_breadcrumbs_hold_query_information_on_error(sentry_init, capture_events):
-    sentry_init(
+def test_breadcrumbs_hold_query_information_on_error(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             GrapheneIntegration(),
         ],

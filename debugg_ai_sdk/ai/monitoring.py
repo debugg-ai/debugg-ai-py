@@ -34,9 +34,9 @@ def ai_track(description, **span_kwargs):
             op = span_kwargs.get("op", "ai.run" if curr_pipeline else "ai.pipeline")
 
             with start_span(name=description, op=op, **span_kwargs) as span:
-                for k, v in kwargs.pop("sentry_tags", {}).items():
+                for k, v in kwargs.pop("debugg_ai_tags", {}).items():
                     span.set_tag(k, v)
-                for k, v in kwargs.pop("sentry_data", {}).items():
+                for k, v in kwargs.pop("debugg_ai_data", {}).items():
                     span.set_data(k, v)
                 if curr_pipeline:
                     span.set_data("ai.pipeline.name", curr_pipeline)
@@ -63,9 +63,9 @@ def ai_track(description, **span_kwargs):
             op = span_kwargs.get("op", "ai.run" if curr_pipeline else "ai.pipeline")
 
             with start_span(name=description, op=op, **span_kwargs) as span:
-                for k, v in kwargs.pop("sentry_tags", {}).items():
+                for k, v in kwargs.pop("debugg_ai_tags", {}).items():
                     span.set_tag(k, v)
-                for k, v in kwargs.pop("sentry_data", {}).items():
+                for k, v in kwargs.pop("debugg_ai_data", {}).items():
                     span.set_data(k, v)
                 if curr_pipeline:
                     span.set_data("ai.pipeline.name", curr_pipeline)

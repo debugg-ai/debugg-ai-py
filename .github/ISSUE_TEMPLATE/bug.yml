@@ -5,9 +5,9 @@ body:
   - type: dropdown
     id: type
     attributes:
-      label: How do you use Sentry?
+      label: How do you use DebuggAI?
       options:
-        - Sentry Saas (sentry.io)
+        - DebuggAI Saas (debugg.ai)
         - Self-hosted/on-premise
     validations:
       required: true

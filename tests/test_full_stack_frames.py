@@ -1,8 +1,8 @@
 import debugg_ai_sdk
 
 
-def test_full_stack_frames_default(sentry_init, capture_events):
-    sentry_init()
+def test_full_stack_frames_default(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     def foo():
@@ -24,8 +24,8 @@ def test_full_stack_frames_default(sentry_init, capture_events):
     assert frames[-2]["function"] == "foo"
 
 
-def test_full_stack_frames_enabled(sentry_init, capture_events):
-    sentry_init(
+def test_full_stack_frames_enabled(debugg_ai_init, capture_events):
+    debugg_ai_init(
         add_full_stack=True,
     )
     events = capture_events()
@@ -51,8 +51,8 @@ def test_full_stack_frames_enabled(sentry_init, capture_events):
     assert frames[-4]["function"] == "test_full_stack_frames_enabled"
 
 
-def test_full_stack_frames_enabled_truncated(sentry_init, capture_events):
-    sentry_init(
+def test_full_stack_frames_enabled_truncated(debugg_ai_init, capture_events):
+    debugg_ai_init(
         add_full_stack=True,
         max_stack_frames=3,
     )
@@ -78,8 +78,8 @@ def test_full_stack_frames_enabled_truncated(sentry_init, capture_events):
     assert frames[-3]["function"] == "foo"
 
 
-def test_full_stack_frames_default_no_truncation_happening(sentry_init, capture_events):
-    sentry_init(
+def test_full_stack_frames_default_no_truncation_happening(debugg_ai_init, capture_events):
+    debugg_ai_init(
         max_stack_frames=1,  # this is ignored if add_full_stack=False (which is the default)
     )
     events = capture_events()

@@ -17,12 +17,12 @@ def test_continue_trace_with_sample_rand():
     Test that an incoming sample_rand is propagated onto the transaction's baggage.
     """
     headers = {
-        "sentry-trace": "00000000000000000000000000000000-0000000000000000-0",
-        "baggage": "sentry-sample_rand=0.1,sentry-sample_rate=0.5",
+        "debugg-ai-trace": "00000000000000000000000000000000-0000000000000000-0",
+        "baggage": "debugg-ai-sample_rand=0.1,debugg-ai-sample_rate=0.5",
     }
 
     transaction = debugg_ai_sdk.continue_trace(headers)
-    assert transaction.get_baggage().sentry_items["sample_rand"] == "0.1"
+    assert transaction.get_baggage().debugg_ai_items["sample_rand"] == "0.1"
 
 
 def test_continue_trace_missing_sample_rand():
@@ -31,8 +31,8 @@ def test_continue_trace_missing_sample_rand():
     """
 
     headers = {
-        "sentry-trace": "00000000000000000000000000000000-0000000000000000",
-        "baggage": "sentry-placeholder=asdf",
+        "debugg-ai-trace": "00000000000000000000000000000000-0000000000000000",
+        "baggage": "debugg-ai-placeholder=asdf",
     }
 
     mock_uniform = Mock(return_value=0.5)
@@ -40,4 +40,4 @@ def test_continue_trace_missing_sample_rand():
     with mock.patch("debugg_ai_sdk.tracing_utils.Random.uniform", mock_uniform):
         transaction = debugg_ai_sdk.continue_trace(headers)
 
-    assert transaction.get_baggage().sentry_items["sample_rand"] == "0.500000"
+    assert transaction.get_baggage().debugg_ai_items["sample_rand"] == "0.500000"

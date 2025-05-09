@@ -1,9 +1,9 @@
 """
 For manual instrumentation,
 The Handler function string of an aws lambda function should be added as an
-environment variable with a key of 'SENTRY_INITIAL_HANDLER' along with the 'DSN'
+environment variable with a key of 'DEBUGG_AI_INITIAL_HANDLER' along with the 'DSN'
 Then the Handler function sstring should be replaced with
-'debugg_ai_sdk.integrations.init_serverless_sdk.sentry_lambda_handler'
+'debugg_ai_sdk.integrations.init_serverless_sdk.debugg_ai_lambda_handler'
 """
 
 import os
@@ -19,20 +19,20 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-# Configure Sentry SDK
+# Configure DebuggAI SDK
 debugg_ai_sdk.init(
     dsn=os.environ["DEBUGGAI_INGEST_URL"],
     integrations=[AwsLambdaIntegration(timeout_warning=True)],
-    traces_sample_rate=float(os.environ["SENTRY_TRACES_SAMPLE_RATE"]),
+    traces_sample_rate=float(os.environ["DEBUGG_AI_TRACES_SAMPLE_RATE"]),
 )
 
 
 class AWSLambdaModuleLoader:
     DIR_PATH_REGEX = r"^(.+)\/([^\/]+)$"
 
-    def __init__(self, sentry_initial_handler):
+    def __init__(self, debugg_ai_initial_handler):
         try:
-            module_path, self.handler_name = sentry_initial_handler.rsplit(".", 1)
+            module_path, self.handler_name = debugg_ai_initial_handler.rsplit(".", 1)
         except ValueError:
             raise ValueError("Incorrect AWS Handler path (Not a path)")
 
@@ -70,11 +70,11 @@ class AWSLambdaModuleLoader:
         return getattr(self.lambda_function_module, self.handler_name)
 
 
-def sentry_lambda_handler(event, context):
+def debugg_ai_lambda_handler(event, context):
     # type: (Any, Any) -> None
     """
     Handler function that invokes a lambda handler which path is defined in
-    environment variables as "SENTRY_INITIAL_HANDLER"
+    environment variables as "DEBUGG_AI_INITIAL_HANDLER"
     """
-    module_loader = AWSLambdaModuleLoader(os.environ["SENTRY_INITIAL_HANDLER"])
+    module_loader = AWSLambdaModuleLoader(os.environ["DEBUGG_AI_INITIAL_HANDLER"])
     return module_loader.get_lambda_handler()(event, context)

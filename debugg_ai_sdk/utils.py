@@ -78,7 +78,7 @@ FALSY_ENV_VALUES = frozenset(("false", "f", "n", "no", "off", "0"))
 TRUTHY_ENV_VALUES = frozenset(("true", "t", "y", "yes", "on", "1"))
 
 MAX_STACK_FRAMES = 2000
-"""Maximum number of stack frames to send to Sentry.
+"""Maximum number of stack frames to send to DebuggAI.
 
 If we have more than this number of stack frames, we will stop processing
 the stacktrace to avoid getting stuck in a long-lasting loop. This value
@@ -140,7 +140,7 @@ def get_git_revision():
 def get_default_release():
     # type: () -> Optional[str]
     """Try to guess a default release."""
-    release = os.environ.get("SENTRY_RELEASE")
+    release = os.environ.get("DEBUGG_AI_RELEASE")
     if release:
         return release
 
@@ -192,9 +192,9 @@ def get_sdk_name(installed_integrations):
 
     for integration in framework_integrations:
         if integration in installed_integrations:
-            return "sentry.python.{}".format(integration)
+            return "debugg-ai.python.{}".format(integration)
 
-    return "sentry.python"
+    return "debugg-ai.python"
 
 
 class CaptureInternalException:
@@ -226,7 +226,7 @@ def capture_internal_exception(exc_info):
     Capture an exception that is likely caused by a bug in the SDK
     itself.
 
-    These exceptions do not end up in Sentry and are just logged instead.
+    These exceptions do not end up in DebuggAI and are just logged instead.
     """
     if debugg_ai_sdk.get_client().is_active():
         logger.error("Internal error in debugg_ai_sdk", exc_info=exc_info)
@@ -408,12 +408,12 @@ class Auth:
     def to_header(self):
         # type: () -> str
         """Returns the auth header a string."""
-        rv = [("sentry_key", self.public_key), ("sentry_version", self.version)]
+        rv = [("debugg_ai_key", self.public_key), ("debugg_ai_version", self.version)]
         if self.client is not None:
-            rv.append(("sentry_client", self.client))
+            rv.append(("debugg_ai_client", self.client))
         if self.secret_key is not None:
-            rv.append(("sentry_secret", self.secret_key))
-        return "Sentry " + ", ".join("%s=%s" % (key, value) for key, value in rv)
+            rv.append(("debugg_ai_secret", self.secret_key))
+        return "DebuggAI " + ", ".join("%s=%s" % (key, value) for key, value in rv)
 
 
 def get_type_name(cls):
@@ -682,10 +682,10 @@ def single_exception_from_error_tuple(
 ):
     # type: (...) -> Dict[str, Any]
     """
-    Creates a dict that goes into the events `exception.values` list and is ingestible by Sentry.
+    Creates a dict that goes into the events `exception.values` list and is ingestible by DebuggAI.
 
     See the Exception Interface documentation for more details:
-    https://develop.sentry.dev/sdk/event-payloads/exception/
+    https://develop.debugg-ai.dev/sdk/event-payloads/exception/
     """
     exception_value = {}  # type: Dict[str, Any]
     exception_value["mechanism"] = (
@@ -830,7 +830,7 @@ def exceptions_from_error(
     This can include chained exceptions and exceptions from an ExceptionGroup.
 
     See the Exception Interface documentation for more details:
-    https://develop.sentry.dev/sdk/event-payloads/exception/
+    https://develop.debugg-ai.dev/sdk/event-payloads/exception/
     """
 
     parent = single_exception_from_error_tuple(
@@ -1322,7 +1322,7 @@ def _is_contextvars_broken():
 
         if greenlet_version is None:
             logger.error(
-                "Internal error in Sentry SDK: Could not parse Greenlet version from greenlet.__version__."
+                "Internal error in DebuggAI SDK: Could not parse Greenlet version from greenlet.__version__."
             )
             return False
 
@@ -1373,7 +1373,7 @@ def _get_contextvars():
     Figure out the "right" contextvars installation to use. Returns a
     `contextvars.ContextVar`-like class with a limited API.
 
-    See https://docs.sentry.io/platforms/python/contextvars/ for more information.
+    See https://docs.debugg.ai/platforms/python/contextvars/ for more information.
     """
     if not _is_contextvars_broken():
         # aiocontextvars is a PyPI package that ensures that the contextvars
@@ -1409,11 +1409,11 @@ HAS_REAL_CONTEXTVARS, ContextVar = _get_contextvars()
 
 CONTEXTVARS_ERROR_MESSAGE = """
 
-With asyncio/ASGI applications, the Sentry SDK requires a functional
+With asyncio/ASGI applications, the DebuggAI SDK requires a functional
 installation of `contextvars` to avoid leaking scope/context data across
 requests.
 
-Please refer to https://docs.sentry.io/platforms/python/contextvars/ for more information.
+Please refer to https://docs.debugg.ai/platforms/python/contextvars/ for more information.
 """
 
 
@@ -1677,10 +1677,10 @@ def match_regex_list(item, regex_list=None, substring_matching=False):
     return False
 
 
-def is_sentry_url(client, url):
+def is_debugg_ai_url(client, url):
     # type: (debugg_ai_sdk.client.BaseClient, str) -> bool
     """
-    Determines whether the given URL matches the Sentry DSN.
+    Determines whether the given URL matches the DebuggAI DSN.
     """
     return (
         client is not None
@@ -1780,13 +1780,13 @@ def ensure_integration_enabled(
 ):
     # type: (...) -> Callable[[Callable[P, R]], Callable[P, R]]
     """
-    Ensures a given integration is enabled prior to calling a Sentry-patched function.
+    Ensures a given integration is enabled prior to calling a DebuggAI-patched function.
 
     The function takes as its parameters the integration that must be enabled and the original
     function that the SDK is patching. The function returns a function that takes the
-    decorated (Sentry-patched) function as its parameter, and returns a function that, when
+    decorated (DebuggAI-patched) function as its parameter, and returns a function that, when
     called, checks whether the given integration is enabled. If the integration is enabled, the
-    function calls the decorated, Sentry-patched function. If the integration is not enabled,
+    function calls the decorated, DebuggAI-patched function. If the integration is not enabled,
     the original function is called.
 
     The function also takes care of preserving the original function's signature and docstring.
@@ -1805,17 +1805,17 @@ def ensure_integration_enabled(
         # ensure the default _no_op function is only used when R is None.
         original_function = cast(Callable[P, R], original_function)
 
-    def patcher(sentry_patched_function):
+    def patcher(debugg_ai_patched_function):
         # type: (Callable[P, R]) -> Callable[P, R]
         def runner(*args: "P.args", **kwargs: "P.kwargs"):
             # type: (...) -> R
             if debugg_ai_sdk.get_client().get_integration(integration) is None:
                 return original_function(*args, **kwargs)
 
-            return sentry_patched_function(*args, **kwargs)
+            return debugg_ai_patched_function(*args, **kwargs)
 
         if original_function is _no_op:
-            return wraps(sentry_patched_function)(runner)
+            return wraps(debugg_ai_patched_function)(runner)
 
         return wraps(original_function)(runner)
 

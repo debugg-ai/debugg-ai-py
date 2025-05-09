@@ -30,7 +30,7 @@ def patch_redis_async_pipeline(
 
     from debugg_ai_sdk.integrations.redis import RedisIntegration
 
-    async def _sentry_execute(self, *args, **kwargs):
+    async def _debugg_ai_execute(self, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Any
         if debugg_ai_sdk.get_client().get_integration(RedisIntegration) is None:
             return await old_execute(self, *args, **kwargs)
@@ -52,7 +52,7 @@ def patch_redis_async_pipeline(
 
             return await old_execute(self, *args, **kwargs)
 
-    pipeline_cls.execute = _sentry_execute  # type: ignore
+    pipeline_cls.execute = _debugg_ai_execute  # type: ignore
 
 
 def patch_redis_async_client(cls, is_cluster, set_db_data_fn):
@@ -61,7 +61,7 @@ def patch_redis_async_client(cls, is_cluster, set_db_data_fn):
 
     from debugg_ai_sdk.integrations.redis import RedisIntegration
 
-    async def _sentry_execute_command(self, name, *args, **kwargs):
+    async def _debugg_ai_execute_command(self, name, *args, **kwargs):
         # type: (Any, str, *Any, **Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(RedisIntegration)
         if integration is None:
@@ -105,4 +105,4 @@ def patch_redis_async_client(cls, is_cluster, set_db_data_fn):
 
         return value
 
-    cls.execute_command = _sentry_execute_command  # type: ignore
+    cls.execute_command = _debugg_ai_execute_command  # type: ignore

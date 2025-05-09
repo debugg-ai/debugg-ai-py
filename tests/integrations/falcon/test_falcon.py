@@ -22,7 +22,7 @@ FALCON_VERSION = parse_version(falcon.__version__)
 
 
 @pytest.fixture
-def make_app(sentry_init):
+def make_app(debugg_ai_init):
     def inner():
         class MessageResource:
             def on_get(self, req, resp):
@@ -65,8 +65,8 @@ def make_client(make_app):
     return inner
 
 
-def test_has_context(sentry_init, capture_events, make_client):
-    sentry_init(integrations=[FalconIntegration()])
+def test_has_context(debugg_ai_init, capture_events, make_client):
+    debugg_ai_init(integrations=[FalconIntegration()])
     events = capture_events()
 
     client = make_client()
@@ -89,7 +89,7 @@ def test_has_context(sentry_init, capture_events, make_client):
     ],
 )
 def test_transaction_style(
-    sentry_init,
+    debugg_ai_init,
     make_client,
     capture_events,
     url,
@@ -98,7 +98,7 @@ def test_transaction_style(
     expected_source,
 ):
     integration = FalconIntegration(transaction_style=transaction_style)
-    sentry_init(integrations=[integration])
+    debugg_ai_init(integrations=[integration])
     events = capture_events()
 
     client = make_client()
@@ -110,8 +110,8 @@ def test_transaction_style(
     assert event["transaction_info"] == {"source": expected_source}
 
 
-def test_unhandled_errors(sentry_init, capture_exceptions, capture_events):
-    sentry_init(integrations=[FalconIntegration()])
+def test_unhandled_errors(debugg_ai_init, capture_exceptions, capture_events):
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     class Resource:
         def on_get(self, req, resp):
@@ -138,8 +138,8 @@ def test_unhandled_errors(sentry_init, capture_exceptions, capture_events):
     assert " by zero" in event["exception"]["values"][0]["value"]
 
 
-def test_raised_5xx_errors(sentry_init, capture_exceptions, capture_events):
-    sentry_init(integrations=[FalconIntegration()])
+def test_raised_5xx_errors(debugg_ai_init, capture_exceptions, capture_events):
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     class Resource:
         def on_get(self, req, resp):
@@ -162,8 +162,8 @@ def test_raised_5xx_errors(sentry_init, capture_exceptions, capture_events):
     assert event["exception"]["values"][0]["type"] == "HTTPError"
 
 
-def test_raised_4xx_errors(sentry_init, capture_exceptions, capture_events):
-    sentry_init(integrations=[FalconIntegration()])
+def test_raised_4xx_errors(debugg_ai_init, capture_exceptions, capture_events):
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     class Resource:
         def on_get(self, req, resp):
@@ -182,12 +182,12 @@ def test_raised_4xx_errors(sentry_init, capture_exceptions, capture_events):
     assert len(events) == 0
 
 
-def test_http_status(sentry_init, capture_exceptions, capture_events):
+def test_http_status(debugg_ai_init, capture_exceptions, capture_events):
     """
     This just demonstrates, that if Falcon raises a HTTPStatus with code 500
-    (instead of a HTTPError with code 500) Sentry will not capture it.
+    (instead of a HTTPError with code 500) DebuggAI will not capture it.
     """
-    sentry_init(integrations=[FalconIntegration()])
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     class Resource:
         def on_get(self, req, resp):
@@ -206,8 +206,8 @@ def test_http_status(sentry_init, capture_exceptions, capture_events):
     assert len(events) == 0
 
 
-def test_falcon_large_json_request(sentry_init, capture_events):
-    sentry_init(integrations=[FalconIntegration()])
+def test_falcon_large_json_request(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     data = {"foo": {"bar": "a" * 2000}}
 
@@ -234,8 +234,8 @@ def test_falcon_large_json_request(sentry_init, capture_events):
 
 
 @pytest.mark.parametrize("data", [{}, []], ids=["empty-dict", "empty-list"])
-def test_falcon_empty_json_request(sentry_init, capture_events, data):
-    sentry_init(integrations=[FalconIntegration()])
+def test_falcon_empty_json_request(debugg_ai_init, capture_events, data):
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     class Resource:
         def on_post(self, req, resp):
@@ -256,8 +256,8 @@ def test_falcon_empty_json_request(sentry_init, capture_events, data):
     assert event["request"]["data"] == data
 
 
-def test_falcon_raw_data_request(sentry_init, capture_events):
-    sentry_init(integrations=[FalconIntegration()])
+def test_falcon_raw_data_request(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     class Resource:
         def on_post(self, req, resp):
@@ -278,8 +278,8 @@ def test_falcon_raw_data_request(sentry_init, capture_events):
     assert event["request"]["data"] == ""
 
 
-def test_logging(sentry_init, capture_events):
-    sentry_init(
+def test_logging(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[FalconIntegration(), LoggingIntegration(event_level="ERROR")]
     )
 
@@ -303,8 +303,8 @@ def test_logging(sentry_init, capture_events):
     assert event["level"] == "error"
 
 
-def test_500(sentry_init):
-    sentry_init(integrations=[FalconIntegration()])
+def test_500(debugg_ai_init):
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     app = falcon.API()
 
@@ -316,18 +316,18 @@ def test_500(sentry_init):
 
     def http500_handler(ex, req, resp, params):
         debugg_ai_sdk.capture_exception(ex)
-        resp.media = {"message": "Sentry error."}
+        resp.media = {"message": "DebuggAI error."}
 
     app.add_error_handler(Exception, http500_handler)
 
     client = falcon.testing.TestClient(app)
     response = client.simulate_get("/")
 
-    assert response.json == {"message": "Sentry error."}
+    assert response.json == {"message": "DebuggAI error."}
 
 
-def test_error_in_errorhandler(sentry_init, capture_events):
-    sentry_init(integrations=[FalconIntegration()])
+def test_error_in_errorhandler(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     app = falcon.API()
 
@@ -356,8 +356,8 @@ def test_error_in_errorhandler(sentry_init, capture_events):
     assert last_ex_values["stacktrace"]["frames"][-1]["vars"]["ex"] == "ValueError()"
 
 
-def test_bad_request_not_captured(sentry_init, capture_events):
-    sentry_init(integrations=[FalconIntegration()])
+def test_bad_request_not_captured(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[FalconIntegration()])
     events = capture_events()
 
     app = falcon.API()
@@ -375,8 +375,8 @@ def test_bad_request_not_captured(sentry_init, capture_events):
     assert not events
 
 
-def test_does_not_leak_scope(sentry_init, capture_events):
-    sentry_init(integrations=[FalconIntegration()])
+def test_does_not_leak_scope(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[FalconIntegration()])
     events = capture_events()
 
     debugg_ai_sdk.get_isolation_scope().set_tag("request_data", False)
@@ -409,7 +409,7 @@ def test_does_not_leak_scope(sentry_init, capture_events):
 @pytest.mark.skipif(
     not hasattr(falcon, "asgi"), reason="This Falcon version lacks ASGI support."
 )
-def test_falcon_not_breaking_asgi(sentry_init):
+def test_falcon_not_breaking_asgi(debugg_ai_init):
     """
     This test simply verifies that the Falcon integration does not break ASGI
     Falcon apps.
@@ -417,7 +417,7 @@ def test_falcon_not_breaking_asgi(sentry_init):
     The test does not verify ASGI Falcon support, since our Falcon integration
     currently lacks support for ASGI Falcon apps.
     """
-    sentry_init(integrations=[FalconIntegration()])
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     asgi_app = falcon.asgi.App()
 
@@ -429,14 +429,14 @@ def test_falcon_not_breaking_asgi(sentry_init):
 
 @pytest.mark.skipif(
     (FALCON_VERSION or ()) < (3,),
-    reason="The Sentry Falcon integration only supports custom error handlers on Falcon 3+",
+    reason="The DebuggAI Falcon integration only supports custom error handlers on Falcon 3+",
 )
-def test_falcon_custom_error_handler(sentry_init, make_app, capture_events):
+def test_falcon_custom_error_handler(debugg_ai_init, make_app, capture_events):
     """
     When a custom error handler handles what otherwise would have resulted in a 5xx error,
-    changing the HTTP status to a non-5xx status, no error event should be sent to Sentry.
+    changing the HTTP status to a non-5xx status, no error event should be sent to DebuggAI.
     """
-    sentry_init(integrations=[FalconIntegration()])
+    debugg_ai_init(integrations=[FalconIntegration()])
     events = capture_events()
 
     app = make_app()
@@ -447,8 +447,8 @@ def test_falcon_custom_error_handler(sentry_init, make_app, capture_events):
     assert len(events) == 0
 
 
-def test_span_origin(sentry_init, capture_events, make_client):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events, make_client):
+    debugg_ai_init(
         integrations=[FalconIntegration()],
         traces_sample_rate=1.0,
     )
@@ -462,7 +462,7 @@ def test_span_origin(sentry_init, capture_events, make_client):
     assert event["contexts"]["trace"]["origin"] == "auto.http.falcon"
 
 
-def test_falcon_request_media(sentry_init):
+def test_falcon_request_media(debugg_ai_init):
     # test_passed stores whether the test has passed.
     test_passed = False
 
@@ -471,7 +471,7 @@ def test_falcon_request_media(sentry_init):
     # test_passed is True.
     test_failure_reason = "test endpoint did not get called"
 
-    class SentryCaptureMiddleware:
+    class DebuggAICaptureMiddleware:
         def process_request(self, _req, _resp):
             # This capture message forces Falcon event processors to run
             # before the request handler runs
@@ -488,14 +488,14 @@ def test_falcon_request_media(sentry_init):
             test_passed = raw_data != b""
             test_failure_reason = "request body has been read"
 
-    sentry_init(integrations=[FalconIntegration()])
+    debugg_ai_init(integrations=[FalconIntegration()])
 
     try:
         app_class = falcon.App  # Falcon ≥3.0
     except AttributeError:
         app_class = falcon.API  # Falcon <3.0
 
-    app = app_class(middleware=[SentryCaptureMiddleware()])
+    app = app_class(middleware=[DebuggAICaptureMiddleware()])
     app.add_route("/read_body", RequestMediaResource())
 
     client = falcon.testing.TestClient(app)

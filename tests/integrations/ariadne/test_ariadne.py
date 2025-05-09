@@ -44,9 +44,9 @@ def schema_factory():
 
 
 def test_capture_request_and_response_if_send_pii_is_on_async(
-    sentry_init, capture_events
+    debugg_ai_init, capture_events
 ):
-    sentry_init(
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[
             AriadneIntegration(),
@@ -86,9 +86,9 @@ def test_capture_request_and_response_if_send_pii_is_on_async(
 
 
 def test_capture_request_and_response_if_send_pii_is_on_sync(
-    sentry_init, capture_events
+    debugg_ai_init, capture_events
 ):
-    sentry_init(
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[AriadneIntegration(), FlaskIntegration()],
     )
@@ -129,9 +129,9 @@ def test_capture_request_and_response_if_send_pii_is_on_sync(
 
 
 def test_do_not_capture_request_and_response_if_send_pii_is_off_async(
-    sentry_init, capture_events
+    debugg_ai_init, capture_events
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             AriadneIntegration(),
             FastApiIntegration(),
@@ -158,9 +158,9 @@ def test_do_not_capture_request_and_response_if_send_pii_is_off_async(
 
 
 def test_do_not_capture_request_and_response_if_send_pii_is_off_sync(
-    sentry_init, capture_events
+    debugg_ai_init, capture_events
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[AriadneIntegration(), FlaskIntegration()],
     )
     events = capture_events()
@@ -187,8 +187,8 @@ def test_do_not_capture_request_and_response_if_send_pii_is_off_sync(
     assert "response" not in event["contexts"]
 
 
-def test_capture_validation_error(sentry_init, capture_events):
-    sentry_init(
+def test_capture_validation_error(debugg_ai_init, capture_events):
+    debugg_ai_init(
         send_default_pii=True,
         integrations=[
             AriadneIntegration(),
@@ -225,8 +225,8 @@ def test_capture_validation_error(sentry_init, capture_events):
     assert event["request"]["data"] == query
 
 
-def test_no_event_if_no_errors_async(sentry_init, capture_events):
-    sentry_init(
+def test_no_event_if_no_errors_async(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             AriadneIntegration(),
             FastApiIntegration(),
@@ -250,8 +250,8 @@ def test_no_event_if_no_errors_async(sentry_init, capture_events):
     assert len(events) == 0
 
 
-def test_no_event_if_no_errors_sync(sentry_init, capture_events):
-    sentry_init(
+def test_no_event_if_no_errors_sync(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[AriadneIntegration(), FlaskIntegration()],
     )
     events = capture_events()

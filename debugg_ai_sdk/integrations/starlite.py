@@ -1,7 +1,7 @@
 import debugg_ai_sdk
 from debugg_ai_sdk.consts import OP
 from debugg_ai_sdk.integrations import DidNotEnable, Integration
-from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.integrations.asgi import DebuggAIAsgiMiddleware
 from debugg_ai_sdk.scope import should_send_default_pii
 from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE, TransactionSource
 from debugg_ai_sdk.utils import (
@@ -56,7 +56,7 @@ class StarliteIntegration(Integration):
         patch_http_route_handle()
 
 
-class SentryStarliteASGIMiddleware(SentryAsgiMiddleware):
+class DebuggAIStarliteASGIMiddleware(DebuggAIAsgiMiddleware):
     def __init__(self, app, span_origin=StarliteIntegration.origin):
         # type: (ASGIApp, str) -> None
         super().__init__(
@@ -72,7 +72,7 @@ def patch_app_init():
     # type: () -> None
     """
     Replaces the Starlite class's `__init__` function in order to inject `after_exception` handlers and set the
-    `SentryStarliteASGIMiddleware` as the outmost middleware in the stack.
+    `DebuggAIStarliteASGIMiddleware` as the outmost middleware in the stack.
     See:
     - https://starlite-api.github.io/starlite/usage/0-the-starlite-app/5-application-hooks/#after-exception
     - https://starlite-api.github.io/starlite/usage/7-middleware/0-middleware-intro/
@@ -94,9 +94,9 @@ def patch_app_init():
             ]
         )
 
-        SentryStarliteASGIMiddleware.__call__ = SentryStarliteASGIMiddleware._run_asgi3  # type: ignore
+        DebuggAIStarliteASGIMiddleware.__call__ = DebuggAIStarliteASGIMiddleware._run_asgi3  # type: ignore
         middleware = kwargs.get("middleware") or []
-        kwargs["middleware"] = [SentryStarliteASGIMiddleware, *middleware]
+        kwargs["middleware"] = [DebuggAIStarliteASGIMiddleware, *middleware]
         old__init__(self, *args, **kwargs)
 
     Starlite.__init__ = injection_wrapper
@@ -121,7 +121,7 @@ def enable_span_for_middleware(middleware):
     # type: (Middleware) -> Middleware
     if (
         not hasattr(middleware, "__call__")  # noqa: B004
-        or middleware is SentryStarliteASGIMiddleware
+        or middleware is DebuggAIStarliteASGIMiddleware
     ):
         return middleware
 
@@ -144,7 +144,7 @@ def enable_span_for_middleware(middleware):
             middleware_span.set_tag("starlite.middleware_name", middleware_name)
 
             # Creating spans for the "receive" callback
-            async def _sentry_receive(*args, **kwargs):
+            async def _debugg_ai_receive(*args, **kwargs):
                 # type: (*Any, **Any) -> Union[HTTPReceiveMessage, WebSocketReceiveMessage]
                 if debugg_ai_sdk.get_client().get_integration(StarliteIntegration) is None:
                     return await receive(*args, **kwargs)
@@ -157,11 +157,11 @@ def enable_span_for_middleware(middleware):
                     return await receive(*args, **kwargs)
 
             receive_name = getattr(receive, "__name__", str(receive))
-            receive_patched = receive_name == "_sentry_receive"
-            new_receive = _sentry_receive if not receive_patched else receive
+            receive_patched = receive_name == "_debugg_ai_receive"
+            new_receive = _debugg_ai_receive if not receive_patched else receive
 
             # Creating spans for the "send" callback
-            async def _sentry_send(message):
+            async def _debugg_ai_send(message):
                 # type: (Message) -> None
                 if debugg_ai_sdk.get_client().get_integration(StarliteIntegration) is None:
                     return await send(message)
@@ -174,8 +174,8 @@ def enable_span_for_middleware(middleware):
                     return await send(message)
 
             send_name = getattr(send, "__name__", str(send))
-            send_patched = send_name == "_sentry_send"
-            new_send = _sentry_send if not send_patched else send
+            send_patched = send_name == "_debugg_ai_send"
+            new_send = _debugg_ai_send if not send_patched else send
 
             return await old_call(self, scope, new_receive, new_send)
 
@@ -199,7 +199,7 @@ def patch_http_route_handle():
         if debugg_ai_sdk.get_client().get_integration(StarliteIntegration) is None:
             return await old_handle(self, scope, receive, send)
 
-        sentry_scope = debugg_ai_sdk.get_isolation_scope()
+        debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
         request = scope["app"].request_class(
             scope=scope, receive=receive, send=send
         )  # type: Request[Any, Any]
@@ -246,8 +246,8 @@ def patch_http_route_handle():
             )
             return event
 
-        sentry_scope._name = StarliteIntegration.identifier
-        sentry_scope.add_event_processor(event_processor)
+        debugg_ai_scope._name = StarliteIntegration.identifier
+        debugg_ai_scope.add_event_processor(event_processor)
 
         return await old_handle(self, scope, receive, send)
 
@@ -280,8 +280,8 @@ def exception_handler(exc, scope, _):
     if should_send_default_pii():
         user_info = retrieve_user_from_scope(scope)
     if user_info and isinstance(user_info, dict):
-        sentry_scope = debugg_ai_sdk.get_isolation_scope()
-        sentry_scope.set_user(user_info)
+        debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
+        debugg_ai_scope.set_user(user_info)
 
     event, hint = event_from_exception(
         exc,

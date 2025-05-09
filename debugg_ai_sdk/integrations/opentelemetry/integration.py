@@ -5,8 +5,8 @@ removed at any time without prior notice.
 """
 
 from debugg_ai_sdk.integrations import DidNotEnable, Integration
-from debugg_ai_sdk.integrations.opentelemetry.propagator import SentryPropagator
-from debugg_ai_sdk.integrations.opentelemetry.span_processor import SentrySpanProcessor
+from debugg_ai_sdk.integrations.opentelemetry.propagator import DebuggAIPropagator
+from debugg_ai_sdk.integrations.opentelemetry.span_processor import DebuggAISpanProcessor
 from debugg_ai_sdk.utils import logger
 
 try:
@@ -38,18 +38,18 @@ class OpenTelemetryIntegration(Integration):
             "Use at your own risk."
         )
 
-        _setup_sentry_tracing()
+        _setup_debugg_ai_tracing()
         # _setup_instrumentors()
 
         logger.debug("[OTel] Finished setting up OpenTelemetry integration")
 
 
-def _setup_sentry_tracing():
+def _setup_debugg_ai_tracing():
     # type: () -> None
     provider = TracerProvider()
-    provider.add_span_processor(SentrySpanProcessor())
+    provider.add_span_processor(DebuggAISpanProcessor())
     trace.set_tracer_provider(provider)
-    set_global_textmap(SentryPropagator())
+    set_global_textmap(DebuggAIPropagator())
 
 
 def _setup_instrumentors():

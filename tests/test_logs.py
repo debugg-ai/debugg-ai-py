@@ -45,11 +45,11 @@ def envelopes_to_logs(envelopes: List[Envelope]) -> List[Log]:
             if item.type == "log":
                 for log_json in item.payload.json["items"]:
                     log = {
-                        "severity_text": log_json["attributes"]["sentry.severity_text"][
+                        "severity_text": log_json["attributes"]["debugg-ai.severity_text"][
                             "value"
                         ],
                         "severity_number": int(
-                            log_json["attributes"]["sentry.severity_number"]["value"]
+                            log_json["attributes"]["debugg-ai.severity_number"]["value"]
                         ),
                         "body": log_json["body"],
                         "attributes": otel_attributes_to_dict(log_json["attributes"]),
@@ -61,8 +61,8 @@ def envelopes_to_logs(envelopes: List[Envelope]) -> List[Log]:
 
 
 @minimum_python_37
-def test_logs_disabled_by_default(sentry_init, capture_envelopes):
-    sentry_init()
+def test_logs_disabled_by_default(debugg_ai_init, capture_envelopes):
+    debugg_ai_init()
 
     python_logger = logging.Logger("some-logger")
 
@@ -80,8 +80,8 @@ def test_logs_disabled_by_default(sentry_init, capture_envelopes):
 
 
 @minimum_python_37
-def test_logs_basics(sentry_init, capture_envelopes):
-    sentry_init(_experiments={"enable_logs": True})
+def test_logs_basics(debugg_ai_init, capture_envelopes):
+    debugg_ai_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
     debugg_ai_sdk.logger.trace("This is a 'trace' log...")
@@ -113,7 +113,7 @@ def test_logs_basics(sentry_init, capture_envelopes):
 
 
 @minimum_python_37
-def test_logs_before_send_log(sentry_init, capture_envelopes):
+def test_logs_before_send_log(debugg_ai_init, capture_envelopes):
     before_log_called = [False]
 
     def _before_log(record, hint):
@@ -133,7 +133,7 @@ def test_logs_before_send_log(sentry_init, capture_envelopes):
 
         return record
 
-    sentry_init(
+    debugg_ai_init(
         _experiments={
             "enable_logs": True,
             "before_send_log": _before_log,
@@ -160,11 +160,11 @@ def test_logs_before_send_log(sentry_init, capture_envelopes):
 
 
 @minimum_python_37
-def test_logs_attributes(sentry_init, capture_envelopes):
+def test_logs_attributes(debugg_ai_init, capture_envelopes):
     """
     Passing arbitrary attributes to log messages.
     """
-    sentry_init(_experiments={"enable_logs": True}, server_name="test-server")
+    debugg_ai_init(_experiments={"enable_logs": True}, server_name="test-server")
     envelopes = capture_envelopes()
 
     attrs = {
@@ -184,20 +184,20 @@ def test_logs_attributes(sentry_init, capture_envelopes):
 
     for k, v in attrs.items():
         assert logs[0]["attributes"][k] == v
-    assert logs[0]["attributes"]["sentry.environment"] == "production"
-    assert "sentry.release" in logs[0]["attributes"]
-    assert logs[0]["attributes"]["sentry.message.parameters.my_var"] == "some value"
+    assert logs[0]["attributes"]["debugg-ai.environment"] == "production"
+    assert "debugg-ai.release" in logs[0]["attributes"]
+    assert logs[0]["attributes"]["debugg-ai.message.parameters.my_var"] == "some value"
     assert logs[0]["attributes"][SPANDATA.SERVER_ADDRESS] == "test-server"
-    assert logs[0]["attributes"]["sentry.sdk.name"].startswith("sentry.python")
-    assert logs[0]["attributes"]["sentry.sdk.version"] == VERSION
+    assert logs[0]["attributes"]["debugg-ai.sdk.name"].startswith("debugg-ai.python")
+    assert logs[0]["attributes"]["debugg-ai.sdk.version"] == VERSION
 
 
 @minimum_python_37
-def test_logs_message_params(sentry_init, capture_envelopes):
+def test_logs_message_params(debugg_ai_init, capture_envelopes):
     """
     This is the official way of how to pass vars to log messages.
     """
-    sentry_init(_experiments={"enable_logs": True})
+    debugg_ai_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
     debugg_ai_sdk.logger.warning("The recorded value was '{int_var}'", int_var=1)
@@ -214,33 +214,33 @@ def test_logs_message_params(sentry_init, capture_envelopes):
     logs = envelopes_to_logs(envelopes)
 
     assert logs[0]["body"] == "The recorded value was '1'"
-    assert logs[0]["attributes"]["sentry.message.parameters.int_var"] == 1
+    assert logs[0]["attributes"]["debugg-ai.message.parameters.int_var"] == 1
 
     assert logs[1]["body"] == "The recorded value was '2.0'"
-    assert logs[1]["attributes"]["sentry.message.parameters.float_var"] == 2.0
+    assert logs[1]["attributes"]["debugg-ai.message.parameters.float_var"] == 2.0
 
     assert logs[2]["body"] == "The recorded value was 'False'"
-    assert logs[2]["attributes"]["sentry.message.parameters.bool_var"] is False
+    assert logs[2]["attributes"]["debugg-ai.message.parameters.bool_var"] is False
 
     assert logs[3]["body"] == "The recorded value was 'some string value'"
     assert (
-        logs[3]["attributes"]["sentry.message.parameters.string_var"]
+        logs[3]["attributes"]["debugg-ai.message.parameters.string_var"]
         == "some string value"
     )
 
     assert logs[4]["body"] == "The recorded error was 'some error'"
     assert (
-        logs[4]["attributes"]["sentry.message.parameters.error"]
+        logs[4]["attributes"]["debugg-ai.message.parameters.error"]
         == "Exception('some error')"
     )
 
 
 @minimum_python_37
-def test_logs_tied_to_transactions(sentry_init, capture_envelopes):
+def test_logs_tied_to_transactions(debugg_ai_init, capture_envelopes):
     """
     Log messages are also tied to transactions.
     """
-    sentry_init(_experiments={"enable_logs": True})
+    debugg_ai_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
     with debugg_ai_sdk.start_transaction(name="test-transaction") as trx:
@@ -248,15 +248,15 @@ def test_logs_tied_to_transactions(sentry_init, capture_envelopes):
 
     get_client().flush()
     logs = envelopes_to_logs(envelopes)
-    assert logs[0]["attributes"]["sentry.trace.parent_span_id"] == trx.span_id
+    assert logs[0]["attributes"]["debugg-ai.trace.parent_span_id"] == trx.span_id
 
 
 @minimum_python_37
-def test_logs_tied_to_spans(sentry_init, capture_envelopes):
+def test_logs_tied_to_spans(debugg_ai_init, capture_envelopes):
     """
     Log messages are also tied to spans.
     """
-    sentry_init(_experiments={"enable_logs": True})
+    debugg_ai_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
     with debugg_ai_sdk.start_transaction(name="test-transaction"):
@@ -265,15 +265,15 @@ def test_logs_tied_to_spans(sentry_init, capture_envelopes):
 
     get_client().flush()
     logs = envelopes_to_logs(envelopes)
-    assert logs[0]["attributes"]["sentry.trace.parent_span_id"] == span.span_id
+    assert logs[0]["attributes"]["debugg-ai.trace.parent_span_id"] == span.span_id
 
 
 @minimum_python_37
-def test_logger_integration_warning(sentry_init, capture_envelopes):
+def test_logger_integration_warning(debugg_ai_init, capture_envelopes):
     """
-    The python logger module should create 'warn' sentry logs if the flag is on.
+    The python logger module should create 'warn' debugg-ai logs if the flag is on.
     """
-    sentry_init(_experiments={"enable_logs": True})
+    debugg_ai_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
     python_logger = logging.Logger("test-logger")
@@ -282,24 +282,24 @@ def test_logger_integration_warning(sentry_init, capture_envelopes):
     get_client().flush()
     logs = envelopes_to_logs(envelopes)
     attrs = logs[0]["attributes"]
-    assert attrs["sentry.message.template"] == "this is %s a template %s"
+    assert attrs["debugg-ai.message.template"] == "this is %s a template %s"
     assert "code.file.path" in attrs
     assert "code.line.number" in attrs
     assert attrs["logger.name"] == "test-logger"
-    assert attrs["sentry.environment"] == "production"
-    assert attrs["sentry.message.parameters.0"] == "1"
-    assert attrs["sentry.message.parameters.1"] == "2"
-    assert attrs["sentry.origin"] == "auto.logger.log"
+    assert attrs["debugg-ai.environment"] == "production"
+    assert attrs["debugg-ai.message.parameters.0"] == "1"
+    assert attrs["debugg-ai.message.parameters.1"] == "2"
+    assert attrs["debugg-ai.origin"] == "auto.logger.log"
     assert logs[0]["severity_number"] == 13
     assert logs[0]["severity_text"] == "warn"
 
 
 @minimum_python_37
-def test_logger_integration_debug(sentry_init, capture_envelopes):
+def test_logger_integration_debug(debugg_ai_init, capture_envelopes):
     """
-    The python logger module should not create 'debug' sentry logs if the flag is on by default
+    The python logger module should not create 'debug' debugg-ai logs if the flag is on by default
     """
-    sentry_init(_experiments={"enable_logs": True})
+    debugg_ai_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
     python_logger = logging.Logger("test-logger")
@@ -310,13 +310,13 @@ def test_logger_integration_debug(sentry_init, capture_envelopes):
 
 
 @minimum_python_37
-def test_no_log_infinite_loop(sentry_init, capture_envelopes):
+def test_no_log_infinite_loop(debugg_ai_init, capture_envelopes):
     """
     If 'debug' mode is true, and you set a low log level in the logging integration, there should be no infinite loops.
     """
-    sentry_init(
+    debugg_ai_init(
         _experiments={"enable_logs": True},
-        integrations=[LoggingIntegration(sentry_logs_level=logging.DEBUG)],
+        integrations=[LoggingIntegration(debugg_ai_logs_level=logging.DEBUG)],
         debug=True,
     )
     envelopes = capture_envelopes()
@@ -329,11 +329,11 @@ def test_no_log_infinite_loop(sentry_init, capture_envelopes):
 
 
 @minimum_python_37
-def test_logging_errors(sentry_init, capture_envelopes):
+def test_logging_errors(debugg_ai_init, capture_envelopes):
     """
     The python logger module should be able to log errors without erroring
     """
-    sentry_init(_experiments={"enable_logs": True})
+    debugg_ai_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
     python_logger = logging.Logger("test-logger")
@@ -348,14 +348,14 @@ def test_logging_errors(sentry_init, capture_envelopes):
 
     logs = envelopes_to_logs(envelopes)
     assert logs[0]["severity_text"] == "error"
-    assert "sentry.message.template" not in logs[0]["attributes"]
-    assert "sentry.message.parameters.0" not in logs[0]["attributes"]
+    assert "debugg-ai.message.template" not in logs[0]["attributes"]
+    assert "debugg-ai.message.parameters.0" not in logs[0]["attributes"]
     assert "code.line.number" in logs[0]["attributes"]
 
     assert logs[1]["severity_text"] == "error"
-    assert logs[1]["attributes"]["sentry.message.template"] == "error is %s"
+    assert logs[1]["attributes"]["debugg-ai.message.template"] == "error is %s"
     assert (
-        logs[1]["attributes"]["sentry.message.parameters.0"]
+        logs[1]["attributes"]["debugg-ai.message.parameters.0"]
         == "Exception('test exc 2')"
     )
     assert "code.line.number" in logs[1]["attributes"]
@@ -363,11 +363,11 @@ def test_logging_errors(sentry_init, capture_envelopes):
     assert len(logs) == 2
 
 
-def test_log_strips_project_root(sentry_init, capture_envelopes):
+def test_log_strips_project_root(debugg_ai_init, capture_envelopes):
     """
     The python logger should strip project roots from the log record path
     """
-    sentry_init(
+    debugg_ai_init(
         _experiments={"enable_logs": True},
         project_root="/custom/test",
     )
@@ -393,11 +393,11 @@ def test_log_strips_project_root(sentry_init, capture_envelopes):
     assert attrs["code.file.path"] == "blah/path.py"
 
 
-def test_auto_flush_logs_after_100(sentry_init, capture_envelopes):
+def test_auto_flush_logs_after_100(debugg_ai_init, capture_envelopes):
     """
     If you log >100 logs, it should automatically trigger a flush.
     """
-    sentry_init(_experiments={"enable_logs": True})
+    debugg_ai_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
     python_logger = logging.Logger("test-logger")
@@ -413,11 +413,11 @@ def test_auto_flush_logs_after_100(sentry_init, capture_envelopes):
 
 
 @minimum_python_37
-def test_auto_flush_logs_after_5s(sentry_init, capture_envelopes):
+def test_auto_flush_logs_after_5s(debugg_ai_init, capture_envelopes):
     """
     If you log a single log, it should automatically flush after 5 seconds, at most 10 seconds.
     """
-    sentry_init(_experiments={"enable_logs": True})
+    debugg_ai_init(_experiments={"enable_logs": True})
     envelopes = capture_envelopes()
 
     python_logger = logging.Logger("test-logger")

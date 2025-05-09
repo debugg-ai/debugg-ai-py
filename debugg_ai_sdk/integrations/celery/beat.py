@@ -80,7 +80,7 @@ def _get_monitor_config(celery_schedule, app, monitor_name):
 
         if schedule_unit == "second":
             logger.warning(
-                "Intervals shorter than one minute are not supported by Sentry Crons. Monitor '%s' has an interval of %s seconds. Use the `exclude_beat_tasks` option in the celery integration to exclude it.",
+                "Intervals shorter than one minute are not supported by DebuggAI Crons. Monitor '%s' has an interval of %s seconds. Use the `exclude_beat_tasks` option in the celery integration to exclude it.",
                 monitor_name,
                 schedule_value,
             )
@@ -88,7 +88,7 @@ def _get_monitor_config(celery_schedule, app, monitor_name):
 
     else:
         logger.warning(
-            "Celery schedule type '%s' not supported by Sentry Crons.",
+            "Celery schedule type '%s' not supported by DebuggAI Crons.",
             type(celery_schedule),
         )
         return {}
@@ -116,7 +116,7 @@ def _get_monitor_config(celery_schedule, app, monitor_name):
 def _apply_crons_data_to_schedule_entry(scheduler, schedule_entry, integration):
     # type: (Any, Any, debugg_ai_sdk.integrations.celery.CeleryIntegration) -> None
     """
-    Add Sentry Crons information to the schedule_entry headers.
+    Add DebuggAI Crons information to the schedule_entry headers.
     """
     if not integration.monitor_beat_tasks:
         return
@@ -141,8 +141,8 @@ def _apply_crons_data_to_schedule_entry(scheduler, schedule_entry, integration):
     headers = schedule_entry.options.pop("headers", {})
     headers.update(
         {
-            "sentry-monitor-slug": monitor_name,
-            "sentry-monitor-config": monitor_config,
+            "debugg-ai-monitor-slug": monitor_name,
+            "debugg-ai-monitor-config": monitor_config,
         }
     )
 
@@ -151,9 +151,9 @@ def _apply_crons_data_to_schedule_entry(scheduler, schedule_entry, integration):
         monitor_config=monitor_config,
         status=MonitorStatus.IN_PROGRESS,
     )
-    headers.update({"sentry-monitor-check-in-id": check_in_id})
+    headers.update({"debugg-ai-monitor-check-in-id": check_in_id})
 
-    # Set the Sentry configuration in the options of the ScheduleEntry.
+    # Set the DebuggAI configuration in the options of the ScheduleEntry.
     # Those will be picked up in `apply_async` and added to the headers.
     schedule_entry.options["headers"] = headers
 
@@ -162,23 +162,23 @@ def _wrap_beat_scheduler(original_function):
     # type: (Callable[..., Any]) -> Callable[..., Any]
     """
     Makes sure that:
-    - a new Sentry trace is started for each task started by Celery Beat and
+    - a new DebuggAI trace is started for each task started by Celery Beat and
       it is propagated to the task.
-    - the Sentry Crons information is set in the Celery Beat task's
-      headers so that is is monitored with Sentry Crons.
+    - the DebuggAI Crons information is set in the Celery Beat task's
+      headers so that is is monitored with DebuggAI Crons.
 
     After the patched function is called,
     Celery Beat will call apply_async to put the task in the queue.
     """
     # Patch only once
     # Can't use __name__ here, because some of our tests mock original_apply_entry
-    already_patched = "sentry_patched_scheduler" in str(original_function)
+    already_patched = "debugg_ai_patched_scheduler" in str(original_function)
     if already_patched:
         return original_function
 
     from debugg_ai_sdk.integrations.celery import CeleryIntegration
 
-    def sentry_patched_scheduler(*args, **kwargs):
+    def debugg_ai_patched_scheduler(*args, **kwargs):
         # type: (*Any, **Any) -> None
         integration = debugg_ai_sdk.get_client().get_integration(CeleryIntegration)
         if integration is None:
@@ -194,7 +194,7 @@ def _wrap_beat_scheduler(original_function):
 
         return original_function(*args, **kwargs)
 
-    return sentry_patched_scheduler
+    return debugg_ai_patched_scheduler
 
 
 def _patch_beat_apply_entry():
@@ -223,17 +223,17 @@ def crons_task_success(sender, **kwargs):
     logger.debug("celery_task_success %s", sender)
     headers = _get_headers(sender)
 
-    if "sentry-monitor-slug" not in headers:
+    if "debugg-ai-monitor-slug" not in headers:
         return
 
-    monitor_config = headers.get("sentry-monitor-config", {})
+    monitor_config = headers.get("debugg-ai-monitor-config", {})
 
-    start_timestamp_s = headers.get("sentry-monitor-start-timestamp-s")
+    start_timestamp_s = headers.get("debugg-ai-monitor-start-timestamp-s")
 
     capture_checkin(
-        monitor_slug=headers["sentry-monitor-slug"],
+        monitor_slug=headers["debugg-ai-monitor-slug"],
         monitor_config=monitor_config,
-        check_in_id=headers["sentry-monitor-check-in-id"],
+        check_in_id=headers["debugg-ai-monitor-check-in-id"],
         duration=(
             _now_seconds_since_epoch() - float(start_timestamp_s)
             if start_timestamp_s
@@ -248,17 +248,17 @@ def crons_task_failure(sender, **kwargs):
     logger.debug("celery_task_failure %s", sender)
     headers = _get_headers(sender)
 
-    if "sentry-monitor-slug" not in headers:
+    if "debugg-ai-monitor-slug" not in headers:
         return
 
-    monitor_config = headers.get("sentry-monitor-config", {})
+    monitor_config = headers.get("debugg-ai-monitor-config", {})
 
-    start_timestamp_s = headers.get("sentry-monitor-start-timestamp-s")
+    start_timestamp_s = headers.get("debugg-ai-monitor-start-timestamp-s")
 
     capture_checkin(
-        monitor_slug=headers["sentry-monitor-slug"],
+        monitor_slug=headers["debugg-ai-monitor-slug"],
         monitor_config=monitor_config,
-        check_in_id=headers["sentry-monitor-check-in-id"],
+        check_in_id=headers["debugg-ai-monitor-check-in-id"],
         duration=(
             _now_seconds_since_epoch() - float(start_timestamp_s)
             if start_timestamp_s
@@ -273,17 +273,17 @@ def crons_task_retry(sender, **kwargs):
     logger.debug("celery_task_retry %s", sender)
     headers = _get_headers(sender)
 
-    if "sentry-monitor-slug" not in headers:
+    if "debugg-ai-monitor-slug" not in headers:
         return
 
-    monitor_config = headers.get("sentry-monitor-config", {})
+    monitor_config = headers.get("debugg-ai-monitor-config", {})
 
-    start_timestamp_s = headers.get("sentry-monitor-start-timestamp-s")
+    start_timestamp_s = headers.get("debugg-ai-monitor-start-timestamp-s")
 
     capture_checkin(
-        monitor_slug=headers["sentry-monitor-slug"],
+        monitor_slug=headers["debugg-ai-monitor-slug"],
         monitor_config=monitor_config,
-        check_in_id=headers["sentry-monitor-check-in-id"],
+        check_in_id=headers["debugg-ai-monitor-check-in-id"],
         duration=(
             _now_seconds_since_epoch() - float(start_timestamp_s)
             if start_timestamp_s

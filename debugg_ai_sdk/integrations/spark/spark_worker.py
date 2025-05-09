@@ -27,7 +27,7 @@ class SparkWorkerIntegration(Integration):
         # type: () -> None
         import pyspark.daemon as original_daemon
 
-        original_daemon.worker_main = _sentry_worker_main
+        original_daemon.worker_main = _debugg_ai_worker_main
 
 
 def _capture_exception(exc_info):
@@ -86,13 +86,13 @@ def _tag_task_context():
             event["tags"].setdefault("taskAttemptId", str(task_context.taskAttemptId()))
 
             if task_context._localProperties:
-                if "sentry_app_name" in task_context._localProperties:
+                if "debugg_ai_app_name" in task_context._localProperties:
                     event["tags"].setdefault(
-                        "app_name", task_context._localProperties["sentry_app_name"]
+                        "app_name", task_context._localProperties["debugg_ai_app_name"]
                     )
                     event["tags"].setdefault(
                         "application_id",
-                        task_context._localProperties["sentry_application_id"],
+                        task_context._localProperties["debugg_ai_application_id"],
                     )
 
                 if "callSite.short" in task_context._localProperties:
@@ -103,7 +103,7 @@ def _tag_task_context():
         return event
 
 
-def _sentry_worker_main(*args, **kwargs):
+def _debugg_ai_worker_main(*args, **kwargs):
     # type: (*Optional[Any], **Optional[Any]) -> None
     import pyspark.worker as original_worker
 

@@ -16,8 +16,8 @@ from tests.conftest import ApproxDict, create_mock_http_server
 PORT = create_mock_http_server()
 
 
-def test_crumb_capture(sentry_init, capture_events):
-    sentry_init(integrations=[StdlibIntegration()])
+def test_crumb_capture(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[StdlibIntegration()])
     events = capture_events()
 
     url = "http://localhost:{}/some/random/url".format(PORT)
@@ -52,8 +52,8 @@ def test_crumb_capture(sentry_init, capture_events):
         (500, "error"),
     ],
 )
-def test_crumb_capture_client_error(sentry_init, capture_events, status_code, level):
-    sentry_init(integrations=[StdlibIntegration()])
+def test_crumb_capture_client_error(debugg_ai_init, capture_events, status_code, level):
+    debugg_ai_init(integrations=[StdlibIntegration()])
     events = capture_events()
 
     url = f"http://localhost:{PORT}/status/{status_code}"  # noqa:E231
@@ -86,12 +86,12 @@ def test_crumb_capture_client_error(sentry_init, capture_events, status_code, le
     )
 
 
-def test_crumb_capture_hint(sentry_init, capture_events):
+def test_crumb_capture_hint(debugg_ai_init, capture_events):
     def before_breadcrumb(crumb, hint):
         crumb["data"]["extra"] = "foo"
         return crumb
 
-    sentry_init(integrations=[StdlibIntegration()], before_breadcrumb=before_breadcrumb)
+    debugg_ai_init(integrations=[StdlibIntegration()], before_breadcrumb=before_breadcrumb)
     events = capture_events()
 
     url = "http://localhost:{}/some/random/url".format(PORT)
@@ -116,17 +116,17 @@ def test_crumb_capture_hint(sentry_init, capture_events):
     )
 
 
-def test_empty_realurl(sentry_init):
+def test_empty_realurl(debugg_ai_init):
     """
     Ensure that after using debugg_ai_sdk.init you can putrequest a
     None url.
     """
 
-    sentry_init(dsn="")
+    debugg_ai_init(dsn="")
     HTTPConnection("example.com", port=443).putrequest("POST", None)
 
 
-def test_httplib_misuse(sentry_init, capture_events, request):
+def test_httplib_misuse(debugg_ai_init, capture_events, request):
     """HTTPConnection.getresponse must be called after every call to
     HTTPConnection.request. However, if somebody does not abide by
     this contract, we still should handle this gracefully and not
@@ -136,7 +136,7 @@ def test_httplib_misuse(sentry_init, capture_events, request):
     wrongly.
     """
 
-    sentry_init()
+    debugg_ai_init()
     events = capture_events()
 
     conn = HTTPConnection("localhost", PORT)
@@ -175,20 +175,20 @@ def test_httplib_misuse(sentry_init, capture_events, request):
     )
 
 
-def test_outgoing_trace_headers(sentry_init, monkeypatch):
+def test_outgoing_trace_headers(debugg_ai_init, monkeypatch):
     # HTTPSConnection.send is passed a string containing (among other things)
     # the headers on the request. Mock it so we can check the headers, and also
     # so it doesn't try to actually talk to the internet.
     mock_send = mock.Mock()
     monkeypatch.setattr(HTTPSConnection, "send", mock_send)
 
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
 
     headers = {
         "baggage": (
-            "other-vendor-value-1=foo;bar;baz, sentry-trace_id=771a43a4192642f0b136d5159a501700, "
-            "sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=0.01337, "
-            "sentry-user_id=Am%C3%A9lie, sentry-sample_rand=0.132521102938283, other-vendor-value-2=foo;bar;"
+            "other-vendor-value-1=foo;bar;baz, debugg-ai-trace_id=771a43a4192642f0b136d5159a501700, "
+            "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3, debugg-ai-sample_rate=0.01337, "
+            "debugg-ai-user_id=Am%C3%A9lie, debugg-ai-sample_rand=0.132521102938283, other-vendor-value-2=foo;bar;"
         ),
     }
 
@@ -210,32 +210,32 @@ def test_outgoing_trace_headers(sentry_init, monkeypatch):
                 request_headers[key] = val
 
         request_span = transaction._span_recorder.spans[-1]
-        expected_sentry_trace = "{trace_id}-{parent_span_id}-{sampled}".format(
+        expected_debugg_ai_trace = "{trace_id}-{parent_span_id}-{sampled}".format(
             trace_id=transaction.trace_id,
             parent_span_id=request_span.span_id,
             sampled=1,
         )
-        assert request_headers["sentry-trace"] == expected_sentry_trace
+        assert request_headers["debugg-ai-trace"] == expected_debugg_ai_trace
 
         expected_outgoing_baggage = (
-            "sentry-trace_id=771a43a4192642f0b136d5159a501700,"
-            "sentry-public_key=49d0f7386ad645858ae85020e393bef3,"
-            "sentry-sample_rate=1.0,"
-            "sentry-user_id=Am%C3%A9lie,"
-            "sentry-sample_rand=0.132521102938283"
+            "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700,"
+            "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3,"
+            "debugg-ai-sample_rate=1.0,"
+            "debugg-ai-user_id=Am%C3%A9lie,"
+            "debugg-ai-sample_rand=0.132521102938283"
         )
 
         assert request_headers["baggage"] == expected_outgoing_baggage
 
 
-def test_outgoing_trace_headers_head_sdk(sentry_init, monkeypatch):
+def test_outgoing_trace_headers_head_sdk(debugg_ai_init, monkeypatch):
     # HTTPSConnection.send is passed a string containing (among other things)
     # the headers on the request. Mock it so we can check the headers, and also
     # so it doesn't try to actually talk to the internet.
     mock_send = mock.Mock()
     monkeypatch.setattr(HTTPSConnection, "send", mock_send)
 
-    sentry_init(traces_sample_rate=0.5, release="foo")
+    debugg_ai_init(traces_sample_rate=0.5, release="foo")
     with mock.patch("debugg_ai_sdk.tracing_utils.Random.uniform", return_value=0.25):
         transaction = Transaction.continue_from_headers({})
 
@@ -250,20 +250,20 @@ def test_outgoing_trace_headers_head_sdk(sentry_init, monkeypatch):
                 request_headers[key] = val
 
         request_span = transaction._span_recorder.spans[-1]
-        expected_sentry_trace = "{trace_id}-{parent_span_id}-{sampled}".format(
+        expected_debugg_ai_trace = "{trace_id}-{parent_span_id}-{sampled}".format(
             trace_id=transaction.trace_id,
             parent_span_id=request_span.span_id,
             sampled=1,
         )
-        assert request_headers["sentry-trace"] == expected_sentry_trace
+        assert request_headers["debugg-ai-trace"] == expected_debugg_ai_trace
 
         expected_outgoing_baggage = (
-            "sentry-trace_id=%s,"
-            "sentry-sample_rand=0.250000,"
-            "sentry-environment=production,"
-            "sentry-release=foo,"
-            "sentry-sample_rate=0.5,"
-            "sentry-sampled=%s"
+            "debugg-ai-trace_id=%s,"
+            "debugg-ai-sample_rand=0.250000,"
+            "debugg-ai-environment=production,"
+            "debugg-ai-release=foo,"
+            "debugg-ai-sample_rate=0.5,"
+            "debugg-ai-sampled=%s"
         ) % (transaction.trace_id, "true" if transaction.sampled else "false")
 
         assert request_headers["baggage"] == expected_outgoing_baggage
@@ -329,7 +329,7 @@ def test_outgoing_trace_headers_head_sdk(sentry_init, monkeypatch):
     ],
 )
 def test_option_trace_propagation_targets(
-    sentry_init, monkeypatch, trace_propagation_targets, host, path, trace_propagated
+    debugg_ai_init, monkeypatch, trace_propagation_targets, host, path, trace_propagated
 ):
     # HTTPSConnection.send is passed a string containing (among other things)
     # the headers on the request. Mock it so we can check the headers, and also
@@ -337,15 +337,15 @@ def test_option_trace_propagation_targets(
     mock_send = mock.Mock()
     monkeypatch.setattr(HTTPSConnection, "send", mock_send)
 
-    sentry_init(
+    debugg_ai_init(
         trace_propagation_targets=trace_propagation_targets,
         traces_sample_rate=1.0,
     )
 
     headers = {
         "baggage": (
-            "sentry-trace_id=771a43a4192642f0b136d5159a501700, "
-            "sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=0.01337, "
+            "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700, "
+            "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3, debugg-ai-sample_rate=0.01337, "
         )
     }
 
@@ -367,15 +367,15 @@ def test_option_trace_propagation_targets(
                 request_headers[key] = val
 
         if trace_propagated:
-            assert "sentry-trace" in request_headers
+            assert "debugg-ai-trace" in request_headers
             assert "baggage" in request_headers
         else:
-            assert "sentry-trace" not in request_headers
+            assert "debugg-ai-trace" not in request_headers
             assert "baggage" not in request_headers
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, debug=True)
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, debug=True)
     events = capture_events()
 
     with start_transaction(name="foo"):
@@ -390,11 +390,11 @@ def test_span_origin(sentry_init, capture_events):
     assert event["spans"][0]["origin"] == "auto.http.stdlib.httplib"
 
 
-def test_http_timeout(monkeypatch, sentry_init, capture_envelopes):
+def test_http_timeout(monkeypatch, debugg_ai_init, capture_envelopes):
     mock_readinto = mock.Mock(side_effect=TimeoutError)
     monkeypatch.setattr(SocketIO, "readinto", mock_readinto)
 
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
 
     envelopes = capture_envelopes()
 

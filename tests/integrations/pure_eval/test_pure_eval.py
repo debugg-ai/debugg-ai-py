@@ -7,8 +7,8 @@ from debugg_ai_sdk.integrations.pure_eval import PureEvalIntegration
 
 
 @pytest.mark.parametrize("integrations", [[], [PureEvalIntegration()]])
-def test_include_local_variables_enabled(sentry_init, capture_events, integrations):
-    sentry_init(include_local_variables=True, integrations=integrations)
+def test_include_local_variables_enabled(debugg_ai_init, capture_events, integrations):
+    debugg_ai_init(include_local_variables=True, integrations=integrations)
     events = capture_events()
 
     def foo():

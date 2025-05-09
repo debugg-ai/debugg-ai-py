@@ -43,7 +43,7 @@ class ImmutableDict(Mapping):
 @pytest.mark.parametrize("env_mapping", [None, os.environ, ImmutableDict(os.environ)])
 @pytest.mark.parametrize("with_cwd", [True, False])
 def test_subprocess_basic(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     monkeypatch,
     positional_args,
@@ -55,7 +55,7 @@ def test_subprocess_basic(
 
     old_environ = dict(os.environ)
 
-    sentry_init(integrations=[StdlibIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[StdlibIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction(name="foo") as transaction:
@@ -174,9 +174,9 @@ def test_subprocess_basic(
         assert sys.executable + " -c" in subprocess_init_span["description"]
 
 
-def test_subprocess_empty_env(sentry_init, monkeypatch):
+def test_subprocess_empty_env(debugg_ai_init, monkeypatch):
     monkeypatch.setenv("TEST_MARKER", "should_not_be_seen")
-    sentry_init(integrations=[StdlibIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[StdlibIntegration()], traces_sample_rate=1.0)
     with start_transaction(name="foo"):
         args = [
             sys.executable,
@@ -187,8 +187,8 @@ def test_subprocess_empty_env(sentry_init, monkeypatch):
     assert "should_not_be_seen" not in output
 
 
-def test_subprocess_invalid_args(sentry_init):
-    sentry_init(integrations=[StdlibIntegration()])
+def test_subprocess_invalid_args(debugg_ai_init):
+    debugg_ai_init(integrations=[StdlibIntegration()])
 
     with pytest.raises(TypeError) as excinfo:
         subprocess.Popen(1)
@@ -196,8 +196,8 @@ def test_subprocess_invalid_args(sentry_init):
     assert "'int' object is not iterable" in str(excinfo.value)
 
 
-def test_subprocess_span_origin(sentry_init, capture_events):
-    sentry_init(integrations=[StdlibIntegration()], traces_sample_rate=1.0)
+def test_subprocess_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[StdlibIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction(name="foo"):

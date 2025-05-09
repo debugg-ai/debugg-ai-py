@@ -21,7 +21,7 @@ except ImportError:
     UnsupportedMediaType = None
 
 import debugg_ai_sdk
-import debugg_ai_sdk.integrations.flask as flask_sentry
+import debugg_ai_sdk.integrations.flask as flask_debugg-ai
 from debugg_ai_sdk import (
     set_tag,
     capture_message,
@@ -64,13 +64,13 @@ def integration_enabled_params(request):
     if request.param == "auto":
         return {"auto_enabling_integrations": True}
     elif request.param == "manual":
-        return {"integrations": [flask_sentry.FlaskIntegration()]}
+        return {"integrations": [flask_debugg-ai.FlaskIntegration()]}
     else:
         raise ValueError(request.param)
 
 
-def test_has_context(sentry_init, app, capture_events):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_has_context(debugg_ai_init, app, capture_events):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
     events = capture_events()
 
     client = app.test_client()
@@ -93,7 +93,7 @@ def test_has_context(sentry_init, app, capture_events):
     ],
 )
 def test_transaction_style(
-    sentry_init,
+    debugg_ai_init,
     app,
     capture_events,
     url,
@@ -101,9 +101,9 @@ def test_transaction_style(
     expected_transaction,
     expected_source,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
-            flask_sentry.FlaskIntegration(transaction_style=transaction_style)
+            flask_debugg-ai.FlaskIntegration(transaction_style=transaction_style)
         ]
     )
     events = capture_events()
@@ -120,7 +120,7 @@ def test_transaction_style(
 @pytest.mark.parametrize("debug", (True, False))
 @pytest.mark.parametrize("testing", (True, False))
 def test_errors(
-    sentry_init,
+    debugg_ai_init,
     capture_exceptions,
     capture_events,
     app,
@@ -128,7 +128,7 @@ def test_errors(
     testing,
     integration_enabled_params,
 ):
-    sentry_init(**integration_enabled_params)
+    debugg_ai_init(**integration_enabled_params)
 
     app.debug = debug
     app.testing = testing
@@ -154,11 +154,11 @@ def test_errors(
 
 
 def test_flask_login_not_installed(
-    sentry_init, app, capture_events, monkeypatch, integration_enabled_params
+    debugg_ai_init, app, capture_events, monkeypatch, integration_enabled_params
 ):
-    sentry_init(**integration_enabled_params)
+    debugg_ai_init(**integration_enabled_params)
 
-    monkeypatch.setattr(flask_sentry, "flask_login", None)
+    monkeypatch.setattr(flask_debugg-ai, "flask_login", None)
 
     events = capture_events()
 
@@ -170,11 +170,11 @@ def test_flask_login_not_installed(
 
 
 def test_flask_login_not_configured(
-    sentry_init, app, capture_events, monkeypatch, integration_enabled_params
+    debugg_ai_init, app, capture_events, monkeypatch, integration_enabled_params
 ):
-    sentry_init(**integration_enabled_params)
+    debugg_ai_init(**integration_enabled_params)
 
-    assert flask_sentry.flask_login
+    assert flask_debugg-ai.flask_login
 
     events = capture_events()
     client = app.test_client()
@@ -185,9 +185,9 @@ def test_flask_login_not_configured(
 
 
 def test_flask_login_partially_configured(
-    sentry_init, app, capture_events, monkeypatch, integration_enabled_params
+    debugg_ai_init, app, capture_events, monkeypatch, integration_enabled_params
 ):
-    sentry_init(**integration_enabled_params)
+    debugg_ai_init(**integration_enabled_params)
 
     events = capture_events()
 
@@ -205,14 +205,14 @@ def test_flask_login_partially_configured(
 @pytest.mark.parametrize("user_id", [None, "42", 3])
 def test_flask_login_configured(
     send_default_pii,
-    sentry_init,
+    debugg_ai_init,
     app,
     user_id,
     capture_events,
     monkeypatch,
     integration_enabled_params,
 ):
-    sentry_init(send_default_pii=send_default_pii, **integration_enabled_params)
+    debugg_ai_init(send_default_pii=send_default_pii, **integration_enabled_params)
 
     class User:
         is_authenticated = is_active = True
@@ -247,8 +247,8 @@ def test_flask_login_configured(
         assert event["user"]["id"] == str(user_id)
 
 
-def test_flask_large_json_request(sentry_init, capture_events, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_flask_large_json_request(debugg_ai_init, capture_events, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     data = {"foo": {"bar": "a" * 2000}}
 
@@ -273,9 +273,9 @@ def test_flask_large_json_request(sentry_init, capture_events, app):
     assert len(event["request"]["data"]["foo"]["bar"]) == 1024
 
 
-def test_flask_session_tracking(sentry_init, capture_envelopes, app):
-    sentry_init(
-        integrations=[flask_sentry.FlaskIntegration()],
+def test_flask_session_tracking(debugg_ai_init, capture_envelopes, app):
+    debugg_ai_init(
+        integrations=[flask_debugg-ai.FlaskIntegration()],
         release="demo-release",
     )
 
@@ -314,8 +314,8 @@ def test_flask_session_tracking(sentry_init, capture_envelopes, app):
 
 
 @pytest.mark.parametrize("data", [{}, []], ids=["empty-dict", "empty-list"])
-def test_flask_empty_json_request(sentry_init, capture_events, app, data):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_flask_empty_json_request(debugg_ai_init, capture_events, app, data):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     @app.route("/", methods=["POST"])
     def index():
@@ -335,8 +335,8 @@ def test_flask_empty_json_request(sentry_init, capture_events, app, data):
     assert event["request"]["data"] == data
 
 
-def test_flask_medium_formdata_request(sentry_init, capture_events, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_flask_medium_formdata_request(debugg_ai_init, capture_events, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     data = {"foo": "a" * 2000}
 
@@ -366,14 +366,14 @@ def test_flask_medium_formdata_request(sentry_init, capture_events, app):
 
 
 def test_flask_formdata_request_appear_transaction_body(
-    sentry_init, capture_events, app
+    debugg_ai_init, capture_events, app
 ):
     """
     Test that ensures that transaction request data contains body, even if no exception was raised
     """
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()], traces_sample_rate=1.0)
 
-    data = {"username": "sentry-user", "age": "26"}
+    data = {"username": "debugg-ai-user", "age": "26"}
 
     @app.route("/", methods=["POST"])
     def index():
@@ -403,9 +403,9 @@ def test_flask_formdata_request_appear_transaction_body(
 
 
 @pytest.mark.parametrize("input_char", ["a", b"a"])
-def test_flask_too_large_raw_request(sentry_init, input_char, capture_events, app):
-    sentry_init(
-        integrations=[flask_sentry.FlaskIntegration()], max_request_body_size="small"
+def test_flask_too_large_raw_request(debugg_ai_init, input_char, capture_events, app):
+    debugg_ai_init(
+        integrations=[flask_debugg-ai.FlaskIntegration()], max_request_body_size="small"
     )
 
     data = input_char * 2000
@@ -436,9 +436,9 @@ def test_flask_too_large_raw_request(sentry_init, input_char, capture_events, ap
     assert not event["request"]["data"]
 
 
-def test_flask_files_and_form(sentry_init, capture_events, app):
-    sentry_init(
-        integrations=[flask_sentry.FlaskIntegration()], max_request_body_size="always"
+def test_flask_files_and_form(debugg_ai_init, capture_events, app):
+    debugg_ai_init(
+        integrations=[flask_debugg-ai.FlaskIntegration()], max_request_body_size="always"
     )
 
     data = {"foo": "a" * 2000, "file": (BytesIO(b"hello"), "hello.txt")}
@@ -472,10 +472,10 @@ def test_flask_files_and_form(sentry_init, capture_events, app):
 
 
 def test_json_not_truncated_if_max_request_body_size_is_always(
-    sentry_init, capture_events, app
+    debugg_ai_init, capture_events, app
 ):
-    sentry_init(
-        integrations=[flask_sentry.FlaskIntegration()], max_request_body_size="always"
+    debugg_ai_init(
+        integrations=[flask_debugg-ai.FlaskIntegration()], max_request_body_size="always"
     )
 
     data = {
@@ -502,12 +502,12 @@ def test_json_not_truncated_if_max_request_body_size_is_always(
 @pytest.mark.parametrize(
     "integrations",
     [
-        [flask_sentry.FlaskIntegration()],
-        [flask_sentry.FlaskIntegration(), LoggingIntegration(event_level="ERROR")],
+        [flask_debugg-ai.FlaskIntegration()],
+        [flask_debugg-ai.FlaskIntegration(), LoggingIntegration(event_level="ERROR")],
     ],
 )
-def test_errors_not_reported_twice(sentry_init, integrations, capture_events, app):
-    sentry_init(integrations=integrations)
+def test_errors_not_reported_twice(debugg_ai_init, integrations, capture_events, app):
+    debugg_ai_init(integrations=integrations)
 
     @app.route("/")
     def index():
@@ -526,11 +526,11 @@ def test_errors_not_reported_twice(sentry_init, integrations, capture_events, ap
     assert len(events) == 1
 
 
-def test_logging(sentry_init, capture_events, app):
+def test_logging(debugg_ai_init, capture_events, app):
     # ensure that Flask's logger magic doesn't break ours
-    sentry_init(
+    debugg_ai_init(
         integrations=[
-            flask_sentry.FlaskIntegration(),
+            flask_debugg-ai.FlaskIntegration(),
             LoggingIntegration(event_level="ERROR"),
         ]
     )
@@ -549,8 +549,8 @@ def test_logging(sentry_init, capture_events, app):
     assert event["level"] == "error"
 
 
-def test_no_errors_without_request(app, sentry_init):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_no_errors_without_request(app, debugg_ai_init):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
     with app.app_context():
         capture_exception(ValueError())
 
@@ -575,9 +575,9 @@ def test_cli_commands_raise(app):
 
 
 def test_wsgi_level_error_is_caught(
-    app, capture_exceptions, capture_events, sentry_init
+    app, capture_exceptions, capture_events, debugg_ai_init
 ):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     def wsgi_app(environ, start_response):
         1 / 0
@@ -600,8 +600,8 @@ def test_wsgi_level_error_is_caught(
     assert event["exception"]["values"][0]["mechanism"]["type"] == "wsgi"
 
 
-def test_500(sentry_init, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_500(debugg_ai_init, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     app.debug = False
     app.testing = False
@@ -612,16 +612,16 @@ def test_500(sentry_init, app):
 
     @app.errorhandler(500)
     def error_handler(err):
-        return "Sentry error."
+        return "DebuggAI error."
 
     client = app.test_client()
     response = client.get("/")
 
-    assert response.data.decode("utf-8") == "Sentry error."
+    assert response.data.decode("utf-8") == "DebuggAI error."
 
 
-def test_error_in_errorhandler(sentry_init, capture_events, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_error_in_errorhandler(debugg_ai_init, capture_events, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     app.debug = False
     app.testing = False
@@ -650,8 +650,8 @@ def test_error_in_errorhandler(sentry_init, capture_events, app):
     assert exception["type"] == "ZeroDivisionError"
 
 
-def test_bad_request_not_captured(sentry_init, capture_events, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_bad_request_not_captured(debugg_ai_init, capture_events, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
     events = capture_events()
 
     @app.route("/")
@@ -665,8 +665,8 @@ def test_bad_request_not_captured(sentry_init, capture_events, app):
     assert not events
 
 
-def test_does_not_leak_scope(sentry_init, capture_events, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_does_not_leak_scope(debugg_ai_init, capture_events, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
     events = capture_events()
 
     debugg_ai_sdk.get_isolation_scope().set_tag("request_data", False)
@@ -691,8 +691,8 @@ def test_does_not_leak_scope(sentry_init, capture_events, app):
     assert not debugg_ai_sdk.get_isolation_scope()._tags["request_data"]
 
 
-def test_scoped_test_client(sentry_init, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_scoped_test_client(debugg_ai_init, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     @app.route("/")
     def index():
@@ -705,12 +705,12 @@ def test_scoped_test_client(sentry_init, app):
 
 @pytest.mark.parametrize("exc_cls", [ZeroDivisionError, Exception])
 def test_errorhandler_for_exception_swallows_exception(
-    sentry_init, app, capture_events, exc_cls
+    debugg_ai_init, app, capture_events, exc_cls
 ):
     # In contrast to error handlers for a status code, error
     # handlers for exceptions can swallow the exception (this is
     # just how the Flask signal works)
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
     events = capture_events()
 
     @app.route("/")
@@ -728,8 +728,8 @@ def test_errorhandler_for_exception_swallows_exception(
     assert not events
 
 
-def test_tracing_success(sentry_init, capture_events, app):
-    sentry_init(traces_sample_rate=1.0, integrations=[flask_sentry.FlaskIntegration()])
+def test_tracing_success(debugg_ai_init, capture_events, app):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[flask_debugg-ai.FlaskIntegration()])
 
     @app.before_request
     def _():
@@ -761,8 +761,8 @@ def test_tracing_success(sentry_init, capture_events, app):
     assert message_event["tags"]["before_request"] == "yes"
 
 
-def test_tracing_error(sentry_init, capture_events, app):
-    sentry_init(traces_sample_rate=1.0, integrations=[flask_sentry.FlaskIntegration()])
+def test_tracing_error(debugg_ai_init, capture_events, app):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[flask_debugg-ai.FlaskIntegration()])
 
     events = capture_events()
 
@@ -786,8 +786,8 @@ def test_tracing_error(sentry_init, capture_events, app):
     assert exception["type"] == "ZeroDivisionError"
 
 
-def test_error_has_trace_context_if_tracing_disabled(sentry_init, capture_events, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_error_has_trace_context_if_tracing_disabled(debugg_ai_init, capture_events, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     events = capture_events()
 
@@ -805,8 +805,8 @@ def test_error_has_trace_context_if_tracing_disabled(sentry_init, capture_events
     assert error_event["contexts"]["trace"]
 
 
-def test_class_based_views(sentry_init, app, capture_events):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_class_based_views(debugg_ai_init, app, capture_events):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
     events = capture_events()
 
     @app.route("/")
@@ -828,10 +828,10 @@ def test_class_based_views(sentry_init, app, capture_events):
 
 
 @pytest.mark.parametrize(
-    "template_string", ["{{ sentry_trace }}", "{{ sentry_trace_meta }}"]
+    "template_string", ["{{ debugg_ai_trace }}", "{{ debugg_ai_trace_meta }}"]
 )
-def test_template_tracing_meta(sentry_init, app, capture_events, template_string):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_template_tracing_meta(debugg_ai_init, app, capture_events, template_string):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
     events = capture_events()
 
     @app.route("/")
@@ -849,7 +849,7 @@ def test_template_tracing_meta(sentry_init, app, capture_events, template_string
         assert baggage != ""
 
     match = re.match(
-        r'^<meta name="sentry-trace" content="([^\"]*)"><meta name="baggage" content="([^\"]*)">',
+        r'^<meta name="debugg-ai-trace" content="([^\"]*)"><meta name="baggage" content="([^\"]*)">',
         rendered_meta,
     )
     assert match is not None
@@ -859,12 +859,12 @@ def test_template_tracing_meta(sentry_init, app, capture_events, template_string
     assert rendered_baggage == baggage
 
 
-def test_dont_override_sentry_trace_context(sentry_init, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_dont_override_debugg_ai_trace_context(debugg_ai_init, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     @app.route("/")
     def index():
-        return render_template_string("{{ sentry_trace }}", sentry_trace="hi")
+        return render_template_string("{{ debugg_ai_trace }}", debugg_ai_trace="hi")
 
     with app.test_client() as client:
         response = client.get("/")
@@ -872,8 +872,8 @@ def test_dont_override_sentry_trace_context(sentry_init, app):
         assert response.data == b"hi"
 
 
-def test_request_not_modified_by_reference(sentry_init, capture_events, app):
-    sentry_init(integrations=[flask_sentry.FlaskIntegration()])
+def test_request_not_modified_by_reference(debugg_ai_init, capture_events, app):
+    debugg_ai_init(integrations=[flask_debugg-ai.FlaskIntegration()])
 
     @app.route("/", methods=["POST"])
     def index():
@@ -896,14 +896,14 @@ def test_request_not_modified_by_reference(sentry_init, capture_events, app):
 
 
 def test_response_status_code_ok_in_transaction_context(
-    sentry_init, capture_envelopes, app
+    debugg_ai_init, capture_envelopes, app
 ):
     """
     Tests that the response status code is added to the transaction context.
     This also works for when there is an Exception during the request, but somehow the test flask app doesn't seem to trigger that.
     """
-    sentry_init(
-        integrations=[flask_sentry.FlaskIntegration()],
+    debugg_ai_init(
+        integrations=[flask_debugg-ai.FlaskIntegration()],
         traces_sample_rate=1.0,
         release="demo-release",
     )
@@ -927,10 +927,10 @@ def test_response_status_code_ok_in_transaction_context(
 
 
 def test_response_status_code_not_found_in_transaction_context(
-    sentry_init, capture_envelopes, app
+    debugg_ai_init, capture_envelopes, app
 ):
-    sentry_init(
-        integrations=[flask_sentry.FlaskIntegration()],
+    debugg_ai_init(
+        integrations=[flask_debugg-ai.FlaskIntegration()],
         traces_sample_rate=1.0,
         release="demo-release",
     )
@@ -953,9 +953,9 @@ def test_response_status_code_not_found_in_transaction_context(
     assert transaction["contexts"]["response"]["status_code"] == 404
 
 
-def test_span_origin(sentry_init, app, capture_events):
-    sentry_init(
-        integrations=[flask_sentry.FlaskIntegration()],
+def test_span_origin(debugg_ai_init, app, capture_events):
+    debugg_ai_init(
+        integrations=[flask_debugg-ai.FlaskIntegration()],
         traces_sample_rate=1.0,
     )
     events = capture_events()
@@ -969,16 +969,16 @@ def test_span_origin(sentry_init, app, capture_events):
 
 
 def test_transaction_http_method_default(
-    sentry_init,
+    debugg_ai_init,
     app,
     capture_events,
 ):
     """
     By default OPTIONS and HEAD requests do not create a transaction.
     """
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
-        integrations=[flask_sentry.FlaskIntegration()],
+        integrations=[flask_debugg-ai.FlaskIntegration()],
     )
     events = capture_events()
 
@@ -999,17 +999,17 @@ def test_transaction_http_method_default(
 
 
 def test_transaction_http_method_custom(
-    sentry_init,
+    debugg_ai_init,
     app,
     capture_events,
 ):
     """
     Configure FlaskIntegration to ONLY capture OPTIONS and HEAD requests.
     """
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[
-            flask_sentry.FlaskIntegration(
+            flask_debugg-ai.FlaskIntegration(
                 http_methods_to_capture=(
                     "OPTIONS",
                     "head",

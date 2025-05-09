@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 def _get_headers(asgi_scope):
     # type: (Any) -> Dict[str, str]
     """
-    Extract headers from the ASGI scope, in the format that the Sentry protocol expects.
+    Extract headers from the ASGI scope, in the format that the DebuggAI protocol expects.
     """
     headers = {}  # type: Dict[str, str]
     for raw_key, raw_value in asgi_scope["headers"]:
@@ -57,7 +57,7 @@ def _get_url(asgi_scope, default_scheme, host):
 def _get_query(asgi_scope):
     # type: (Any) -> Any
     """
-    Extract querystring from the ASGI scope, in the format that the Sentry protocol expects.
+    Extract querystring from the ASGI scope, in the format that the DebuggAI protocol expects.
     """
     qs = asgi_scope.get("query_string")
     if not qs:

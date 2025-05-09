@@ -17,7 +17,7 @@ from tests.conftest import unpack_werkzeug_response
 
 
 @pytest.fixture(scope="function")
-def app(sentry_init):
+def app(debugg_ai_init):
     yield trytond_app
 
 
@@ -33,9 +33,9 @@ def get_client(app):
     "exception", [Exception("foo"), type("FooException", (Exception,), {})("bar")]
 )
 def test_exceptions_captured(
-    sentry_init, app, capture_exceptions, get_client, exception
+    debugg_ai_init, app, capture_exceptions, get_client, exception
 ):
-    sentry_init(integrations=[TrytondWSGIIntegration()])
+    debugg_ai_init(integrations=[TrytondWSGIIntegration()])
     exceptions = capture_exceptions()
 
     unittest.mock.sentinel.exception = exception
@@ -60,9 +60,9 @@ def test_exceptions_captured(
     ],
 )
 def test_trytonderrors_not_captured(
-    sentry_init, app, capture_exceptions, get_client, exception
+    debugg_ai_init, app, capture_exceptions, get_client, exception
 ):
-    sentry_init(integrations=[TrytondWSGIIntegration()])
+    debugg_ai_init(integrations=[TrytondWSGIIntegration()])
     exceptions = capture_exceptions()
 
     unittest.mock.sentinel.exception = exception
@@ -80,12 +80,12 @@ def test_trytonderrors_not_captured(
 @pytest.mark.skipif(
     trytond.__version__.split(".") < ["5", "4"], reason="At least Trytond-5.4 required"
 )
-def test_rpc_error_page(sentry_init, app, get_client):
-    """Test that, after initializing the Trytond-SentrySDK integration
+def test_rpc_error_page(debugg_ai_init, app, get_client):
+    """Test that, after initializing the Trytond-DebuggAISDK integration
     a custom error handler can be registered to the Trytond WSGI app so as to
     inform the event identifiers to the Tryton RPC client"""
 
-    sentry_init(integrations=[TrytondWSGIIntegration()])
+    debugg_ai_init(integrations=[TrytondWSGIIntegration()])
 
     @app.route("/rpcerror", methods=["POST"])
     def _(request):
@@ -96,7 +96,7 @@ def test_rpc_error_page(sentry_init, app, get_client):
         if isinstance(e, TrytondBaseException):
             return
         else:
-            data = TrytondUserError("Sentry error.", str(e))
+            data = TrytondUserError("DebuggAI error.", str(e))
             return app.make_response(request, data)
 
     client = get_client()
@@ -124,11 +124,11 @@ def test_rpc_error_page(sentry_init, app, get_client):
     data = json.loads(content)
     assert status == "200 OK"
     assert headers.get("Content-Type") == "application/json"
-    assert data == dict(id=42, error=["UserError", ["Sentry error.", "foo", None]])
+    assert data == dict(id=42, error=["UserError", ["DebuggAI error.", "foo", None]])
 
 
-def test_span_origin(sentry_init, app, capture_events, get_client):
-    sentry_init(
+def test_span_origin(debugg_ai_init, app, capture_events, get_client):
+    debugg_ai_init(
         integrations=[TrytondWSGIIntegration()],
         traces_sample_rate=1.0,
     )

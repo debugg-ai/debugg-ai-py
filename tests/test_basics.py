@@ -57,8 +57,8 @@ class NoOpIntegration(Integration):
         return type(__value) == type(self)
 
 
-def test_processors(sentry_init, capture_events):
-    sentry_init()
+def test_processors(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     def error_processor(event, exc_info):
@@ -97,13 +97,13 @@ class ModuleImportErrorSimulator:
         sys.meta_path.remove(self)
 
 
-def test_auto_enabling_integrations_catches_import_error(sentry_init, caplog):
+def test_auto_enabling_integrations_catches_import_error(debugg_ai_init, caplog):
     caplog.set_level(logging.DEBUG)
 
     with ModuleImportErrorSimulator(
         [i.rsplit(".", 1)[0] for i in _AUTO_ENABLING_INTEGRATIONS]
     ):
-        sentry_init(auto_enabling_integrations=True, debug=True)
+        debugg_ai_init(auto_enabling_integrations=True, debug=True)
 
     for import_string in _AUTO_ENABLING_INTEGRATIONS:
         assert any(
@@ -114,8 +114,8 @@ def test_auto_enabling_integrations_catches_import_error(sentry_init, caplog):
         ), "Problem with checking auto enabling {}".format(import_string)
 
 
-def test_generic_mechanism(sentry_init, capture_events):
-    sentry_init()
+def test_generic_mechanism(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
 
     try:
@@ -128,7 +128,7 @@ def test_generic_mechanism(sentry_init, capture_events):
     assert event["exception"]["values"][0]["mechanism"]["handled"]
 
 
-def test_option_before_send(sentry_init, capture_events):
+def test_option_before_send(debugg_ai_init, capture_events):
     def before_send(event, hint):
         event["extra"] = {"before_send_called": True}
         return event
@@ -139,7 +139,7 @@ def test_option_before_send(sentry_init, capture_events):
         except Exception:
             capture_exception()
 
-    sentry_init(before_send=before_send)
+    debugg_ai_init(before_send=before_send)
     events = capture_events()
 
     do_this()
@@ -148,7 +148,7 @@ def test_option_before_send(sentry_init, capture_events):
     assert event["extra"] == {"before_send_called": True}
 
 
-def test_option_before_send_discard(sentry_init, capture_events):
+def test_option_before_send_discard(debugg_ai_init, capture_events):
     def before_send_discard(event, hint):
         return None
 
@@ -158,7 +158,7 @@ def test_option_before_send_discard(sentry_init, capture_events):
         except Exception:
             capture_exception()
 
-    sentry_init(before_send=before_send_discard)
+    debugg_ai_init(before_send=before_send_discard)
     events = capture_events()
 
     do_this()
@@ -166,13 +166,13 @@ def test_option_before_send_discard(sentry_init, capture_events):
     assert len(events) == 0
 
 
-def test_option_before_send_transaction(sentry_init, capture_events):
+def test_option_before_send_transaction(debugg_ai_init, capture_events):
     def before_send_transaction(event, hint):
         assert event["type"] == "transaction"
         event["extra"] = {"before_send_transaction_called": True}
         return event
 
-    sentry_init(
+    debugg_ai_init(
         before_send_transaction=before_send_transaction,
         traces_sample_rate=1.0,
     )
@@ -185,11 +185,11 @@ def test_option_before_send_transaction(sentry_init, capture_events):
     assert event["extra"] == {"before_send_transaction_called": True}
 
 
-def test_option_before_send_transaction_discard(sentry_init, capture_events):
+def test_option_before_send_transaction_discard(debugg_ai_init, capture_events):
     def before_send_transaction_discard(event, hint):
         return None
 
-    sentry_init(
+    debugg_ai_init(
         before_send_transaction=before_send_transaction_discard,
         traces_sample_rate=1.0,
     )
@@ -200,7 +200,7 @@ def test_option_before_send_transaction_discard(sentry_init, capture_events):
     assert len(events) == 0
 
 
-def test_option_before_breadcrumb(sentry_init, capture_events, monkeypatch):
+def test_option_before_breadcrumb(debugg_ai_init, capture_events, monkeypatch):
     drop_events = False
     drop_breadcrumbs = False
     reports = []
@@ -220,7 +220,7 @@ def test_option_before_breadcrumb(sentry_init, capture_events, monkeypatch):
             crumb["data"] = {"foo": "bar"}
             return crumb
 
-    sentry_init(before_send=before_send, before_breadcrumb=before_breadcrumb)
+    debugg_ai_init(before_send=before_send, before_breadcrumb=before_breadcrumb)
     events = capture_events()
 
     monkeypatch.setattr(
@@ -266,26 +266,26 @@ def test_option_before_breadcrumb(sentry_init, capture_events, monkeypatch):
     ],
 )
 def test_option_enable_tracing(
-    sentry_init,
+    debugg_ai_init,
     enable_tracing,
     traces_sample_rate,
     tracing_enabled,
     updated_traces_sample_rate,
 ):
-    sentry_init(enable_tracing=enable_tracing, traces_sample_rate=traces_sample_rate)
+    debugg_ai_init(enable_tracing=enable_tracing, traces_sample_rate=traces_sample_rate)
     options = debugg_ai_sdk.get_client().options
     assert has_tracing_enabled(options) is tracing_enabled
     assert options["traces_sample_rate"] == updated_traces_sample_rate
 
 
-def test_breadcrumb_arguments(sentry_init, capture_events):
+def test_breadcrumb_arguments(debugg_ai_init, capture_events):
     assert_hint = {"bar": 42}
 
     def before_breadcrumb(crumb, hint):
         assert crumb["foo"] == 42
         assert hint == assert_hint
 
-    sentry_init(before_breadcrumb=before_breadcrumb)
+    debugg_ai_init(before_breadcrumb=before_breadcrumb)
 
     add_breadcrumb(foo=42, hint=dict(bar=42))
     add_breadcrumb(dict(foo=42), dict(bar=42))
@@ -297,8 +297,8 @@ def test_breadcrumb_arguments(sentry_init, capture_events):
     add_breadcrumb(crumb=dict(foo=42))
 
 
-def test_push_scope(sentry_init, capture_events, suppress_deprecation_warnings):
-    sentry_init()
+def test_push_scope(debugg_ai_init, capture_events, suppress_deprecation_warnings):
+    debugg_ai_init()
     events = capture_events()
 
     with push_scope() as scope:
@@ -315,12 +315,12 @@ def test_push_scope(sentry_init, capture_events, suppress_deprecation_warnings):
 
 
 def test_push_scope_null_client(
-    sentry_init, capture_events, suppress_deprecation_warnings
+    debugg_ai_init, capture_events, suppress_deprecation_warnings
 ):
     """
     This test can be removed when we remove push_scope and the Hub from the SDK.
     """
-    sentry_init()
+    debugg_ai_init()
     events = capture_events()
 
     Hub.current.bind_client(None)
@@ -339,11 +339,11 @@ def test_push_scope_null_client(
     reason="This test is not valid anymore, because push_scope just returns the isolation scope. This test should be removed once the Hub is removed"
 )
 @pytest.mark.parametrize("null_client", (True, False))
-def test_push_scope_callback(sentry_init, null_client, capture_events):
+def test_push_scope_callback(debugg_ai_init, null_client, capture_events):
     """
     This test can be removed when we remove push_scope and the Hub from the SDK.
     """
-    sentry_init()
+    debugg_ai_init()
 
     if null_client:
         Hub.current.bind_client(None)
@@ -367,8 +367,8 @@ def test_push_scope_callback(sentry_init, null_client, capture_events):
     assert Hub.current.scope is outer_scope
 
 
-def test_breadcrumbs(sentry_init, capture_events):
-    sentry_init(max_breadcrumbs=10)
+def test_breadcrumbs(debugg_ai_init, capture_events):
+    debugg_ai_init(max_breadcrumbs=10)
     events = capture_events()
 
     for i in range(20):
@@ -397,8 +397,8 @@ def test_breadcrumbs(sentry_init, capture_events):
     assert len(event["breadcrumbs"]["values"]) == 0
 
 
-def test_breadcrumb_ordering(sentry_init, capture_events):
-    sentry_init()
+def test_breadcrumb_ordering(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
     now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
 
@@ -426,8 +426,8 @@ def test_breadcrumb_ordering(sentry_init, capture_events):
     assert timestamps_from_event == sorted(timestamps)
 
 
-def test_breadcrumb_ordering_different_types(sentry_init, capture_events):
-    sentry_init()
+def test_breadcrumb_ordering_different_types(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
     now = datetime.datetime.now(datetime.timezone.utc)
 
@@ -467,8 +467,8 @@ def test_breadcrumb_ordering_different_types(sentry_init, capture_events):
     assert timestamps_from_event == sorted(timestamps)
 
 
-def test_attachments(sentry_init, capture_envelopes):
-    sentry_init()
+def test_attachments(debugg_ai_init, capture_envelopes):
+    debugg_ai_init()
     envelopes = capture_envelopes()
 
     this_file = os.path.abspath(__file__.rstrip("c"))
@@ -502,9 +502,9 @@ def test_attachments(sentry_init, capture_envelopes):
 
 @pytest.mark.tests_internal_exceptions
 def test_attachments_graceful_failure(
-    sentry_init, capture_envelopes, internal_exceptions
+    debugg_ai_init, capture_envelopes, internal_exceptions
 ):
-    sentry_init()
+    debugg_ai_init()
     envelopes = capture_envelopes()
 
     debugg_ai_sdk.get_isolation_scope().add_attachment(path="non_existent")
@@ -515,18 +515,18 @@ def test_attachments_graceful_failure(
     assert envelope.items[1].payload.get_bytes() == b""
 
 
-def test_integration_scoping(sentry_init, capture_events):
+def test_integration_scoping(debugg_ai_init, capture_events):
     logger = logging.getLogger("test_basics")
 
     # This client uses the logging integration
     logging_integration = LoggingIntegration(event_level=logging.WARNING)
-    sentry_init(default_integrations=False, integrations=[logging_integration])
+    debugg_ai_init(default_integrations=False, integrations=[logging_integration])
     events = capture_events()
     logger.warning("This is a warning")
     assert len(events) == 1
 
     # This client does not
-    sentry_init(default_integrations=False)
+    debugg_ai_init(default_integrations=False)
     events = capture_events()
     logger.warning("This is not a warning")
     assert not events
@@ -558,14 +558,14 @@ default_integrations = [
     ],
 )
 def test_integrations(
-    sentry_init,
+    debugg_ai_init,
     provided_integrations,
     default_integrations,
     disabled_integrations,
     expected_integrations,
     reset_integrations,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=provided_integrations,
         default_integrations=default_integrations,
         disabled_integrations=disabled_integrations,
@@ -580,13 +580,13 @@ def test_integrations(
 @pytest.mark.skip(
     reason="This test is not valid anymore, because with the new Scopes calling bind_client on the Hub sets the client on the global scope. This test should be removed once the Hub is removed"
 )
-def test_client_initialized_within_scope(sentry_init, caplog):
+def test_client_initialized_within_scope(debugg_ai_init, caplog):
     """
     This test can be removed when we remove push_scope and the Hub from the SDK.
     """
     caplog.set_level(logging.WARNING)
 
-    sentry_init()
+    debugg_ai_init()
 
     with push_scope():
         Hub.current.bind_client(Client())
@@ -599,13 +599,13 @@ def test_client_initialized_within_scope(sentry_init, caplog):
 @pytest.mark.skip(
     reason="This test is not valid anymore, because with the new Scopes the push_scope just returns the isolation scope. This test should be removed once the Hub is removed"
 )
-def test_scope_leaks_cleaned_up(sentry_init, caplog):
+def test_scope_leaks_cleaned_up(debugg_ai_init, caplog):
     """
     This test can be removed when we remove push_scope and the Hub from the SDK.
     """
     caplog.set_level(logging.WARNING)
 
-    sentry_init()
+    debugg_ai_init()
 
     old_stack = list(Hub.current._stack)
 
@@ -622,13 +622,13 @@ def test_scope_leaks_cleaned_up(sentry_init, caplog):
 @pytest.mark.skip(
     reason="This test is not valid anymore, because with the new Scopes there is not pushing and popping of scopes. This test should be removed once the Hub is removed"
 )
-def test_scope_popped_too_soon(sentry_init, caplog):
+def test_scope_popped_too_soon(debugg_ai_init, caplog):
     """
     This test can be removed when we remove push_scope and the Hub from the SDK.
     """
     caplog.set_level(logging.ERROR)
 
-    sentry_init()
+    debugg_ai_init()
 
     old_stack = list(Hub.current._stack)
 
@@ -642,12 +642,12 @@ def test_scope_popped_too_soon(sentry_init, caplog):
     assert record.message == ("Scope popped too soon. Popped 1 scopes too many.")
 
 
-def test_scope_event_processor_order(sentry_init, capture_events):
+def test_scope_event_processor_order(debugg_ai_init, capture_events):
     def before_send(event, hint):
         event["message"] += "baz"
         return event
 
-    sentry_init(debug=True, before_send=before_send)
+    debugg_ai_init(debug=True, before_send=before_send)
     events = capture_events()
 
     with new_scope() as scope:
@@ -671,8 +671,8 @@ def test_scope_event_processor_order(sentry_init, capture_events):
     assert event["message"] == "hifoobarbaz"
 
 
-def test_capture_event_with_scope_kwargs(sentry_init, capture_events):
-    sentry_init()
+def test_capture_event_with_scope_kwargs(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
     capture_event({}, level="info", extras={"foo": "bar"})
     (event,) = events
@@ -681,14 +681,14 @@ def test_capture_event_with_scope_kwargs(sentry_init, capture_events):
 
 
 def test_dedupe_event_processor_drop_records_client_report(
-    sentry_init, capture_events, capture_record_lost_event_calls
+    debugg_ai_init, capture_events, capture_record_lost_event_calls
 ):
     """
     DedupeIntegration internally has an event_processor that filters duplicate exceptions.
     We want a duplicate exception to be captured only once and the drop being recorded as
     a client report.
     """
-    sentry_init()
+    debugg_ai_init()
     events = capture_events()
     record_lost_event_calls = capture_record_lost_event_calls()
 
@@ -709,7 +709,7 @@ def test_dedupe_event_processor_drop_records_client_report(
     assert lost_event_call == ("event_processor", "error", None, 1)
 
 
-def test_dedupe_doesnt_take_into_account_dropped_exception(sentry_init, capture_events):
+def test_dedupe_doesnt_take_into_account_dropped_exception(debugg_ai_init, capture_events):
     # Two exceptions happen one after another. The first one is dropped in the
     # user's before_send. The second one isn't.
     # Originally, DedupeIntegration would drop the second exception. This test
@@ -724,14 +724,14 @@ def test_dedupe_doesnt_take_into_account_dropped_exception(sentry_init, capture_
             return None
         return event
 
-    sentry_init(before_send=before_send)
+    debugg_ai_init(before_send=before_send)
     events = capture_events()
 
     exc = ValueError("aha!")
     for _ in range(2):
         # The first ValueError will be dropped by before_send. The second
         # ValueError will be accepted by before_send, and should be sent to
-        # Sentry.
+        # DebuggAI.
         try:
             raise exc
         except Exception:
@@ -741,9 +741,9 @@ def test_dedupe_doesnt_take_into_account_dropped_exception(sentry_init, capture_
 
 
 def test_event_processor_drop_records_client_report(
-    sentry_init, capture_events, capture_record_lost_event_calls
+    debugg_ai_init, capture_events, capture_record_lost_event_calls
 ):
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
     record_lost_event_calls = capture_record_lost_event_calls()
 
@@ -783,66 +783,66 @@ def test_event_processor_drop_records_client_report(
     "installed_integrations, expected_name",
     [
         # integrations with own name
-        (["django"], "sentry.python.django"),
-        (["flask"], "sentry.python.flask"),
-        (["fastapi"], "sentry.python.fastapi"),
-        (["bottle"], "sentry.python.bottle"),
-        (["falcon"], "sentry.python.falcon"),
-        (["quart"], "sentry.python.quart"),
-        (["sanic"], "sentry.python.sanic"),
-        (["starlette"], "sentry.python.starlette"),
-        (["starlite"], "sentry.python.starlite"),
-        (["litestar"], "sentry.python.litestar"),
-        (["chalice"], "sentry.python.chalice"),
-        (["serverless"], "sentry.python.serverless"),
-        (["pyramid"], "sentry.python.pyramid"),
-        (["tornado"], "sentry.python.tornado"),
-        (["aiohttp"], "sentry.python.aiohttp"),
-        (["aws_lambda"], "sentry.python.aws_lambda"),
-        (["gcp"], "sentry.python.gcp"),
-        (["beam"], "sentry.python.beam"),
-        (["asgi"], "sentry.python.asgi"),
-        (["wsgi"], "sentry.python.wsgi"),
+        (["django"], "debugg-ai.python.django"),
+        (["flask"], "debugg-ai.python.flask"),
+        (["fastapi"], "debugg-ai.python.fastapi"),
+        (["bottle"], "debugg-ai.python.bottle"),
+        (["falcon"], "debugg-ai.python.falcon"),
+        (["quart"], "debugg-ai.python.quart"),
+        (["sanic"], "debugg-ai.python.sanic"),
+        (["starlette"], "debugg-ai.python.starlette"),
+        (["starlite"], "debugg-ai.python.starlite"),
+        (["litestar"], "debugg-ai.python.litestar"),
+        (["chalice"], "debugg-ai.python.chalice"),
+        (["serverless"], "debugg-ai.python.serverless"),
+        (["pyramid"], "debugg-ai.python.pyramid"),
+        (["tornado"], "debugg-ai.python.tornado"),
+        (["aiohttp"], "debugg-ai.python.aiohttp"),
+        (["aws_lambda"], "debugg-ai.python.aws_lambda"),
+        (["gcp"], "debugg-ai.python.gcp"),
+        (["beam"], "debugg-ai.python.beam"),
+        (["asgi"], "debugg-ai.python.asgi"),
+        (["wsgi"], "debugg-ai.python.wsgi"),
         # integrations without name
-        (["argv"], "sentry.python"),
-        (["atexit"], "sentry.python"),
-        (["boto3"], "sentry.python"),
-        (["celery"], "sentry.python"),
-        (["dedupe"], "sentry.python"),
-        (["excepthook"], "sentry.python"),
-        (["executing"], "sentry.python"),
-        (["modules"], "sentry.python"),
-        (["pure_eval"], "sentry.python"),
-        (["redis"], "sentry.python"),
-        (["rq"], "sentry.python"),
-        (["sqlalchemy"], "sentry.python"),
-        (["stdlib"], "sentry.python"),
-        (["threading"], "sentry.python"),
-        (["trytond"], "sentry.python"),
-        (["logging"], "sentry.python"),
-        (["gnu_backtrace"], "sentry.python"),
-        (["httpx"], "sentry.python"),
+        (["argv"], "debugg-ai.python"),
+        (["atexit"], "debugg-ai.python"),
+        (["boto3"], "debugg-ai.python"),
+        (["celery"], "debugg-ai.python"),
+        (["dedupe"], "debugg-ai.python"),
+        (["excepthook"], "debugg-ai.python"),
+        (["executing"], "debugg-ai.python"),
+        (["modules"], "debugg-ai.python"),
+        (["pure_eval"], "debugg-ai.python"),
+        (["redis"], "debugg-ai.python"),
+        (["rq"], "debugg-ai.python"),
+        (["sqlalchemy"], "debugg-ai.python"),
+        (["stdlib"], "debugg-ai.python"),
+        (["threading"], "debugg-ai.python"),
+        (["trytond"], "debugg-ai.python"),
+        (["logging"], "debugg-ai.python"),
+        (["gnu_backtrace"], "debugg-ai.python"),
+        (["httpx"], "debugg-ai.python"),
         # precedence of frameworks
-        (["flask", "django", "celery"], "sentry.python.django"),
-        (["fastapi", "flask", "redis"], "sentry.python.flask"),
-        (["bottle", "fastapi", "httpx"], "sentry.python.fastapi"),
-        (["falcon", "bottle", "logging"], "sentry.python.bottle"),
-        (["quart", "falcon", "gnu_backtrace"], "sentry.python.falcon"),
-        (["sanic", "quart", "sqlalchemy"], "sentry.python.quart"),
-        (["starlette", "sanic", "rq"], "sentry.python.sanic"),
-        (["chalice", "starlette", "modules"], "sentry.python.starlette"),
-        (["chalice", "starlite", "modules"], "sentry.python.starlite"),
-        (["chalice", "litestar", "modules"], "sentry.python.litestar"),
-        (["serverless", "chalice", "pure_eval"], "sentry.python.chalice"),
-        (["pyramid", "serverless", "modules"], "sentry.python.serverless"),
-        (["tornado", "pyramid", "executing"], "sentry.python.pyramid"),
-        (["aiohttp", "tornado", "dedupe"], "sentry.python.tornado"),
-        (["aws_lambda", "aiohttp", "boto3"], "sentry.python.aiohttp"),
-        (["gcp", "aws_lambda", "atexit"], "sentry.python.aws_lambda"),
-        (["beam", "gcp", "argv"], "sentry.python.gcp"),
-        (["asgi", "beam", "stdtlib"], "sentry.python.beam"),
-        (["wsgi", "asgi", "boto3"], "sentry.python.asgi"),
-        (["wsgi", "celery", "redis"], "sentry.python.wsgi"),
+        (["flask", "django", "celery"], "debugg-ai.python.django"),
+        (["fastapi", "flask", "redis"], "debugg-ai.python.flask"),
+        (["bottle", "fastapi", "httpx"], "debugg-ai.python.fastapi"),
+        (["falcon", "bottle", "logging"], "debugg-ai.python.bottle"),
+        (["quart", "falcon", "gnu_backtrace"], "debugg-ai.python.falcon"),
+        (["sanic", "quart", "sqlalchemy"], "debugg-ai.python.quart"),
+        (["starlette", "sanic", "rq"], "debugg-ai.python.sanic"),
+        (["chalice", "starlette", "modules"], "debugg-ai.python.starlette"),
+        (["chalice", "starlite", "modules"], "debugg-ai.python.starlite"),
+        (["chalice", "litestar", "modules"], "debugg-ai.python.litestar"),
+        (["serverless", "chalice", "pure_eval"], "debugg-ai.python.chalice"),
+        (["pyramid", "serverless", "modules"], "debugg-ai.python.serverless"),
+        (["tornado", "pyramid", "executing"], "debugg-ai.python.pyramid"),
+        (["aiohttp", "tornado", "dedupe"], "debugg-ai.python.tornado"),
+        (["aws_lambda", "aiohttp", "boto3"], "debugg-ai.python.aiohttp"),
+        (["gcp", "aws_lambda", "atexit"], "debugg-ai.python.aws_lambda"),
+        (["beam", "gcp", "argv"], "debugg-ai.python.gcp"),
+        (["asgi", "beam", "stdtlib"], "debugg-ai.python.beam"),
+        (["wsgi", "asgi", "boto3"], "debugg-ai.python.asgi"),
+        (["wsgi", "celery", "redis"], "debugg-ai.python.wsgi"),
     ],
 )
 def test_get_sdk_name(installed_integrations, expected_name):
@@ -853,13 +853,13 @@ def _hello_world(word):
     return "Hello, {}".format(word)
 
 
-def test_functions_to_trace(sentry_init, capture_events):
+def test_functions_to_trace(debugg_ai_init, capture_events):
     functions_to_trace = [
         {"qualified_name": "tests.test_basics._hello_world"},
         {"qualified_name": "time.sleep"},
     ]
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         functions_to_trace=functions_to_trace,
     )
@@ -890,12 +890,12 @@ class WorldGreeter:
         return "Hello, {}".format(new_word if new_word else self.word)
 
 
-def test_functions_to_trace_with_class(sentry_init, capture_events):
+def test_functions_to_trace_with_class(debugg_ai_init, capture_events):
     functions_to_trace = [
         {"qualified_name": "tests.test_basics.WorldGreeter.greet"},
     ]
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         functions_to_trace=functions_to_trace,
     )
@@ -936,8 +936,8 @@ class TracingTestClass:
 
 # We need to fork here because the test modifies tests.test_basics.TracingTestClass
 @pytest.mark.forked
-def test_staticmethod_class_tracing(sentry_init, capture_events):
-    sentry_init(
+def test_staticmethod_class_tracing(debugg_ai_init, capture_events):
+    debugg_ai_init(
         debug=True,
         traces_sample_rate=1.0,
         functions_to_trace=[
@@ -960,8 +960,8 @@ def test_staticmethod_class_tracing(sentry_init, capture_events):
 
 # We need to fork here because the test modifies tests.test_basics.TracingTestClass
 @pytest.mark.forked
-def test_staticmethod_instance_tracing(sentry_init, capture_events):
-    sentry_init(
+def test_staticmethod_instance_tracing(debugg_ai_init, capture_events):
+    debugg_ai_init(
         debug=True,
         traces_sample_rate=1.0,
         functions_to_trace=[
@@ -984,8 +984,8 @@ def test_staticmethod_instance_tracing(sentry_init, capture_events):
 
 # We need to fork here because the test modifies tests.test_basics.TracingTestClass
 @pytest.mark.forked
-def test_classmethod_class_tracing(sentry_init, capture_events):
-    sentry_init(
+def test_classmethod_class_tracing(debugg_ai_init, capture_events):
+    debugg_ai_init(
         debug=True,
         traces_sample_rate=1.0,
         functions_to_trace=[
@@ -1008,8 +1008,8 @@ def test_classmethod_class_tracing(sentry_init, capture_events):
 
 # We need to fork here because the test modifies tests.test_basics.TracingTestClass
 @pytest.mark.forked
-def test_classmethod_instance_tracing(sentry_init, capture_events):
-    sentry_init(
+def test_classmethod_instance_tracing(debugg_ai_init, capture_events):
+    debugg_ai_init(
         debug=True,
         traces_sample_rate=1.0,
         functions_to_trace=[
@@ -1030,8 +1030,8 @@ def test_classmethod_instance_tracing(sentry_init, capture_events):
     assert span["description"] == "tests.test_basics.TracingTestClass.class_"
 
 
-def test_last_event_id(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_last_event_id(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     assert last_event_id() is None
 
@@ -1040,8 +1040,8 @@ def test_last_event_id(sentry_init):
     assert last_event_id() is not None
 
 
-def test_last_event_id_transaction(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_last_event_id_transaction(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     assert last_event_id() is None
 
@@ -1051,8 +1051,8 @@ def test_last_event_id_transaction(sentry_init):
     assert last_event_id() is None, "Transaction should not set last_event_id"
 
 
-def test_last_event_id_scope(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_last_event_id_scope(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     # Should not crash
     with isolation_scope() as scope:
@@ -1060,12 +1060,12 @@ def test_last_event_id_scope(sentry_init):
 
 
 def test_hub_constructor_deprecation_warning():
-    with pytest.warns(debugg_ai_sdk.hub.SentryHubDeprecationWarning):
+    with pytest.warns(debugg_ai_sdk.hub.DebuggAIHubDeprecationWarning):
         Hub()
 
 
 def test_hub_current_deprecation_warning():
-    with pytest.warns(debugg_ai_sdk.hub.SentryHubDeprecationWarning) as warning_records:
+    with pytest.warns(debugg_ai_sdk.hub.DebuggAIHubDeprecationWarning) as warning_records:
         Hub.current
 
     # Make sure we only issue one deprecation warning
@@ -1073,13 +1073,13 @@ def test_hub_current_deprecation_warning():
 
 
 def test_hub_main_deprecation_warnings():
-    with pytest.warns(debugg_ai_sdk.hub.SentryHubDeprecationWarning):
+    with pytest.warns(debugg_ai_sdk.hub.DebuggAIHubDeprecationWarning):
         Hub.main
 
 
 @pytest.mark.skipif(sys.version_info < (3, 11), reason="add_note() not supported")
-def test_notes(sentry_init, capture_events):
-    sentry_init()
+def test_notes(debugg_ai_init, capture_events):
+    debugg_ai_init()
     events = capture_events()
     try:
         e = ValueError("aha!")
@@ -1095,7 +1095,7 @@ def test_notes(sentry_init, capture_events):
 
 
 @pytest.mark.skipif(sys.version_info < (3, 11), reason="add_note() not supported")
-def test_notes_safe_str(sentry_init, capture_events):
+def test_notes_safe_str(debugg_ai_init, capture_events):
     class Note2:
         def __repr__(self):
             raise TypeError
@@ -1103,7 +1103,7 @@ def test_notes_safe_str(sentry_init, capture_events):
         def __str__(self):
             raise TypeError
 
-    sentry_init()
+    debugg_ai_init()
     events = capture_events()
     try:
         e = ValueError("aha!")
@@ -1124,13 +1124,13 @@ def test_notes_safe_str(sentry_init, capture_events):
     sys.version_info < (3, 11),
     reason="this test appears to cause a segfault on Python < 3.11",
 )
-def test_stacktrace_big_recursion(sentry_init, capture_events):
+def test_stacktrace_big_recursion(debugg_ai_init, capture_events):
     """
     Ensure that if the recursion limit is increased, the full stacktrace is not captured,
     as it would take too long to process the entire stack trace.
     Also, ensure that the capturing does not take too long.
     """
-    sentry_init()
+    debugg_ai_init()
     events = capture_events()
 
     def recurse():

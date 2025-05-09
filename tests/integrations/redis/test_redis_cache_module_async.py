@@ -21,8 +21,8 @@ FAKEREDIS_VERSION = parse_version(fakeredis.__version__)
 
 
 @pytest.mark.asyncio
-async def test_no_cache_basic(sentry_init, capture_events):
-    sentry_init(
+async def test_no_cache_basic(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             RedisIntegration(),
         ],
@@ -41,8 +41,8 @@ async def test_no_cache_basic(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_cache_basic(sentry_init, capture_events):
-    sentry_init(
+async def test_cache_basic(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             RedisIntegration(
                 cache_prefixes=["myasynccache"],
@@ -65,8 +65,8 @@ async def test_cache_basic(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_cache_keys(sentry_init, capture_events):
-    sentry_init(
+async def test_cache_keys(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             RedisIntegration(
                 cache_prefixes=["abla", "ablub"],
@@ -104,8 +104,8 @@ async def test_cache_keys(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_cache_data(sentry_init, capture_events):
-    sentry_init(
+async def test_cache_data(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[
             RedisIntegration(
                 cache_prefixes=["myasynccache"],

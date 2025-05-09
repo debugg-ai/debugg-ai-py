@@ -76,8 +76,8 @@ LINES = r"""
 
 
 @pytest.mark.parametrize("input", LINES.strip().splitlines())
-def test_basic(sentry_init, capture_events, input):
-    sentry_init(integrations=[GnuBacktraceIntegration()])
+def test_basic(debugg_ai_init, capture_events, input):
+    debugg_ai_init(integrations=[GnuBacktraceIntegration()])
     events = capture_events()
 
     try:

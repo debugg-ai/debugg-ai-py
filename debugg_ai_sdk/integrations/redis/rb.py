@@ -1,7 +1,7 @@
 """
 Instrumentation for Redis Blaster (rb)
 
-https://github.com/getsentry/rb
+https://github.com/debugg-ai/rb
 """
 
 from debugg_ai_sdk.integrations.redis._sync_common import patch_redis_client

@@ -12,7 +12,7 @@ from debugg_ai_sdk import (
     capture_exception,
 )
 from debugg_ai_sdk.integrations.logging import LoggingIntegration
-import debugg_ai_sdk.integrations.quart as quart_sentry
+import debugg_ai_sdk.integrations.quart as quart_debugg-ai
 
 
 def quart_app_factory():
@@ -67,7 +67,7 @@ def quart_app_factory():
 @pytest.fixture(params=("manual",))
 def integration_enabled_params(request):
     if request.param == "manual":
-        return {"integrations": [quart_sentry.QuartIntegration()]}
+        return {"integrations": [quart_debugg-ai.QuartIntegration()]}
     else:
         raise ValueError(request.param)
 
@@ -78,7 +78,7 @@ def integration_enabled_params(request):
     not importlib.util.find_spec("quart_flask_patch"),
     reason="requires quart_flask_patch",
 )
-async def test_quart_flask_patch(sentry_init, capture_events, reset_integrations):
+async def test_quart_flask_patch(debugg_ai_init, capture_events, reset_integrations):
     # This testcase is forked because `import quart_flask_patch` needs to run
     # before anything else Quart-related is imported (since it monkeypatches
     # some things) and we don't want this to affect other testcases.
@@ -88,8 +88,8 @@ async def test_quart_flask_patch(sentry_init, capture_events, reset_integrations
     import quart_flask_patch  # noqa: F401
 
     app = quart_app_factory()
-    sentry_init(
-        integrations=[quart_sentry.QuartIntegration()],
+    debugg_ai_init(
+        integrations=[quart_debugg-ai.QuartIntegration()],
     )
 
     @app.route("/")
@@ -109,8 +109,8 @@ async def test_quart_flask_patch(sentry_init, capture_events, reset_integrations
 
 
 @pytest.mark.asyncio
-async def test_has_context(sentry_init, capture_events):
-    sentry_init(integrations=[quart_sentry.QuartIntegration()])
+async def test_has_context(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
     events = capture_events()
 
@@ -135,16 +135,16 @@ async def test_has_context(sentry_init, capture_events):
     ],
 )
 async def test_transaction_style(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     url,
     transaction_style,
     expected_transaction,
     expected_source,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
-            quart_sentry.QuartIntegration(transaction_style=transaction_style)
+            quart_debugg-ai.QuartIntegration(transaction_style=transaction_style)
         ]
     )
     app = quart_app_factory()
@@ -160,12 +160,12 @@ async def test_transaction_style(
 
 @pytest.mark.asyncio
 async def test_errors(
-    sentry_init,
+    debugg_ai_init,
     capture_exceptions,
     capture_events,
     integration_enabled_params,
 ):
-    sentry_init(**integration_enabled_params)
+    debugg_ai_init(**integration_enabled_params)
     app = quart_app_factory()
 
     @app.route("/")
@@ -190,12 +190,12 @@ async def test_errors(
 
 @pytest.mark.asyncio
 async def test_quart_auth_not_installed(
-    sentry_init, capture_events, monkeypatch, integration_enabled_params
+    debugg_ai_init, capture_events, monkeypatch, integration_enabled_params
 ):
-    sentry_init(**integration_enabled_params)
+    debugg_ai_init(**integration_enabled_params)
     app = quart_app_factory()
 
-    monkeypatch.setattr(quart_sentry, "quart_auth", None)
+    monkeypatch.setattr(quart_debugg-ai, "quart_auth", None)
 
     events = capture_events()
 
@@ -208,12 +208,12 @@ async def test_quart_auth_not_installed(
 
 @pytest.mark.asyncio
 async def test_quart_auth_not_configured(
-    sentry_init, capture_events, monkeypatch, integration_enabled_params
+    debugg_ai_init, capture_events, monkeypatch, integration_enabled_params
 ):
-    sentry_init(**integration_enabled_params)
+    debugg_ai_init(**integration_enabled_params)
     app = quart_app_factory()
 
-    assert quart_sentry.quart_auth
+    assert quart_debugg-ai.quart_auth
 
     events = capture_events()
     client = app.test_client()
@@ -225,9 +225,9 @@ async def test_quart_auth_not_configured(
 
 @pytest.mark.asyncio
 async def test_quart_auth_partially_configured(
-    sentry_init, capture_events, monkeypatch, integration_enabled_params
+    debugg_ai_init, capture_events, monkeypatch, integration_enabled_params
 ):
-    sentry_init(**integration_enabled_params)
+    debugg_ai_init(**integration_enabled_params)
     app = quart_app_factory()
 
     events = capture_events()
@@ -244,7 +244,7 @@ async def test_quart_auth_partially_configured(
 @pytest.mark.parametrize("user_id", [None, "42", "3"])
 async def test_quart_auth_configured(
     send_default_pii,
-    sentry_init,
+    debugg_ai_init,
     user_id,
     capture_events,
     monkeypatch,
@@ -252,7 +252,7 @@ async def test_quart_auth_configured(
 ):
     from quart_auth import AuthUser, login_user
 
-    sentry_init(send_default_pii=send_default_pii, **integration_enabled_params)
+    debugg_ai_init(send_default_pii=send_default_pii, **integration_enabled_params)
     app = quart_app_factory()
 
     @app.route("/login")
@@ -280,12 +280,12 @@ async def test_quart_auth_configured(
 @pytest.mark.parametrize(
     "integrations",
     [
-        [quart_sentry.QuartIntegration()],
-        [quart_sentry.QuartIntegration(), LoggingIntegration(event_level="ERROR")],
+        [quart_debugg-ai.QuartIntegration()],
+        [quart_debugg-ai.QuartIntegration(), LoggingIntegration(event_level="ERROR")],
     ],
 )
-async def test_errors_not_reported_twice(sentry_init, integrations, capture_events):
-    sentry_init(integrations=integrations)
+async def test_errors_not_reported_twice(debugg_ai_init, integrations, capture_events):
+    debugg_ai_init(integrations=integrations)
     app = quart_app_factory()
 
     @app.route("/")
@@ -306,11 +306,11 @@ async def test_errors_not_reported_twice(sentry_init, integrations, capture_even
 
 
 @pytest.mark.asyncio
-async def test_logging(sentry_init, capture_events):
+async def test_logging(debugg_ai_init, capture_events):
     # ensure that Quart's logger magic doesn't break ours
-    sentry_init(
+    debugg_ai_init(
         integrations=[
-            quart_sentry.QuartIntegration(),
+            quart_debugg-ai.QuartIntegration(),
             LoggingIntegration(event_level="ERROR"),
         ]
     )
@@ -331,8 +331,8 @@ async def test_logging(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_no_errors_without_request(sentry_init):
-    sentry_init(integrations=[quart_sentry.QuartIntegration()])
+async def test_no_errors_without_request(debugg_ai_init):
+    debugg_ai_init(integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
 
     async with app.app_context():
@@ -358,8 +358,8 @@ def test_cli_commands_raise():
 
 
 @pytest.mark.asyncio
-async def test_500(sentry_init):
-    sentry_init(integrations=[quart_sentry.QuartIntegration()])
+async def test_500(debugg_ai_init):
+    debugg_ai_init(integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
 
     @app.route("/")
@@ -368,17 +368,17 @@ async def test_500(sentry_init):
 
     @app.errorhandler(500)
     async def error_handler(err):
-        return "Sentry error."
+        return "DebuggAI error."
 
     client = app.test_client()
     response = await client.get("/")
 
-    assert (await response.get_data(as_text=True)) == "Sentry error."
+    assert (await response.get_data(as_text=True)) == "DebuggAI error."
 
 
 @pytest.mark.asyncio
-async def test_error_in_errorhandler(sentry_init, capture_events):
-    sentry_init(integrations=[quart_sentry.QuartIntegration()])
+async def test_error_in_errorhandler(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
 
     @app.route("/")
@@ -406,10 +406,10 @@ async def test_error_in_errorhandler(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_bad_request_not_captured(sentry_init, capture_events):
+async def test_bad_request_not_captured(debugg_ai_init, capture_events):
     from quart import abort
 
-    sentry_init(integrations=[quart_sentry.QuartIntegration()])
+    debugg_ai_init(integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
     events = capture_events()
 
@@ -425,10 +425,10 @@ async def test_bad_request_not_captured(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_does_not_leak_scope(sentry_init, capture_events):
+async def test_does_not_leak_scope(debugg_ai_init, capture_events):
     from quart import Response, stream_with_context
 
-    sentry_init(integrations=[quart_sentry.QuartIntegration()])
+    debugg_ai_init(integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
     events = capture_events()
 
@@ -456,8 +456,8 @@ async def test_does_not_leak_scope(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_scoped_test_client(sentry_init):
-    sentry_init(integrations=[quart_sentry.QuartIntegration()])
+async def test_scoped_test_client(debugg_ai_init):
+    debugg_ai_init(integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
 
     @app.route("/")
@@ -472,12 +472,12 @@ async def test_scoped_test_client(sentry_init):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("exc_cls", [ZeroDivisionError, Exception])
 async def test_errorhandler_for_exception_swallows_exception(
-    sentry_init, capture_events, exc_cls
+    debugg_ai_init, capture_events, exc_cls
 ):
     # In contrast to error handlers for a status code, error
     # handlers for exceptions can swallow the exception (this is
     # just how the Quart signal works)
-    sentry_init(integrations=[quart_sentry.QuartIntegration()])
+    debugg_ai_init(integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
     events = capture_events()
 
@@ -497,8 +497,8 @@ async def test_errorhandler_for_exception_swallows_exception(
 
 
 @pytest.mark.asyncio
-async def test_tracing_success(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, integrations=[quart_sentry.QuartIntegration()])
+async def test_tracing_success(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
 
     @app.before_request
@@ -531,8 +531,8 @@ async def test_tracing_success(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_tracing_error(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0, integrations=[quart_sentry.QuartIntegration()])
+async def test_tracing_error(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0, integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
 
     events = capture_events()
@@ -556,10 +556,10 @@ async def test_tracing_error(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_class_based_views(sentry_init, capture_events):
+async def test_class_based_views(debugg_ai_init, capture_events):
     from quart.views import View
 
-    sentry_init(integrations=[quart_sentry.QuartIntegration()])
+    debugg_ai_init(integrations=[quart_debugg-ai.QuartIntegration()])
     app = quart_app_factory()
     events = capture_events()
 
@@ -586,12 +586,12 @@ async def test_class_based_views(sentry_init, capture_events):
 @pytest.mark.parametrize("endpoint", ["/sync/thread_ids", "/async/thread_ids"])
 @pytest.mark.asyncio
 async def test_active_thread_id(
-    sentry_init, capture_envelopes, teardown_profiling, endpoint
+    debugg_ai_init, capture_envelopes, teardown_profiling, endpoint
 ):
     with mock.patch(
         "debugg_ai_sdk.profiler.transaction_profiler.PROFILE_MINIMUM_SAMPLES", 0
     ):
-        sentry_init(
+        debugg_ai_init(
             traces_sample_rate=1.0,
             profiles_sample_rate=1.0,
         )
@@ -628,9 +628,9 @@ async def test_active_thread_id(
 
 
 @pytest.mark.asyncio
-async def test_span_origin(sentry_init, capture_events):
-    sentry_init(
-        integrations=[quart_sentry.QuartIntegration()],
+async def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
+        integrations=[quart_debugg-ai.QuartIntegration()],
         traces_sample_rate=1.0,
     )
     app = quart_app_factory()

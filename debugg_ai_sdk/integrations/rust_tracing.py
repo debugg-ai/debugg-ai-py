@@ -37,10 +37,10 @@ from typing import Any, Callable, Dict, Tuple, Optional
 import debugg_ai_sdk
 from debugg_ai_sdk.integrations import Integration
 from debugg_ai_sdk.scope import should_send_default_pii
-from debugg_ai_sdk.tracing import Span as SentrySpan
+from debugg_ai_sdk.tracing import Span as DebuggAISpan
 from debugg_ai_sdk.utils import SENSITIVE_DATA_SUBSTITUTE
 
-TraceState = Optional[Tuple[Optional[SentrySpan], SentrySpan]]
+TraceState = Optional[Tuple[Optional[DebuggAISpan], DebuggAISpan]]
 
 
 class RustTracingLevel(Enum):
@@ -58,7 +58,7 @@ class EventTypeMapping(Enum):
     Event = auto()
 
 
-def tracing_level_to_sentry_level(level):
+def tracing_level_to_debugg_ai_level(level):
     # type: (str) -> debugg_ai_sdk._types.LogLevelStr
     level = RustTracingLevel(level)
     if level in (RustTracingLevel.Trace, RustTracingLevel.Debug):
@@ -98,18 +98,18 @@ def process_event(event: Dict[str, Any]) -> None:
     metadata = event.get("metadata", {})
 
     logger = metadata.get("target")
-    level = tracing_level_to_sentry_level(metadata.get("level"))
+    level = tracing_level_to_debugg_ai_level(metadata.get("level"))
     message = event.get("message")  # type: debugg_ai_sdk._types.Any
     contexts = extract_contexts(event)
 
-    sentry_event = {
+    debugg_ai_event = {
         "logger": logger,
         "level": level,
         "message": message,
         "contexts": contexts,
     }  # type: debugg_ai_sdk._types.Event
 
-    debugg_ai_sdk.capture_event(sentry_event)
+    debugg_ai_sdk.capture_event(debugg_ai_event)
 
 
 def process_exception(event: Dict[str, Any]) -> None:
@@ -117,7 +117,7 @@ def process_exception(event: Dict[str, Any]) -> None:
 
 
 def process_breadcrumb(event: Dict[str, Any]) -> None:
-    level = tracing_level_to_sentry_level(event.get("metadata", {}).get("level"))
+    level = tracing_level_to_debugg_ai_level(event.get("metadata", {}).get("level"))
     message = event.get("message")
 
     debugg_ai_sdk.add_breadcrumb(level=level, message=message)
@@ -163,7 +163,7 @@ class RustTracingLayer:
         By default, the values of tracing fields are not included in case they
         contain PII. A user may override that by passing `True` for the
         `include_tracing_fields` keyword argument of this integration or by
-        setting `send_default_pii` to `True` in their Sentry client options.
+        setting `send_default_pii` to `True` in their DebuggAI client options.
         """
         return (
             should_send_default_pii()
@@ -197,56 +197,56 @@ class RustTracingLayer:
         message = attrs.get("message")
 
         if message is not None:
-            sentry_span_name = message
+            debugg_ai_span_name = message
         elif module_path is not None and name is not None:
-            sentry_span_name = f"{module_path}::{name}"  # noqa: E231
+            debugg_ai_span_name = f"{module_path}::{name}"  # noqa: E231
         elif name is not None:
-            sentry_span_name = name
+            debugg_ai_span_name = name
         else:
-            sentry_span_name = "<unknown>"
+            debugg_ai_span_name = "<unknown>"
 
         kwargs = {
             "op": "function",
-            "name": sentry_span_name,
+            "name": debugg_ai_span_name,
             "origin": self.origin,
         }
 
         scope = debugg_ai_sdk.get_current_scope()
-        parent_sentry_span = scope.span
-        if parent_sentry_span:
-            sentry_span = parent_sentry_span.start_child(**kwargs)
+        parent_debugg_ai_span = scope.span
+        if parent_debugg_ai_span:
+            debugg_ai_span = parent_debugg_ai_span.start_child(**kwargs)
         else:
-            sentry_span = scope.start_span(**kwargs)
+            debugg_ai_span = scope.start_span(**kwargs)
 
         fields = metadata.get("fields", [])
         for field in fields:
             if self._include_tracing_fields():
-                sentry_span.set_data(field, attrs.get(field))
+                debugg_ai_span.set_data(field, attrs.get(field))
             else:
-                sentry_span.set_data(field, SENSITIVE_DATA_SUBSTITUTE)
+                debugg_ai_span.set_data(field, SENSITIVE_DATA_SUBSTITUTE)
 
-        scope.span = sentry_span
-        return (parent_sentry_span, sentry_span)
+        scope.span = debugg_ai_span
+        return (parent_debugg_ai_span, debugg_ai_span)
 
     def on_close(self, span_id: str, span_state: TraceState) -> None:
         if span_state is None:
             return
 
-        parent_sentry_span, sentry_span = span_state
-        sentry_span.finish()
-        debugg_ai_sdk.get_current_scope().span = parent_sentry_span
+        parent_debugg_ai_span, debugg_ai_span = span_state
+        debugg_ai_span.finish()
+        debugg_ai_sdk.get_current_scope().span = parent_debugg_ai_span
 
     def on_record(self, span_id: str, values: str, span_state: TraceState) -> None:
         if span_state is None:
             return
-        _parent_sentry_span, sentry_span = span_state
+        _parent_debugg_ai_span, debugg_ai_span = span_state
 
         deserialized_values = json.loads(values)
         for key, value in deserialized_values.items():
             if self._include_tracing_fields():
-                sentry_span.set_data(key, value)
+                debugg_ai_span.set_data(key, value)
             else:
-                sentry_span.set_data(key, SENSITIVE_DATA_SUBSTITUTE)
+                debugg_ai_span.set_data(key, SENSITIVE_DATA_SUBSTITUTE)
 
 
 class RustTracingIntegration(Integration):

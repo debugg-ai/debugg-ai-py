@@ -18,8 +18,8 @@ from debugg_ai_sdk.tracing_utils import record_sql_queries
 from debugg_ai_sdk.utils import json_dumps
 
 
-def test_orm_queries(sentry_init, capture_events):
-    sentry_init(
+def test_orm_queries(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[SqlalchemyIntegration()], _experiments={"record_sql_params": True}
     )
     events = capture_events()
@@ -78,8 +78,8 @@ def test_orm_queries(sentry_init, capture_events):
     ]
 
 
-def test_transactions(sentry_init, capture_events, render_span_tree):
-    sentry_init(
+def test_transactions(debugg_ai_init, capture_events, render_span_tree):
+    debugg_ai_init(
         integrations=[SqlalchemyIntegration()],
         _experiments={"record_sql_params": True},
         traces_sample_rate=1.0,
@@ -151,8 +151,8 @@ def test_transactions(sentry_init, capture_events, render_span_tree):
     )
 
 
-def test_transactions_no_engine_url(sentry_init, capture_events):
-    sentry_init(
+def test_transactions_no_engine_url(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[SqlalchemyIntegration()],
         _experiments={"record_sql_params": True},
         traces_sample_rate=1.0,
@@ -206,8 +206,8 @@ def test_transactions_no_engine_url(sentry_init, capture_events):
         assert SPANDATA.SERVER_PORT not in span["data"]
 
 
-def test_long_sql_query_preserved(sentry_init, capture_events):
-    sentry_init(
+def test_long_sql_query_preserved(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1,
         integrations=[SqlalchemyIntegration()],
     )
@@ -226,8 +226,8 @@ def test_long_sql_query_preserved(sentry_init, capture_events):
     assert description.endswith("SELECT 98 UNION SELECT 99")
 
 
-def test_large_event_not_truncated(sentry_init, capture_events):
-    sentry_init(
+def test_large_event_not_truncated(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1,
         integrations=[SqlalchemyIntegration()],
     )
@@ -279,8 +279,8 @@ def test_large_event_not_truncated(sentry_init, capture_events):
     }
 
 
-def test_engine_name_not_string(sentry_init):
-    sentry_init(
+def test_engine_name_not_string(debugg_ai_init):
+    debugg_ai_init(
         integrations=[SqlalchemyIntegration()],
     )
 
@@ -293,15 +293,15 @@ def test_engine_name_not_string(sentry_init):
         con.execute(text("SELECT 0"))
 
 
-def test_query_source_disabled(sentry_init, capture_events):
-    sentry_options = {
+def test_query_source_disabled(debugg_ai_init, capture_events):
+    debugg_ai_options = {
         "integrations": [SqlalchemyIntegration()],
         "enable_tracing": True,
         "enable_db_query_source": False,
         "db_query_source_threshold_ms": 0,
     }
 
-    sentry_init(**sentry_options)
+    debugg_ai_init(**debugg_ai_options)
 
     events = capture_events()
 
@@ -344,16 +344,16 @@ def test_query_source_disabled(sentry_init, capture_events):
 
 
 @pytest.mark.parametrize("enable_db_query_source", [None, True])
-def test_query_source_enabled(sentry_init, capture_events, enable_db_query_source):
-    sentry_options = {
+def test_query_source_enabled(debugg_ai_init, capture_events, enable_db_query_source):
+    debugg_ai_options = {
         "integrations": [SqlalchemyIntegration()],
         "enable_tracing": True,
         "db_query_source_threshold_ms": 0,
     }
     if enable_db_query_source is not None:
-        sentry_options["enable_db_query_source"] = enable_db_query_source
+        debugg_ai_options["enable_db_query_source"] = enable_db_query_source
 
-    sentry_init(**sentry_options)
+    debugg_ai_init(**debugg_ai_options)
 
     events = capture_events()
 
@@ -395,8 +395,8 @@ def test_query_source_enabled(sentry_init, capture_events, enable_db_query_sourc
         raise AssertionError("No db span found")
 
 
-def test_query_source(sentry_init, capture_events):
-    sentry_init(
+def test_query_source(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[SqlalchemyIntegration()],
         enable_tracing=True,
         enable_db_query_source=True,
@@ -457,11 +457,11 @@ def test_query_source(sentry_init, capture_events):
         raise AssertionError("No db span found")
 
 
-def test_query_source_with_module_in_search_path(sentry_init, capture_events):
+def test_query_source_with_module_in_search_path(debugg_ai_init, capture_events):
     """
     Test that query source is relative to the path of the module it ran in
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[SqlalchemyIntegration()],
         enable_tracing=True,
         enable_db_query_source=True,
@@ -523,8 +523,8 @@ def test_query_source_with_module_in_search_path(sentry_init, capture_events):
         raise AssertionError("No db span found")
 
 
-def test_no_query_source_if_duration_too_short(sentry_init, capture_events):
-    sentry_init(
+def test_no_query_source_if_duration_too_short(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[SqlalchemyIntegration()],
         enable_tracing=True,
         enable_db_query_source=True,
@@ -589,8 +589,8 @@ def test_no_query_source_if_duration_too_short(sentry_init, capture_events):
         raise AssertionError("No db span found")
 
 
-def test_query_source_if_duration_over_threshold(sentry_init, capture_events):
-    sentry_init(
+def test_query_source_if_duration_over_threshold(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[SqlalchemyIntegration()],
         enable_tracing=True,
         enable_db_query_source=True,
@@ -672,8 +672,8 @@ def test_query_source_if_duration_over_threshold(sentry_init, capture_events):
         raise AssertionError("No db span found")
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[SqlalchemyIntegration()],
         traces_sample_rate=1.0,
     )

@@ -88,12 +88,12 @@ jobs:
         if: ${{ !cancelled() && matrix.python-version == '3.6' }}
         run: |
           export COVERAGE_RCFILE=.coveragerc36
-          coverage combine .coverage-sentry-*
+          coverage combine .coverage-debugg-ai-*
           coverage xml --ignore-errors
       - name: Generate coverage XML
         if: ${{ !cancelled() && matrix.python-version != '3.6' }}
         run: |
-          coverage combine .coverage-sentry-*
+          coverage combine .coverage-debugg-ai-*
           coverage xml
       - name: Upload coverage to Codecov
         if: ${{ !cancelled() }}
@@ -177,12 +177,12 @@ jobs:
         if: ${{ !cancelled() && matrix.python-version == '3.6' }}
         run: |
           export COVERAGE_RCFILE=.coveragerc36
-          coverage combine .coverage-sentry-*
+          coverage combine .coverage-debugg-ai-*
           coverage xml --ignore-errors
       - name: Generate coverage XML
         if: ${{ !cancelled() && matrix.python-version != '3.6' }}
         run: |
-          coverage combine .coverage-sentry-*
+          coverage combine .coverage-debugg-ai-*
           coverage xml
       - name: Upload coverage to Codecov
         if: ${{ !cancelled() }}

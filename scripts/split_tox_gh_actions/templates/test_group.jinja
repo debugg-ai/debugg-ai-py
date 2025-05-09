@@ -23,7 +23,7 @@
       postgres:
         image: postgres
         env:
-          POSTGRES_PASSWORD: sentry
+          POSTGRES_PASSWORD: debugg-ai
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -34,9 +34,9 @@
         ports:
           - 5432:5432
     env:
-      SENTRY_PYTHON_TEST_POSTGRES_HOST: {% raw %}${{ matrix.python-version == '3.6' && 'postgres' || 'localhost' }}{% endraw %}
-      SENTRY_PYTHON_TEST_POSTGRES_USER: postgres
-      SENTRY_PYTHON_TEST_POSTGRES_PASSWORD: sentry
+      DEBUGG_AI_PYTHON_TEST_POSTGRES_HOST: {% raw %}${{ matrix.python-version == '3.6' && 'postgres' || 'localhost' }}{% endraw %}
+      DEBUGG_AI_PYTHON_TEST_POSTGRES_USER: postgres
+      DEBUGG_AI_PYTHON_TEST_POSTGRES_PASSWORD: debugg-ai
 
     {% endif %}
     # Use Docker container only for Python 3.6
@@ -50,7 +50,7 @@
           allow-prereleases: true
       {% if needs_clickhouse %}
       - name: "Setup ClickHouse Server"
-        uses: getsentry/action-clickhouse-in-ci@v1.6
+        uses: debugg-ai/action-clickhouse-in-ci@v1.6
       {% endif %}
 
       {% if needs_redis %}
@@ -80,13 +80,13 @@
         if: {% raw %}${{ !cancelled() && matrix.python-version == '3.6' }}{% endraw %}
         run: |
           export COVERAGE_RCFILE=.coveragerc36
-          coverage combine .coverage-sentry-*
+          coverage combine .coverage-debugg-ai-*
           coverage xml --ignore-errors
 
       - name: Generate coverage XML
         if: {% raw %}${{ !cancelled() && matrix.python-version != '3.6' }}{% endraw %}
         run: |
-          coverage combine .coverage-sentry-*
+          coverage combine .coverage-debugg-ai-*
           coverage xml
 
       - name: Upload coverage to Codecov

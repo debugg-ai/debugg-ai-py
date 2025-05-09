@@ -27,7 +27,7 @@ class ShouldBeIncludedTestCase:
     [
         (
             ShouldBeIncludedTestCase(
-                id="Frame from Sentry SDK",
+                id="Frame from DebuggAI SDK",
                 is_debugg_ai_sdk_frame=True,
             ),
             False,
@@ -90,7 +90,7 @@ class ShouldBeIncludedTestCase:
 )
 def test_should_be_included(test_case, expected):
     # type: (ShouldBeIncludedTestCase, bool) -> None
-    """Checking logic, see: https://github.com/getsentry/sentry-python/issues/3312"""
+    """Checking logic, see: https://github.com/debugg-ai/debugg-ai-py/issues/3312"""
     kwargs = asdict(test_case)
     kwargs.pop("id")
     assert _should_be_included(**kwargs) == expected
@@ -102,45 +102,45 @@ def test_should_be_included(test_case, expected):
         ("", ""),
         ("foo=bar", "foo=bar"),
         (" foo=bar, baz =  qux ", " foo=bar, baz =  qux "),
-        ("sentry-trace_id=123", ""),
-        ("  sentry-trace_id = 123  ", ""),
-        ("sentry-trace_id=123,sentry-public_key=456", ""),
-        ("foo=bar,sentry-trace_id=123", "foo=bar"),
-        ("foo=bar,sentry-trace_id=123,baz=qux", "foo=bar,baz=qux"),
+        ("debugg-ai-trace_id=123", ""),
+        ("  debugg-ai-trace_id = 123  ", ""),
+        ("debugg-ai-trace_id=123,debugg-ai-public_key=456", ""),
+        ("foo=bar,debugg-ai-trace_id=123", "foo=bar"),
+        ("foo=bar,debugg-ai-trace_id=123,baz=qux", "foo=bar,baz=qux"),
         (
-            "foo=bar,sentry-trace_id=123,baz=qux,sentry-public_key=456",
+            "foo=bar,debugg-ai-trace_id=123,baz=qux,debugg-ai-public_key=456",
             "foo=bar,baz=qux",
         ),
     ),
 )
-def test_strip_sentry_baggage(header, expected):
-    assert Baggage.strip_sentry_baggage(header) == expected
+def test_strip_debugg_ai_baggage(header, expected):
+    assert Baggage.strip_debugg_ai_baggage(header) == expected
 
 
 @pytest.mark.parametrize(
     ("baggage", "expected_repr"),
     (
-        (Baggage(sentry_items={}), '<Baggage "", mutable=True>'),
-        (Baggage(sentry_items={}, mutable=False), '<Baggage "", mutable=False>'),
+        (Baggage(debugg_ai_items={}), '<Baggage "", mutable=True>'),
+        (Baggage(debugg_ai_items={}, mutable=False), '<Baggage "", mutable=False>'),
         (
-            Baggage(sentry_items={"foo": "bar"}),
-            '<Baggage "sentry-foo=bar,", mutable=True>',
+            Baggage(debugg_ai_items={"foo": "bar"}),
+            '<Baggage "debugg-ai-foo=bar,", mutable=True>',
         ),
         (
-            Baggage(sentry_items={"foo": "bar"}, mutable=False),
-            '<Baggage "sentry-foo=bar,", mutable=False>',
+            Baggage(debugg_ai_items={"foo": "bar"}, mutable=False),
+            '<Baggage "debugg-ai-foo=bar,", mutable=False>',
         ),
         (
-            Baggage(sentry_items={"foo": "bar"}, third_party_items="asdf=1234,"),
-            '<Baggage "sentry-foo=bar,asdf=1234,", mutable=True>',
+            Baggage(debugg_ai_items={"foo": "bar"}, third_party_items="asdf=1234,"),
+            '<Baggage "debugg-ai-foo=bar,asdf=1234,", mutable=True>',
         ),
         (
             Baggage(
-                sentry_items={"foo": "bar"},
+                debugg_ai_items={"foo": "bar"},
                 third_party_items="asdf=1234,",
                 mutable=False,
             ),
-            '<Baggage "sentry-foo=bar,asdf=1234,", mutable=False>',
+            '<Baggage "debugg-ai-foo=bar,asdf=1234,", mutable=False>',
         ),
     ),
 )

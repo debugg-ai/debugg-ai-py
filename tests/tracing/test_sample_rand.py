@@ -10,13 +10,13 @@ from debugg_ai_sdk.tracing_utils import Baggage
 
 @pytest.mark.parametrize("sample_rand", (0.0, 0.25, 0.5, 0.75))
 @pytest.mark.parametrize("sample_rate", (0.0, 0.25, 0.5, 0.75, 1.0))
-def test_deterministic_sampled(sentry_init, capture_events, sample_rate, sample_rand):
+def test_deterministic_sampled(debugg_ai_init, capture_events, sample_rate, sample_rand):
     """
     Test that sample_rand is generated on new traces, that it is used to
     make the sampling decision, and that it is included in the transaction's
     baggage.
     """
-    sentry_init(traces_sample_rate=sample_rate)
+    debugg_ai_init(traces_sample_rate=sample_rate)
     events = capture_events()
 
     with mock.patch(
@@ -24,7 +24,7 @@ def test_deterministic_sampled(sentry_init, capture_events, sample_rate, sample_
     ):
         with debugg_ai_sdk.start_transaction() as transaction:
             assert (
-                transaction.get_baggage().sentry_items["sample_rand"]
+                transaction.get_baggage().debugg_ai_items["sample_rand"]
                 == f"{sample_rand:.6f}"  # noqa: E231
             )
 
@@ -36,19 +36,19 @@ def test_deterministic_sampled(sentry_init, capture_events, sample_rate, sample_
 @pytest.mark.parametrize("sample_rand", (0.0, 0.25, 0.5, 0.75))
 @pytest.mark.parametrize("sample_rate", (0.0, 0.25, 0.5, 0.75, 1.0))
 def test_transaction_uses_incoming_sample_rand(
-    sentry_init, capture_events, sample_rate, sample_rand
+    debugg_ai_init, capture_events, sample_rate, sample_rand
 ):
     """
     Test that the transaction uses the sample_rand value from the incoming baggage.
     """
-    baggage = Baggage(sentry_items={"sample_rand": f"{sample_rand:.6f}"})  # noqa: E231
+    baggage = Baggage(debugg_ai_items={"sample_rand": f"{sample_rand:.6f}"})  # noqa: E231
 
-    sentry_init(traces_sample_rate=sample_rate)
+    debugg_ai_init(traces_sample_rate=sample_rate)
     events = capture_events()
 
     with debugg_ai_sdk.start_transaction(baggage=baggage) as transaction:
         assert (
-            transaction.get_baggage().sentry_items["sample_rand"]
+            transaction.get_baggage().debugg_ai_items["sample_rand"]
             == f"{sample_rand:.6f}"  # noqa: E231
         )
 
@@ -57,12 +57,12 @@ def test_transaction_uses_incoming_sample_rand(
     assert len(events) == int(sample_rand < sample_rate)
 
 
-def test_decimal_context(sentry_init, capture_events):
+def test_decimal_context(debugg_ai_init, capture_events):
     """
     Ensure that having a user altered decimal context with a precision below 6
     does not cause an InvalidOperation exception.
     """
-    sentry_init(traces_sample_rate=1.0)
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     old_prec = decimal.getcontext().prec
@@ -79,7 +79,7 @@ def test_decimal_context(sentry_init, capture_events):
         ):
             with debugg_ai_sdk.start_transaction() as transaction:
                 assert (
-                    transaction.get_baggage().sentry_items["sample_rand"] == "0.123456"
+                    transaction.get_baggage().debugg_ai_items["sample_rand"] == "0.123456"
                 )
     finally:
         decimal.getcontext().prec = old_prec

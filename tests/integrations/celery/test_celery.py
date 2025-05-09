@@ -26,14 +26,14 @@ def connect_signal(request):
 
 
 @pytest.fixture
-def init_celery(sentry_init, request):
+def init_celery(debugg_ai_init, request):
     def inner(
         propagate_traces=True,
         backend="always_eager",
         monitor_beat_tasks=False,
         **kwargs,
     ):
-        sentry_init(
+        debugg_ai_init(
             integrations=[
                 CeleryIntegration(
                     propagate_traces=propagate_traces,
@@ -250,7 +250,7 @@ def test_no_stackoverflows(celery):
     """We used to have a bug in the Celery integration where its monkeypatching
     was repeated for every task invocation, leading to stackoverflows.
 
-    See https://github.com/getsentry/sentry-python/issues/265
+    See https://github.com/debugg-ai/debugg-ai-py/issues/265
     """
 
     results = []
@@ -390,7 +390,7 @@ def test_redis_backend_trace_propagation(init_celery, capture_events_forksafe):
 
 
 @pytest.mark.forked
-@pytest.mark.parametrize("newrelic_order", ["sentry_first", "sentry_last"])
+@pytest.mark.parametrize("newrelic_order", ["debugg_ai_first", "debugg_ai_last"])
 def test_newrelic_interference(init_celery, newrelic_order, celery_invocation):
     def instrument_newrelic():
         try:
@@ -412,10 +412,10 @@ def test_newrelic_interference(init_celery, newrelic_order, celery_invocation):
             assert hasattr(celery_app_module.Celery, "send_task")
             instrument_celery_app_base(celery_app_module)
 
-    if newrelic_order == "sentry_first":
+    if newrelic_order == "debugg_ai_first":
         celery = init_celery()
         instrument_newrelic()
-    elif newrelic_order == "sentry_last":
+    elif newrelic_order == "debugg_ai_last":
         instrument_newrelic()
         celery = init_celery()
     else:
@@ -478,10 +478,10 @@ def test_task_headers(celery):
     """
     Test that the headers set in the Celery Beat auto-instrumentation are passed to the celery signal handlers
     """
-    sentry_crons_setup = {
-        "sentry-monitor-slug": "some-slug",
-        "sentry-monitor-config": {"some": "config"},
-        "sentry-monitor-check-in-id": "123abc",
+    debugg_ai_crons_setup = {
+        "debugg-ai-monitor-slug": "some-slug",
+        "debugg-ai-monitor-config": {"some": "config"},
+        "debugg-ai-monitor-check-in-id": "123abc",
     }
 
     @celery.task(name="dummy_task", bind=True)
@@ -491,13 +491,13 @@ def test_task_headers(celery):
     # This is how the Celery Beat auto-instrumentation starts a task
     # in the monkey patched version of `apply_async`
     # in `debugg_ai_sdk/integrations/celery.py::_wrap_apply_async()`
-    result = dummy_task.apply_async(args=(1, 0), headers=sentry_crons_setup)
+    result = dummy_task.apply_async(args=(1, 0), headers=debugg_ai_crons_setup)
 
-    expected_headers = sentry_crons_setup.copy()
+    expected_headers = debugg_ai_crons_setup.copy()
     # Newly added headers
-    expected_headers["sentry-trace"] = mock.ANY
+    expected_headers["debugg-ai-trace"] = mock.ANY
     expected_headers["baggage"] = mock.ANY
-    expected_headers["sentry-task-enqueued-time"] = mock.ANY
+    expected_headers["debugg-ai-task-enqueued-time"] = mock.ANY
 
     assert result.get() == expected_headers
 
@@ -519,20 +519,20 @@ def test_baggage_propagation(init_celery):
 
             assert sorted(result["baggage"].split(",")) == sorted(
                 [
-                    "sentry-release=abcdef",
-                    "sentry-trace_id={}".format(transaction.trace_id),
-                    "sentry-environment=production",
-                    "sentry-sample_rand=0.500000",
-                    "sentry-sample_rate=1.0",
-                    "sentry-sampled=true",
+                    "debugg-ai-release=abcdef",
+                    "debugg-ai-trace_id={}".format(transaction.trace_id),
+                    "debugg-ai-environment=production",
+                    "debugg-ai-sample_rand=0.500000",
+                    "debugg-ai-sample_rate=1.0",
+                    "debugg-ai-sampled=true",
                     "custom=value",
                 ]
             )
 
 
-def test_sentry_propagate_traces_override(init_celery):
+def test_debugg_ai_propagate_traces_override(init_celery):
     """
-    Test if the `sentry-propagate-traces` header given to `apply_async`
+    Test if the `debugg-ai-propagate-traces` header given to `apply_async`
     overrides the `propagate_traces` parameter in the integration constructor.
     """
     celery = init_celery(
@@ -556,19 +556,19 @@ def test_sentry_propagate_traces_override(init_celery):
         # should NOT propagate trace (overrides `propagate_traces` parameter in integration constructor)
         task_transaction_id = dummy_task.apply_async(
             args=("another message",),
-            headers={"sentry-propagate-traces": False},
+            headers={"debugg-ai-propagate-traces": False},
         ).get()
         assert transaction_trace_id != task_transaction_id
 
 
-def test_apply_async_manually_span(sentry_init):
-    sentry_init(
+def test_apply_async_manually_span(debugg_ai_init):
+    debugg_ai_init(
         integrations=[CeleryIntegration()],
     )
 
     def dummy_function(*args, **kwargs):
         headers = kwargs.get("headers")
-        assert "sentry-trace" in headers
+        assert "debugg-ai-trace" in headers
         assert "baggage" in headers
 
     wrapped = _wrap_task_run(dummy_function)
@@ -697,7 +697,7 @@ def test_messaging_system(system, init_celery, capture_events):
 
 
 @pytest.mark.parametrize("system", ("amqp", "redis"))
-def test_producer_span_data(system, monkeypatch, sentry_init, capture_events):
+def test_producer_span_data(system, monkeypatch, debugg_ai_init, capture_events):
     old_publish = kombu.messaging.Producer._publish
 
     def publish(*args, **kwargs):
@@ -705,7 +705,7 @@ def test_producer_span_data(system, monkeypatch, sentry_init, capture_events):
 
     monkeypatch.setattr(kombu.messaging.Producer, "_publish", publish)
 
-    sentry_init(integrations=[CeleryIntegration()], enable_tracing=True)
+    debugg_ai_init(integrations=[CeleryIntegration()], enable_tracing=True)
     celery = Celery(__name__, broker=f"{system}://example.com")  # noqa: E231
     events = capture_events()
 
@@ -759,7 +759,7 @@ def tests_span_origin_consumer(init_celery, capture_events):
     assert event["spans"][0]["origin"] == "auto.queue.celery"
 
 
-def tests_span_origin_producer(monkeypatch, sentry_init, capture_events):
+def tests_span_origin_producer(monkeypatch, debugg_ai_init, capture_events):
     old_publish = kombu.messaging.Producer._publish
 
     def publish(*args, **kwargs):
@@ -767,7 +767,7 @@ def tests_span_origin_producer(monkeypatch, sentry_init, capture_events):
 
     monkeypatch.setattr(kombu.messaging.Producer, "_publish", publish)
 
-    sentry_init(integrations=[CeleryIntegration()], enable_tracing=True)
+    debugg_ai_init(integrations=[CeleryIntegration()], enable_tracing=True)
     celery = Celery(__name__, broker="redis://example.com")  # noqa: E231
 
     events = capture_events()
@@ -792,11 +792,11 @@ def tests_span_origin_producer(monkeypatch, sentry_init, capture_events):
 @mock.patch("celery.Celery.send_task")
 def test_send_task_wrapped(
     patched_send_task,
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     reset_integrations,
 ):
-    sentry_init(integrations=[CeleryIntegration()], enable_tracing=True)
+    debugg_ai_init(integrations=[CeleryIntegration()], enable_tracing=True)
     celery = Celery(__name__, broker="redis://example.com")  # noqa: E231
 
     events = capture_events()
@@ -811,19 +811,19 @@ def test_send_task_wrapped(
     assert kwargs["args"] == (1, 2)
     assert kwargs["kwargs"] == {"foo": "bar"}
     assert set(kwargs["headers"].keys()) == {
-        "sentry-task-enqueued-time",
-        "sentry-trace",
+        "debugg-ai-task-enqueued-time",
+        "debugg-ai-trace",
         "baggage",
         "headers",
     }
     assert set(kwargs["headers"]["headers"].keys()) == {
-        "sentry-trace",
+        "debugg-ai-trace",
         "baggage",
-        "sentry-task-enqueued-time",
+        "debugg-ai-task-enqueued-time",
     }
     assert (
-        kwargs["headers"]["sentry-trace"]
-        == kwargs["headers"]["headers"]["sentry-trace"]
+        kwargs["headers"]["debugg-ai-trace"]
+        == kwargs["headers"]["headers"]["debugg-ai-trace"]
     )
 
     (event,) = events  # We should have exactly one event (the transaction)
@@ -833,7 +833,7 @@ def test_send_task_wrapped(
     (span,) = event["spans"]  # We should have exactly one span
     assert span["description"] == "very_creative_task_name"
     assert span["op"] == "queue.submit.celery"
-    assert span["trace_id"] == kwargs["headers"]["sentry-trace"].split("-")[0]
+    assert span["trace_id"] == kwargs["headers"]["debugg-ai-trace"].split("-")[0]
 
 
 @pytest.mark.skip(reason="placeholder so that forked test does not come last")

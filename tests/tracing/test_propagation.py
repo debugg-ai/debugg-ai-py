@@ -2,8 +2,8 @@ import debugg_ai_sdk
 import pytest
 
 
-def test_standalone_span_iter_headers(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_standalone_span_iter_headers(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     with debugg_ai_sdk.start_span(op="test") as span:
         with pytest.raises(StopIteration):
@@ -11,8 +11,8 @@ def test_standalone_span_iter_headers(sentry_init):
             next(span.iter_headers())
 
 
-def test_span_in_span_iter_headers(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_span_in_span_iter_headers(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     with debugg_ai_sdk.start_span(op="test"):
         with debugg_ai_sdk.start_span(op="test2") as span_inner:
@@ -21,8 +21,8 @@ def test_span_in_span_iter_headers(sentry_init):
                 next(span_inner.iter_headers())
 
 
-def test_span_in_transaction(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_span_in_transaction(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     with debugg_ai_sdk.start_transaction(op="test"):
         with debugg_ai_sdk.start_span(op="test2") as span:
@@ -30,8 +30,8 @@ def test_span_in_transaction(sentry_init):
             next(span.iter_headers())
 
 
-def test_span_in_span_in_transaction(sentry_init):
-    sentry_init(enable_tracing=True)
+def test_span_in_span_in_transaction(debugg_ai_init):
+    debugg_ai_init(enable_tracing=True)
 
     with debugg_ai_sdk.start_transaction(op="test"):
         with debugg_ai_sdk.start_span(op="test2"):

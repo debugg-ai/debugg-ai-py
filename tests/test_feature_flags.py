@@ -11,8 +11,8 @@ from debugg_ai_sdk import start_span, start_transaction
 from tests.conftest import ApproxDict
 
 
-def test_featureflags_integration(sentry_init, capture_events, uninstall_integration):
-    sentry_init()
+def test_featureflags_integration(debugg_ai_init, capture_events, uninstall_integration):
+    debugg_ai_init()
 
     add_feature_flag("hello", False)
     add_feature_flag("world", True)
@@ -32,8 +32,8 @@ def test_featureflags_integration(sentry_init, capture_events, uninstall_integra
 
 
 @pytest.mark.asyncio
-async def test_featureflags_integration_spans_async(sentry_init, capture_events):
-    sentry_init(
+async def test_featureflags_integration_spans_async(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
     )
     events = capture_events()
@@ -60,8 +60,8 @@ async def test_featureflags_integration_spans_async(sentry_init, capture_events)
     assert found, "No event with exception found"
 
 
-def test_featureflags_integration_spans_sync(sentry_init, capture_events):
-    sentry_init(
+def test_featureflags_integration_spans_sync(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
     )
     events = capture_events()
@@ -89,9 +89,9 @@ def test_featureflags_integration_spans_sync(sentry_init, capture_events):
 
 
 def test_featureflags_integration_threaded(
-    sentry_init, capture_events, uninstall_integration
+    debugg_ai_init, capture_events, uninstall_integration
 ):
-    sentry_init()
+    debugg_ai_init()
     events = capture_events()
 
     # Capture an eval before we split isolation scopes.
@@ -138,11 +138,11 @@ def test_featureflags_integration_threaded(
 
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
 def test_featureflags_integration_asyncio(
-    sentry_init, capture_events, uninstall_integration
+    debugg_ai_init, capture_events, uninstall_integration
 ):
     asyncio = pytest.importorskip("asyncio")
 
-    sentry_init()
+    debugg_ai_init()
     events = capture_events()
 
     # Capture an eval before we split isolation scopes.
@@ -281,8 +281,8 @@ def test_flag_buffer_concurrent_access():
     assert error_occurred is False
 
 
-def test_flag_limit(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_flag_limit(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
 
     events = capture_events()
 

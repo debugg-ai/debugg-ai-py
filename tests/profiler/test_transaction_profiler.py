@@ -126,7 +126,7 @@ def test_profiler_setup_twice(make_options, teardown_profiling):
 )
 @mock.patch("debugg_ai_sdk.profiler.transaction_profiler.PROFILE_MINIMUM_SAMPLES", 0)
 def test_profiles_sample_rate(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     capture_record_lost_event_calls,
     teardown_profiling,
@@ -136,7 +136,7 @@ def test_profiles_sample_rate(
     mode,
 ):
     options = make_options(mode=mode, sample_rate=profiles_sample_rate)
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         profiler_mode=options.get("profiler_mode"),
         profiles_sample_rate=options.get("profiles_sample_rate"),
@@ -201,7 +201,7 @@ def test_profiles_sample_rate(
 )
 @mock.patch("debugg_ai_sdk.profiler.transaction_profiler.PROFILE_MINIMUM_SAMPLES", 0)
 def test_profiles_sampler(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     capture_record_lost_event_calls,
     teardown_profiling,
@@ -209,7 +209,7 @@ def test_profiles_sampler(
     profile_count,
     mode,
 ):
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         profiles_sampler=profiles_sampler,
     )
@@ -237,12 +237,12 @@ def test_profiles_sampler(
 
 
 def test_minimum_unique_samples_required(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     capture_record_lost_event_calls,
     teardown_profiling,
 ):
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         _experiments={"profiles_sample_rate": 1.0},
     )
@@ -267,11 +267,11 @@ def test_minimum_unique_samples_required(
 
 @pytest.mark.forked
 def test_profile_captured(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     teardown_profiling,
 ):
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         _experiments={"profiles_sample_rate": 1.0},
     )

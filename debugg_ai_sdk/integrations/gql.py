@@ -92,7 +92,7 @@ def _patch_execute():
     real_execute = gql.Client.execute
 
     @ensure_integration_enabled(GQLIntegration, real_execute)
-    def sentry_patched_execute(self, document, *args, **kwargs):
+    def debugg_ai_patched_execute(self, document, *args, **kwargs):
         # type: (gql.Client, DocumentNode, Any, Any) -> Any
         scope = debugg_ai_sdk.get_isolation_scope()
         scope.add_event_processor(_make_gql_event_processor(self, document))
@@ -109,7 +109,7 @@ def _patch_execute():
             debugg_ai_sdk.capture_event(event, hint)
             raise e
 
-    gql.Client.execute = sentry_patched_execute
+    gql.Client.execute = debugg_ai_patched_execute
 
 
 def _make_gql_event_processor(client, document):

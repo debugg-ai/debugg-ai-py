@@ -55,8 +55,8 @@ def parse_metrics(bytes):
 
 @minimum_python_37_with_gevent
 @pytest.mark.forked
-def test_increment(sentry_init, capture_envelopes, maybe_monkeypatched_threading):
-    sentry_init(
+def test_increment(debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading):
+    debugg_ai_init(
         release="fun-release",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": True},
@@ -109,8 +109,8 @@ def test_increment(sentry_init, capture_envelopes, maybe_monkeypatched_threading
 
 @minimum_python_37_with_gevent
 @pytest.mark.forked
-def test_timing(sentry_init, capture_envelopes, maybe_monkeypatched_threading):
-    sentry_init(
+def test_timing(debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading):
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": True},
@@ -171,9 +171,9 @@ def test_timing(sentry_init, capture_envelopes, maybe_monkeypatched_threading):
 @minimum_python_37_with_gevent
 @pytest.mark.forked
 def test_timing_decorator(
-    sentry_init, capture_envelopes, maybe_monkeypatched_threading
+    debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": True},
@@ -266,8 +266,8 @@ def test_timing_decorator(
 
 @minimum_python_37_with_gevent
 @pytest.mark.forked
-def test_timing_basic(sentry_init, capture_envelopes, maybe_monkeypatched_threading):
-    sentry_init(
+def test_timing_basic(debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading):
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": True},
@@ -321,8 +321,8 @@ def test_timing_basic(sentry_init, capture_envelopes, maybe_monkeypatched_thread
 
 @minimum_python_37_with_gevent
 @pytest.mark.forked
-def test_distribution(sentry_init, capture_envelopes, maybe_monkeypatched_threading):
-    sentry_init(
+def test_distribution(debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading):
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": True},
@@ -384,8 +384,8 @@ def test_distribution(sentry_init, capture_envelopes, maybe_monkeypatched_thread
 
 @minimum_python_37_with_gevent
 @pytest.mark.forked
-def test_set(sentry_init, capture_envelopes, maybe_monkeypatched_threading):
-    sentry_init(
+def test_set(debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading):
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": True},
@@ -438,8 +438,8 @@ def test_set(sentry_init, capture_envelopes, maybe_monkeypatched_threading):
 
 @minimum_python_37_with_gevent
 @pytest.mark.forked
-def test_gauge(sentry_init, capture_envelopes, maybe_monkeypatched_threading):
-    sentry_init(
+def test_gauge(debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading):
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": False},
@@ -472,8 +472,8 @@ def test_gauge(sentry_init, capture_envelopes, maybe_monkeypatched_threading):
 
 @minimum_python_37_with_gevent
 @pytest.mark.forked
-def test_multiple(sentry_init, capture_envelopes):
-    sentry_init(
+def test_multiple(debugg_ai_init, capture_envelopes):
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": False},
@@ -528,9 +528,9 @@ def test_multiple(sentry_init, capture_envelopes):
 @minimum_python_37_with_gevent
 @pytest.mark.forked
 def test_transaction_name(
-    sentry_init, capture_envelopes, maybe_monkeypatched_threading
+    debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": False},
@@ -570,9 +570,9 @@ def test_transaction_name(
 @minimum_python_37_with_gevent
 @pytest.mark.forked
 def test_metric_summaries(
-    sentry_init, capture_envelopes, maybe_monkeypatched_threading
+    debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         enable_tracing=True,
@@ -694,14 +694,14 @@ def test_metric_summaries(
     ],
 )
 def test_metric_name_normalization(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     metric_name,
     metric_unit,
     expected_name,
     maybe_monkeypatched_threading,
 ):
-    sentry_init(
+    debugg_ai_init(
         _experiments={"enable_metrics": True, "metric_code_locations": False},
     )
     envelopes = capture_envelopes()
@@ -739,13 +739,13 @@ def test_metric_name_normalization(
     ],
 )
 def test_metric_tag_normalization(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     metric_tag,
     expected_tag,
     maybe_monkeypatched_threading,
 ):
-    sentry_init(
+    debugg_ai_init(
         _experiments={"enable_metrics": True, "metric_code_locations": False},
     )
     envelopes = capture_envelopes()
@@ -772,7 +772,7 @@ def test_metric_tag_normalization(
 @minimum_python_37_with_gevent
 @pytest.mark.forked
 def test_before_emit_metric(
-    sentry_init, capture_envelopes, maybe_monkeypatched_threading
+    debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading
 ):
     def before_emit(key, value, unit, tags):
         if key == "removed-metric" or value == 47 or unit == "unsupported":
@@ -784,7 +784,7 @@ def test_before_emit_metric(
         metrics.increment("shitty-recursion")
         return True
 
-    sentry_init(
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={
@@ -819,9 +819,9 @@ def test_before_emit_metric(
 @minimum_python_37_with_gevent
 @pytest.mark.forked
 def test_aggregator_flush(
-    sentry_init, capture_envelopes, maybe_monkeypatched_threading
+    debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release@1.0.0",
         environment="not-fun-env",
         _experiments={
@@ -840,9 +840,9 @@ def test_aggregator_flush(
 @minimum_python_37_with_gevent
 @pytest.mark.forked
 def test_tag_serialization(
-    sentry_init, capture_envelopes, maybe_monkeypatched_threading
+    debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release",
         environment="not-fun-env",
         _experiments={"enable_metrics": True, "metric_code_locations": False},
@@ -881,9 +881,9 @@ def test_tag_serialization(
 @minimum_python_37_with_gevent
 @pytest.mark.forked
 def test_flush_recursion_protection(
-    sentry_init, capture_envelopes, monkeypatch, maybe_monkeypatched_threading
+    debugg_ai_init, capture_envelopes, monkeypatch, maybe_monkeypatched_threading
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release",
         environment="not-fun-env",
         _experiments={"enable_metrics": True},
@@ -914,10 +914,10 @@ def test_flush_recursion_protection(
 @minimum_python_37_with_gevent
 @pytest.mark.forked
 def test_flush_recursion_protection_background_flush(
-    sentry_init, capture_envelopes, monkeypatch, maybe_monkeypatched_threading
+    debugg_ai_init, capture_envelopes, monkeypatch, maybe_monkeypatched_threading
 ):
     monkeypatch.setattr(metrics.MetricsAggregator, "FLUSHER_SLEEP_TIME", 0.01)
-    sentry_init(
+    debugg_ai_init(
         release="fun-release",
         environment="not-fun-env",
         _experiments={"enable_metrics": True},
@@ -951,12 +951,12 @@ def test_flush_recursion_protection_background_flush(
 )
 @pytest.mark.forked
 def test_disable_metrics_for_old_python_with_gevent(
-    sentry_init, capture_envelopes, maybe_monkeypatched_threading
+    debugg_ai_init, capture_envelopes, maybe_monkeypatched_threading
 ):
     if maybe_monkeypatched_threading != "greenlet":
         pytest.skip("Test specifically for gevent/greenlet")
 
-    sentry_init(
+    debugg_ai_init(
         release="fun-release",
         environment="not-fun-env",
         _experiments={"enable_metrics": True},

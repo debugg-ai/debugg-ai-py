@@ -46,8 +46,8 @@ def do_trick(dog, trick):
     return "{}, can you {}? Good dog!".format(dog, trick)
 
 
-def test_basic(sentry_init, capture_events):
-    sentry_init(integrations=[RqIntegration()])
+def test_basic(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[RqIntegration()])
     events = capture_events()
 
     queue = rq.Queue(connection=FakeStrictRedis())
@@ -78,8 +78,8 @@ def test_basic(sentry_init, capture_events):
         assert "started_at" in extra
 
 
-def test_transport_shutdown(sentry_init, capture_events_forksafe):
-    sentry_init(integrations=[RqIntegration()])
+def test_transport_shutdown(debugg_ai_init, capture_events_forksafe):
+    debugg_ai_init(integrations=[RqIntegration()])
 
     events = capture_events_forksafe()
 
@@ -97,9 +97,9 @@ def test_transport_shutdown(sentry_init, capture_events_forksafe):
 
 
 def test_transaction_with_error(
-    sentry_init, capture_events, DictionaryContaining  # noqa:N803
+    debugg_ai_init, capture_events, DictionaryContaining  # noqa:N803
 ):
-    sentry_init(integrations=[RqIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[RqIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     queue = rq.Queue(connection=FakeStrictRedis())
@@ -132,10 +132,10 @@ def test_transaction_with_error(
 
 
 def test_error_has_trace_context_if_tracing_disabled(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
-    sentry_init(integrations=[RqIntegration()])
+    debugg_ai_init(integrations=[RqIntegration()])
     events = capture_events()
 
     queue = rq.Queue(connection=FakeStrictRedis())
@@ -150,10 +150,10 @@ def test_error_has_trace_context_if_tracing_disabled(
 
 
 def test_tracing_enabled(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
-    sentry_init(integrations=[RqIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[RqIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     queue = rq.Queue(connection=FakeStrictRedis())
@@ -172,10 +172,10 @@ def test_tracing_enabled(
 
 
 def test_tracing_disabled(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
-    sentry_init(integrations=[RqIntegration()])
+    debugg_ai_init(integrations=[RqIntegration()])
     events = capture_events()
 
     queue = rq.Queue(connection=FakeStrictRedis())
@@ -195,9 +195,9 @@ def test_tracing_disabled(
 
 
 def test_transaction_no_error(
-    sentry_init, capture_events, DictionaryContaining  # noqa:N803
+    debugg_ai_init, capture_events, DictionaryContaining  # noqa:N803
 ):
-    sentry_init(integrations=[RqIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[RqIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     queue = rq.Queue(connection=FakeStrictRedis())
@@ -222,10 +222,10 @@ def test_transaction_no_error(
 
 
 def test_traces_sampler_gets_correct_values_in_sampling_context(
-    sentry_init, DictionaryContaining, ObjectDescribedBy  # noqa:N803
+    debugg_ai_init, DictionaryContaining, ObjectDescribedBy  # noqa:N803
 ):
     traces_sampler = mock.Mock(return_value=True)
-    sentry_init(integrations=[RqIntegration()], traces_sampler=traces_sampler)
+    debugg_ai_init(integrations=[RqIntegration()], traces_sampler=traces_sampler)
 
     queue = rq.Queue(connection=FakeStrictRedis())
     worker = rq.SimpleWorker([queue], connection=queue.connection)
@@ -254,8 +254,8 @@ def test_traces_sampler_gets_correct_values_in_sampling_context(
 @pytest.mark.skipif(
     parse_version(rq.__version__) < (1, 5), reason="At least rq-1.5 required"
 )
-def test_job_with_retries(sentry_init, capture_events):
-    sentry_init(integrations=[RqIntegration()])
+def test_job_with_retries(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[RqIntegration()])
     events = capture_events()
 
     queue = rq.Queue(connection=FakeStrictRedis())
@@ -267,8 +267,8 @@ def test_job_with_retries(sentry_init, capture_events):
     assert len(events) == 1
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(integrations=[RqIntegration()], traces_sample_rate=1.0)
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[RqIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     queue = rq.Queue(connection=FakeStrictRedis())

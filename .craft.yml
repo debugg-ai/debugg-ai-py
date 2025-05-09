@@ -1,17 +1,17 @@
 minVersion: 0.34.1
 targets:
   - name: pypi
-    includeNames: /^sentry[_\-]sdk.*$/
+    includeNames: /^debugg-ai[_\-]sdk.*$/
   - name: gh-pages
   - name: registry
     sdks:
-      pypi:sentry-sdk:
+      pypi:debugg-ai-sdk:
   - name: github
   - name: aws-lambda-layer
     # This regex that matches the version is taken from craft:
-    # https://github.com/getsentry/craft/blob/8d77c38ddbe4be59f98f61b6e42952ca087d3acd/src/utils/version.ts#L11
-    includeNames: /^sentry-python-serverless-\bv?(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-?([\da-z-]+(?:\.[\da-z-]+)*))?(?:\+([\da-z-]+(?:\.[\da-z-]+)*))?\b.zip$/
-    layerName: SentryPythonServerlessSDK
+    # https://github.com/debugg-ai/craft/blob/8d77c38ddbe4be59f98f61b6e42952ca087d3acd/src/utils/version.ts#L11
+    includeNames: /^debugg-ai-py-serverless-\bv?(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-?([\da-z-]+(?:\.[\da-z-]+)*))?(?:\+([\da-z-]+(?:\.[\da-z-]+)*))?\b.zip$/
+    layerName: DebuggAIPythonServerlessSDK
     compatibleRuntimes:
       - name: python
         versions:
@@ -28,7 +28,7 @@ targets:
           - python3.12
           - python3.13
     license: MIT
-  - name: sentry-pypi
-    internalPypiRepo: getsentry/pypi
+  - name: debugg-ai-pypi
+    internalPypiRepo: debugg-ai/pypi
 changelog: CHANGELOG.md
 changelogPolicy: auto

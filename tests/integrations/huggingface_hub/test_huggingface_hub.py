@@ -23,9 +23,9 @@ def mock_client_post(client, post_mock):
     itertools.product([True, False], repeat=3),
 )
 def test_nonstreaming_chat_completion(
-    sentry_init, capture_events, send_default_pii, include_prompts, details_arg
+    debugg_ai_init, capture_events, send_default_pii, include_prompts, details_arg
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[HuggingfaceHubIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -82,9 +82,9 @@ def test_nonstreaming_chat_completion(
     itertools.product([True, False], repeat=3),
 )
 def test_streaming_chat_completion(
-    sentry_init, capture_events, send_default_pii, include_prompts, details_arg
+    debugg_ai_init, capture_events, send_default_pii, include_prompts, details_arg
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[HuggingfaceHubIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -136,8 +136,8 @@ def test_streaming_chat_completion(
         assert span["measurements"]["ai_total_tokens_used"]["value"] == 10
 
 
-def test_bad_chat_completion(sentry_init, capture_events):
-    sentry_init(integrations=[HuggingfaceHubIntegration()], traces_sample_rate=1.0)
+def test_bad_chat_completion(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[HuggingfaceHubIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     client = InferenceClient()
@@ -151,8 +151,8 @@ def test_bad_chat_completion(sentry_init, capture_events):
     assert event["level"] == "error"
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[HuggingfaceHubIntegration()],
         traces_sample_rate=1.0,
     )

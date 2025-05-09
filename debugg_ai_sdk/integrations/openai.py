@@ -267,7 +267,7 @@ def _wrap_chat_completion_create(f):
             return e.value
 
     @wraps(f)
-    def _sentry_patched_create_sync(*args, **kwargs):
+    def _debugg_ai_patched_create_sync(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(OpenAIIntegration)
         if integration is None or "messages" not in kwargs:
@@ -276,7 +276,7 @@ def _wrap_chat_completion_create(f):
 
         return _execute_sync(f, *args, **kwargs)
 
-    return _sentry_patched_create_sync
+    return _debugg_ai_patched_create_sync
 
 
 def _wrap_async_chat_completion_create(f):
@@ -302,7 +302,7 @@ def _wrap_async_chat_completion_create(f):
             return e.value
 
     @wraps(f)
-    async def _sentry_patched_create_async(*args, **kwargs):
+    async def _debugg_ai_patched_create_async(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(OpenAIIntegration)
         if integration is None or "messages" not in kwargs:
@@ -311,7 +311,7 @@ def _wrap_async_chat_completion_create(f):
 
         return await _execute_async(f, *args, **kwargs)
 
-    return _sentry_patched_create_async
+    return _debugg_ai_patched_create_async
 
 
 def _new_embeddings_create_common(f, *args, **kwargs):
@@ -384,7 +384,7 @@ def _wrap_embeddings_create(f):
             return e.value
 
     @wraps(f)
-    def _sentry_patched_create_sync(*args, **kwargs):
+    def _debugg_ai_patched_create_sync(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(OpenAIIntegration)
         if integration is None:
@@ -392,7 +392,7 @@ def _wrap_embeddings_create(f):
 
         return _execute_sync(f, *args, **kwargs)
 
-    return _sentry_patched_create_sync
+    return _debugg_ai_patched_create_sync
 
 
 def _wrap_async_embeddings_create(f):
@@ -418,7 +418,7 @@ def _wrap_async_embeddings_create(f):
             return e.value
 
     @wraps(f)
-    async def _sentry_patched_create_async(*args, **kwargs):
+    async def _debugg_ai_patched_create_async(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(OpenAIIntegration)
         if integration is None:
@@ -426,4 +426,4 @@ def _wrap_async_embeddings_create(f):
 
         return await _execute_async(f, *args, **kwargs)
 
-    return _sentry_patched_create_async
+    return _debugg_ai_patched_create_async

@@ -57,12 +57,12 @@ class BackgroundWorker:
         finally:
             queue.all_tasks_done.release()
 
-    def start(self):
-        # type: () -> None
+    def start(self, *args, **kwargs):
+        # type: (Any, Any) -> None
         with self._lock:
             if not self.is_alive:
                 self._thread = threading.Thread(
-                    target=self._target, name="sentry-sdk.BackgroundWorker"
+                    target=self._target, name="debugg-ai-sdk.BackgroundWorker"
                 )
                 self._thread.daemon = True
                 try:
@@ -125,8 +125,8 @@ class BackgroundWorker:
         except FullError:
             return False
 
-    def _target(self):
-        # type: () -> None
+    def _target(self, *args, **kwargs):
+        # type: (Any, Any) -> None
         while True:
             callback = self._queue.get()
             try:

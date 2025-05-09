@@ -24,7 +24,7 @@ from debugg_ai_sdk.utils import (
 )
 from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
 from debugg_ai_sdk.integrations.logging import ignore_logger
-from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.integrations.wsgi import DebuggAIWsgiMiddleware
 from debugg_ai_sdk.integrations._wsgi_common import (
     DEFAULT_HTTP_METHODS_TO_CAPTURE,
     RequestExtractor,
@@ -168,7 +168,7 @@ class DjangoIntegration(Integration):
         old_app = WSGIHandler.__call__
 
         @ensure_integration_enabled(DjangoIntegration, old_app)
-        def sentry_patched_wsgi_handler(self, environ, start_response):
+        def debugg_ai_patched_wsgi_handler(self, environ, start_response):
             # type: (Any, Dict[str, str], Callable[..., Any]) -> _ScopedResponse
             bound_old_app = old_app.__get__(self, WSGIHandler)
 
@@ -178,7 +178,7 @@ class DjangoIntegration(Integration):
 
             integration = debugg_ai_sdk.get_client().get_integration(DjangoIntegration)
 
-            middleware = SentryWsgiMiddleware(
+            middleware = DebuggAIWsgiMiddleware(
                 bound_old_app,
                 use_x_forwarded_for,
                 span_origin=DjangoIntegration.origin,
@@ -190,7 +190,7 @@ class DjangoIntegration(Integration):
             )
             return middleware(environ, start_response)
 
-        WSGIHandler.__call__ = sentry_patched_wsgi_handler
+        WSGIHandler.__call__ = debugg_ai_patched_wsgi_handler
 
         _patch_get_response()
 
@@ -321,16 +321,16 @@ def _patch_drf():
             else:
                 old_drf_initial = APIView.initial
 
-                def sentry_patched_drf_initial(self, request, *args, **kwargs):
+                def debugg_ai_patched_drf_initial(self, request, *args, **kwargs):
                     # type: (APIView, Any, *Any, **Any) -> Any
                     with capture_internal_exceptions():
-                        request._request._sentry_drf_request_backref = weakref.ref(
+                        request._request._debugg_ai_drf_request_backref = weakref.ref(
                             request
                         )
                         pass
                     return old_drf_initial(self, request, *args, **kwargs)
 
-                APIView.initial = sentry_patched_drf_initial
+                APIView.initial = debugg_ai_patched_drf_initial
 
 
 def _patch_channels():
@@ -471,14 +471,14 @@ def _patch_get_response():
 
     old_get_response = BaseHandler.get_response
 
-    def sentry_patched_get_response(self, request):
+    def debugg_ai_patched_get_response(self, request):
         # type: (Any, WSGIRequest) -> Union[HttpResponse, BaseException]
         _before_get_response(request)
         rv = old_get_response(self, request)
         _after_get_response(request)
         return rv
 
-    BaseHandler.get_response = sentry_patched_get_response
+    BaseHandler.get_response = debugg_ai_patched_get_response
 
     if hasattr(BaseHandler, "get_response_async"):
         from debugg_ai_sdk.integrations.django.asgi import patch_get_response_async
@@ -537,7 +537,7 @@ class DjangoRequestExtractor(RequestExtractor):
     def __init__(self, request):
         # type: (Union[WSGIRequest, ASGIRequest]) -> None
         try:
-            drf_request = request._sentry_drf_request_backref()
+            drf_request = request._debugg_ai_drf_request_backref()
             if drf_request is not None:
                 request = drf_request
         except AttributeError:

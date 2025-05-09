@@ -6,7 +6,7 @@ from werkzeug.test import Client
 
 import debugg_ai_sdk
 from debugg_ai_sdk import capture_message
-from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.integrations.wsgi import DebuggAIWsgiMiddleware
 
 
 @pytest.fixture
@@ -39,9 +39,9 @@ class ExitingIterable:
         return type(self).__next__(self)
 
 
-def test_basic(sentry_init, crashing_app, capture_events):
-    sentry_init(send_default_pii=True)
-    app = SentryWsgiMiddleware(crashing_app)
+def test_basic(debugg_ai_init, crashing_app, capture_events):
+    debugg_ai_init(send_default_pii=True)
+    app = DebuggAIWsgiMiddleware(crashing_app)
     client = Client(app)
     events = capture_events()
 
@@ -64,10 +64,10 @@ def test_basic(sentry_init, crashing_app, capture_events):
 @pytest.mark.parametrize("path_info", ("bark/", "/bark/"))
 @pytest.mark.parametrize("script_name", ("woof/woof", "woof/woof/"))
 def test_script_name_is_respected(
-    sentry_init, crashing_app, capture_events, script_name, path_info
+    debugg_ai_init, crashing_app, capture_events, script_name, path_info
 ):
-    sentry_init(send_default_pii=True)
-    app = SentryWsgiMiddleware(crashing_app)
+    debugg_ai_init(send_default_pii=True)
+    app = DebuggAIWsgiMiddleware(crashing_app)
     client = Client(app)
     events = capture_events()
 
@@ -81,11 +81,11 @@ def test_script_name_is_respected(
 
 
 @pytest.fixture(params=[0, None])
-def test_systemexit_zero_is_ignored(sentry_init, capture_events, request):
+def test_systemexit_zero_is_ignored(debugg_ai_init, capture_events, request):
     zero_code = request.param
-    sentry_init(send_default_pii=True)
+    debugg_ai_init(send_default_pii=True)
     iterable = ExitingIterable(lambda: SystemExit(zero_code))
-    app = SentryWsgiMiddleware(IterableApp(iterable))
+    app = DebuggAIWsgiMiddleware(IterableApp(iterable))
     client = Client(app)
     events = capture_events()
 
@@ -96,11 +96,11 @@ def test_systemexit_zero_is_ignored(sentry_init, capture_events, request):
 
 
 @pytest.fixture(params=["", "foo", 1, 2])
-def test_systemexit_nonzero_is_captured(sentry_init, capture_events, request):
+def test_systemexit_nonzero_is_captured(debugg_ai_init, capture_events, request):
     nonzero_code = request.param
-    sentry_init(send_default_pii=True)
+    debugg_ai_init(send_default_pii=True)
     iterable = ExitingIterable(lambda: SystemExit(nonzero_code))
-    app = SentryWsgiMiddleware(IterableApp(iterable))
+    app = DebuggAIWsgiMiddleware(IterableApp(iterable))
     client = Client(app)
     events = capture_events()
 
@@ -116,10 +116,10 @@ def test_systemexit_nonzero_is_captured(sentry_init, capture_events, request):
     assert event["level"] == "error"
 
 
-def test_keyboard_interrupt_is_captured(sentry_init, capture_events):
-    sentry_init(send_default_pii=True)
+def test_keyboard_interrupt_is_captured(debugg_ai_init, capture_events):
+    debugg_ai_init(send_default_pii=True)
     iterable = ExitingIterable(lambda: KeyboardInterrupt())
-    app = SentryWsgiMiddleware(IterableApp(iterable))
+    app = DebuggAIWsgiMiddleware(IterableApp(iterable))
     client = Client(app)
     events = capture_events()
 
@@ -136,13 +136,13 @@ def test_keyboard_interrupt_is_captured(sentry_init, capture_events):
 
 
 def test_transaction_with_error(
-    sentry_init, crashing_app, capture_events, DictionaryContaining  # noqa:N803
+    debugg_ai_init, crashing_app, capture_events, DictionaryContaining  # noqa:N803
 ):
     def dogpark(environ, start_response):
         raise ValueError("Fetch aborted. The ball was not returned.")
 
-    sentry_init(send_default_pii=True, traces_sample_rate=1.0)
-    app = SentryWsgiMiddleware(dogpark)
+    debugg_ai_init(send_default_pii=True, traces_sample_rate=1.0)
+    app = DebuggAIWsgiMiddleware(dogpark)
     client = Client(app)
     events = capture_events()
 
@@ -173,14 +173,14 @@ def test_transaction_with_error(
 
 
 def test_transaction_no_error(
-    sentry_init, capture_events, DictionaryContaining  # noqa:N803
+    debugg_ai_init, capture_events, DictionaryContaining  # noqa:N803
 ):
     def dogpark(environ, start_response):
         start_response("200 OK", [])
         return ["Go get the ball! Good dog!"]
 
-    sentry_init(send_default_pii=True, traces_sample_rate=1.0)
-    app = SentryWsgiMiddleware(dogpark)
+    debugg_ai_init(send_default_pii=True, traces_sample_rate=1.0)
+    app = DebuggAIWsgiMiddleware(dogpark)
     client = Client(app)
     events = capture_events()
 
@@ -197,15 +197,15 @@ def test_transaction_no_error(
 
 
 def test_has_trace_if_performance_enabled(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
     def dogpark(environ, start_response):
         capture_message("Attempting to fetch the ball")
         raise ValueError("Fetch aborted. The ball was not returned.")
 
-    sentry_init(traces_sample_rate=1.0)
-    app = SentryWsgiMiddleware(dogpark)
+    debugg_ai_init(traces_sample_rate=1.0)
+    app = DebuggAIWsgiMiddleware(dogpark)
     client = Client(app)
     events = capture_events()
 
@@ -231,15 +231,15 @@ def test_has_trace_if_performance_enabled(
 
 
 def test_has_trace_if_performance_disabled(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
     def dogpark(environ, start_response):
         capture_message("Attempting to fetch the ball")
         raise ValueError("Fetch aborted. The ball was not returned.")
 
-    sentry_init()
-    app = SentryWsgiMiddleware(dogpark)
+    debugg_ai_init()
+    app = DebuggAIWsgiMiddleware(dogpark)
     client = Client(app)
     events = capture_events()
 
@@ -256,25 +256,25 @@ def test_has_trace_if_performance_disabled(
 
 
 def test_trace_from_headers_if_performance_enabled(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
     def dogpark(environ, start_response):
         capture_message("Attempting to fetch the ball")
         raise ValueError("Fetch aborted. The ball was not returned.")
 
-    sentry_init(traces_sample_rate=1.0)
-    app = SentryWsgiMiddleware(dogpark)
+    debugg_ai_init(traces_sample_rate=1.0)
+    app = DebuggAIWsgiMiddleware(dogpark)
     client = Client(app)
     events = capture_events()
 
     trace_id = "582b43a4192642f0b136d5159a501701"
-    sentry_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
 
     with pytest.raises(ValueError):
         client.get(
             "http://dogs.are.great/sit/stay/rollover/",
-            headers={"sentry-trace": sentry_trace_header},
+            headers={"debugg-ai-trace": debugg_ai_trace_header},
         )
 
     msg_event, error_event, transaction_event = events
@@ -294,25 +294,25 @@ def test_trace_from_headers_if_performance_enabled(
 
 
 def test_trace_from_headers_if_performance_disabled(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
     def dogpark(environ, start_response):
         capture_message("Attempting to fetch the ball")
         raise ValueError("Fetch aborted. The ball was not returned.")
 
-    sentry_init()
-    app = SentryWsgiMiddleware(dogpark)
+    debugg_ai_init()
+    app = DebuggAIWsgiMiddleware(dogpark)
     client = Client(app)
     events = capture_events()
 
     trace_id = "582b43a4192642f0b136d5159a501701"
-    sentry_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
 
     with pytest.raises(ValueError):
         client.get(
             "http://dogs.are.great/sit/stay/rollover/",
-            headers={"sentry-trace": sentry_trace_header},
+            headers={"debugg-ai-trace": debugg_ai_trace_header},
         )
 
     msg_event, error_event = events
@@ -327,7 +327,7 @@ def test_trace_from_headers_if_performance_disabled(
 
 
 def test_traces_sampler_gets_correct_values_in_sampling_context(
-    sentry_init,
+    debugg_ai_init,
     DictionaryContaining,  # noqa:N803
 ):
     def app(environ, start_response):
@@ -335,8 +335,8 @@ def test_traces_sampler_gets_correct_values_in_sampling_context(
         return ["Go get the ball! Good dog!"]
 
     traces_sampler = mock.Mock(return_value=True)
-    sentry_init(send_default_pii=True, traces_sampler=traces_sampler)
-    app = SentryWsgiMiddleware(app)
+    debugg_ai_init(send_default_pii=True, traces_sampler=traces_sampler)
+    app = DebuggAIWsgiMiddleware(app)
     client = Client(app)
 
     client.get("/dogs/are/great/")
@@ -356,7 +356,7 @@ def test_traces_sampler_gets_correct_values_in_sampling_context(
 
 
 def test_session_mode_defaults_to_request_mode_in_wsgi_handler(
-    capture_envelopes, sentry_init
+    capture_envelopes, debugg_ai_init
 ):
     """
     Test that ensures that even though the default `session_mode` for
@@ -369,8 +369,8 @@ def test_session_mode_defaults_to_request_mode_in_wsgi_handler(
         return ["Go get the ball! Good dog!"]
 
     traces_sampler = mock.Mock(return_value=True)
-    sentry_init(send_default_pii=True, traces_sampler=traces_sampler)
-    app = SentryWsgiMiddleware(app)
+    debugg_ai_init(send_default_pii=True, traces_sampler=traces_sampler)
+    app = DebuggAIWsgiMiddleware(app)
     envelopes = capture_envelopes()
 
     client = Client(app)
@@ -388,7 +388,7 @@ def test_session_mode_defaults_to_request_mode_in_wsgi_handler(
     assert aggregates[0]["exited"] == 1
 
 
-def test_auto_session_tracking_with_aggregates(sentry_init, capture_envelopes):
+def test_auto_session_tracking_with_aggregates(debugg_ai_init, capture_envelopes):
     """
     Test for correct session aggregates in auto session tracking.
     """
@@ -401,8 +401,8 @@ def test_auto_session_tracking_with_aggregates(sentry_init, capture_envelopes):
         return ["Go get the ball! Good dog!"]
 
     traces_sampler = mock.Mock(return_value=True)
-    sentry_init(send_default_pii=True, traces_sampler=traces_sampler)
-    app = SentryWsgiMiddleware(sample_app)
+    debugg_ai_init(send_default_pii=True, traces_sampler=traces_sampler)
+    app = DebuggAIWsgiMiddleware(sample_app)
     envelopes = capture_envelopes()
     assert len(envelopes) == 0
 
@@ -433,7 +433,7 @@ def test_auto_session_tracking_with_aggregates(sentry_init, capture_envelopes):
 
 @mock.patch("debugg_ai_sdk.profiler.transaction_profiler.PROFILE_MINIMUM_SAMPLES", 0)
 def test_profile_sent(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     teardown_profiling,
 ):
@@ -441,11 +441,11 @@ def test_profile_sent(
         start_response("200 OK", [])
         return ["Go get the ball! Good dog!"]
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         _experiments={"profiles_sample_rate": 1.0},
     )
-    app = SentryWsgiMiddleware(test_app)
+    app = DebuggAIWsgiMiddleware(test_app)
     envelopes = capture_envelopes()
 
     client = Client(app)
@@ -458,13 +458,13 @@ def test_profile_sent(
     assert len(profiles) == 1
 
 
-def test_span_origin_manual(sentry_init, capture_events):
+def test_span_origin_manual(debugg_ai_init, capture_events):
     def dogpark(environ, start_response):
         start_response("200 OK", [])
         return ["Go get the ball! Good dog!"]
 
-    sentry_init(send_default_pii=True, traces_sample_rate=1.0)
-    app = SentryWsgiMiddleware(dogpark)
+    debugg_ai_init(send_default_pii=True, traces_sample_rate=1.0)
+    app = DebuggAIWsgiMiddleware(dogpark)
 
     events = capture_events()
 
@@ -476,13 +476,13 @@ def test_span_origin_manual(sentry_init, capture_events):
     assert event["contexts"]["trace"]["origin"] == "manual"
 
 
-def test_span_origin_custom(sentry_init, capture_events):
+def test_span_origin_custom(debugg_ai_init, capture_events):
     def dogpark(environ, start_response):
         start_response("200 OK", [])
         return ["Go get the ball! Good dog!"]
 
-    sentry_init(send_default_pii=True, traces_sample_rate=1.0)
-    app = SentryWsgiMiddleware(
+    debugg_ai_init(send_default_pii=True, traces_sample_rate=1.0)
+    app = DebuggAIWsgiMiddleware(
         dogpark,
         span_origin="auto.dogpark.deluxe",
     )

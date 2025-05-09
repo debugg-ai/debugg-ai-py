@@ -38,9 +38,9 @@ async def boom():
     1 / 0
 
 
-def get_sentry_task_factory(mock_get_running_loop):
+def get_debugg_ai_task_factory(mock_get_running_loop):
     """
-    Patches (mocked) asyncio and gets the sentry_task_factory.
+    Patches (mocked) asyncio and gets the debugg_ai_task_factory.
     """
     mock_loop = mock_get_running_loop.return_value
     patch_asyncio()
@@ -52,10 +52,10 @@ def get_sentry_task_factory(mock_get_running_loop):
 @minimum_python_38
 @pytest.mark.asyncio(loop_scope="module")
 async def test_create_task(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         send_default_pii=True,
         integrations=[
@@ -95,10 +95,10 @@ async def test_create_task(
 @minimum_python_38
 @pytest.mark.asyncio(loop_scope="module")
 async def test_gather(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         send_default_pii=True,
         integrations=[
@@ -137,10 +137,10 @@ async def test_gather(
 @minimum_python_38
 @pytest.mark.asyncio(loop_scope="module")
 async def test_exception(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         send_default_pii=True,
         integrations=[
@@ -169,8 +169,8 @@ async def test_exception(
 
 @minimum_python_38
 @pytest.mark.asyncio(loop_scope="module")
-async def test_task_result(sentry_init):
-    sentry_init(
+async def test_task_result(debugg_ai_init):
+    debugg_ai_init(
         integrations=[
             AsyncioIntegration(),
         ],
@@ -185,11 +185,11 @@ async def test_task_result(sentry_init):
 
 @minimum_python_311
 @pytest.mark.asyncio(loop_scope="module")
-async def test_task_with_context(sentry_init):
+async def test_task_with_context(debugg_ai_init):
     """
     Integration test to ensure working context parameter in Python 3.11+
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             AsyncioIntegration(),
         ],
@@ -228,25 +228,25 @@ def test_patch_asyncio(mock_get_running_loop):
     set_task_factory_args, _ = mock_loop.set_task_factory.call_args
     assert len(set_task_factory_args) == 1
 
-    sentry_task_factory, *_ = set_task_factory_args
-    assert callable(sentry_task_factory)
+    debugg_ai_task_factory, *_ = set_task_factory_args
+    assert callable(debugg_ai_task_factory)
 
 
 @minimum_python_38
 @patch("asyncio.get_running_loop")
 @patch("debugg_ai_sdk.integrations.asyncio.Task")
-def test_sentry_task_factory_no_factory(MockTask, mock_get_running_loop):  # noqa: N803
+def test_debugg_ai_task_factory_no_factory(MockTask, mock_get_running_loop):  # noqa: N803
     mock_loop = mock_get_running_loop.return_value
     mock_coro = MagicMock()
 
     # Set the original task factory to None
     mock_loop.get_task_factory.return_value = None
 
-    # Retieve sentry task factory (since it is an inner function within patch_asyncio)
-    sentry_task_factory = get_sentry_task_factory(mock_get_running_loop)
+    # Retieve debugg-ai task factory (since it is an inner function within patch_asyncio)
+    debugg_ai_task_factory = get_debugg_ai_task_factory(mock_get_running_loop)
 
     # The call we are testing
-    ret_val = sentry_task_factory(mock_loop, mock_coro)
+    ret_val = debugg_ai_task_factory(mock_loop, mock_coro)
 
     assert MockTask.called
     assert ret_val == MockTask.return_value
@@ -263,18 +263,18 @@ def test_sentry_task_factory_no_factory(MockTask, mock_get_running_loop):  # noq
 
 @minimum_python_38
 @patch("asyncio.get_running_loop")
-def test_sentry_task_factory_with_factory(mock_get_running_loop):
+def test_debugg_ai_task_factory_with_factory(mock_get_running_loop):
     mock_loop = mock_get_running_loop.return_value
     mock_coro = MagicMock()
 
     # The original task factory will be mocked out here, let's retrieve the value for later
     orig_task_factory = mock_loop.get_task_factory.return_value
 
-    # Retieve sentry task factory (since it is an inner function within patch_asyncio)
-    sentry_task_factory = get_sentry_task_factory(mock_get_running_loop)
+    # Retieve debugg-ai task factory (since it is an inner function within patch_asyncio)
+    debugg_ai_task_factory = get_debugg_ai_task_factory(mock_get_running_loop)
 
     # The call we are testing
-    ret_val = sentry_task_factory(mock_loop, mock_coro)
+    ret_val = debugg_ai_task_factory(mock_loop, mock_coro)
 
     assert orig_task_factory.called
     assert ret_val == orig_task_factory.return_value
@@ -290,7 +290,7 @@ def test_sentry_task_factory_with_factory(mock_get_running_loop):
 @minimum_python_311
 @patch("asyncio.get_running_loop")
 @patch("debugg_ai_sdk.integrations.asyncio.Task")
-def test_sentry_task_factory_context_no_factory(
+def test_debugg_ai_task_factory_context_no_factory(
     MockTask, mock_get_running_loop  # noqa: N803
 ):
     mock_loop = mock_get_running_loop.return_value
@@ -300,11 +300,11 @@ def test_sentry_task_factory_context_no_factory(
     # Set the original task factory to None
     mock_loop.get_task_factory.return_value = None
 
-    # Retieve sentry task factory (since it is an inner function within patch_asyncio)
-    sentry_task_factory = get_sentry_task_factory(mock_get_running_loop)
+    # Retieve debugg-ai task factory (since it is an inner function within patch_asyncio)
+    debugg_ai_task_factory = get_debugg_ai_task_factory(mock_get_running_loop)
 
     # The call we are testing
-    ret_val = sentry_task_factory(mock_loop, mock_coro, context=mock_context)
+    ret_val = debugg_ai_task_factory(mock_loop, mock_coro, context=mock_context)
 
     assert MockTask.called
     assert ret_val == MockTask.return_value
@@ -323,7 +323,7 @@ def test_sentry_task_factory_context_no_factory(
 
 @minimum_python_311
 @patch("asyncio.get_running_loop")
-def test_sentry_task_factory_context_with_factory(mock_get_running_loop):
+def test_debugg_ai_task_factory_context_with_factory(mock_get_running_loop):
     mock_loop = mock_get_running_loop.return_value
     mock_coro = MagicMock()
     mock_context = MagicMock()
@@ -331,11 +331,11 @@ def test_sentry_task_factory_context_with_factory(mock_get_running_loop):
     # The original task factory will be mocked out here, let's retrieve the value for later
     orig_task_factory = mock_loop.get_task_factory.return_value
 
-    # Retieve sentry task factory (since it is an inner function within patch_asyncio)
-    sentry_task_factory = get_sentry_task_factory(mock_get_running_loop)
+    # Retieve debugg-ai task factory (since it is an inner function within patch_asyncio)
+    debugg_ai_task_factory = get_debugg_ai_task_factory(mock_get_running_loop)
 
     # The call we are testing
-    ret_val = sentry_task_factory(mock_loop, mock_coro, context=mock_context)
+    ret_val = debugg_ai_task_factory(mock_loop, mock_coro, context=mock_context)
 
     assert orig_task_factory.called
     assert ret_val == orig_task_factory.return_value
@@ -354,10 +354,10 @@ def test_sentry_task_factory_context_with_factory(mock_get_running_loop):
 @minimum_python_38
 @pytest.mark.asyncio(loop_scope="module")
 async def test_span_origin(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[AsyncioIntegration()],
         traces_sample_rate=1.0,
     )

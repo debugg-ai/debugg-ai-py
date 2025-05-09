@@ -12,18 +12,18 @@ from opentelemetry.trace import (
 from opentelemetry.trace.propagation import get_current_span
 
 from debugg_ai_sdk.integrations.opentelemetry.consts import (
-    SENTRY_BAGGAGE_KEY,
-    SENTRY_TRACE_KEY,
+    DEBUGG_AI_BAGGAGE_KEY,
+    DEBUGG_AI_TRACE_KEY,
 )
-from debugg_ai_sdk.integrations.opentelemetry.propagator import SentryPropagator
-from debugg_ai_sdk.integrations.opentelemetry.span_processor import SentrySpanProcessor
+from debugg_ai_sdk.integrations.opentelemetry.propagator import DebuggAIPropagator
+from debugg_ai_sdk.integrations.opentelemetry.span_processor import DebuggAISpanProcessor
 from debugg_ai_sdk.tracing_utils import Baggage
 
 
 @pytest.mark.forked
-def test_extract_no_context_no_sentry_trace_header():
+def test_extract_no_context_no_debugg_ai_trace_header():
     """
-    No context and NO Sentry trace data in getter.
+    No context and NO DebuggAI trace data in getter.
     Extract should return empty context.
     """
     carrier = None
@@ -31,15 +31,15 @@ def test_extract_no_context_no_sentry_trace_header():
     getter = MagicMock()
     getter.get.return_value = None
 
-    modified_context = SentryPropagator().extract(carrier, context, getter)
+    modified_context = DebuggAIPropagator().extract(carrier, context, getter)
 
     assert modified_context == {}
 
 
 @pytest.mark.forked
-def test_extract_context_no_sentry_trace_header():
+def test_extract_context_no_debugg_ai_trace_header():
     """
-    Context but NO Sentry trace data in getter.
+    Context but NO DebuggAI trace data in getter.
     Extract should return context as is.
     """
     carrier = None
@@ -47,15 +47,15 @@ def test_extract_context_no_sentry_trace_header():
     getter = MagicMock()
     getter.get.return_value = None
 
-    modified_context = SentryPropagator().extract(carrier, context, getter)
+    modified_context = DebuggAIPropagator().extract(carrier, context, getter)
 
     assert modified_context == context
 
 
 @pytest.mark.forked
-def test_extract_empty_context_sentry_trace_header_no_baggage():
+def test_extract_empty_context_debugg_ai_trace_header_no_baggage():
     """
-    Empty context but Sentry trace data but NO Baggage in getter.
+    Empty context but DebuggAI trace data but NO Baggage in getter.
     Extract should return context that has empty baggage in it and also a NoopSpan with span_id and trace_id.
     """
     carrier = None
@@ -66,16 +66,16 @@ def test_extract_empty_context_sentry_trace_header_no_baggage():
         None,
     ]
 
-    modified_context = SentryPropagator().extract(carrier, context, getter)
+    modified_context = DebuggAIPropagator().extract(carrier, context, getter)
 
     assert len(modified_context.keys()) == 3
 
-    assert modified_context[SENTRY_TRACE_KEY] == {
+    assert modified_context[DEBUGG_AI_TRACE_KEY] == {
         "trace_id": "1234567890abcdef1234567890abcdef",
         "parent_span_id": "1234567890abcdef",
         "parent_sampled": True,
     }
-    assert modified_context[SENTRY_BAGGAGE_KEY].serialize() == ""
+    assert modified_context[DEBUGG_AI_BAGGAGE_KEY].serialize() == ""
 
     span_context = get_current_span(modified_context).get_span_context()
     assert span_context.span_id == int("1234567890abcdef", 16)
@@ -83,15 +83,15 @@ def test_extract_empty_context_sentry_trace_header_no_baggage():
 
 
 @pytest.mark.forked
-def test_extract_context_sentry_trace_header_baggage():
+def test_extract_context_debugg_ai_trace_header_baggage():
     """
-    Empty context but Sentry trace data and Baggage in getter.
+    Empty context but DebuggAI trace data and Baggage in getter.
     Extract should return context that has baggage in it and also a NoopSpan with span_id and trace_id.
     """
     baggage_header = (
-        "other-vendor-value-1=foo;bar;baz, sentry-trace_id=771a43a4192642f0b136d5159a501700, "
-        "sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=0.01337, "
-        "sentry-user_id=Am%C3%A9lie, other-vendor-value-2=foo;bar;"
+        "other-vendor-value-1=foo;bar;baz, debugg-ai-trace_id=771a43a4192642f0b136d5159a501700, "
+        "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3, debugg-ai-sample_rate=0.01337, "
+        "debugg-ai-user_id=Am%C3%A9lie, other-vendor-value-2=foo;bar;"
     )
 
     carrier = None
@@ -102,20 +102,20 @@ def test_extract_context_sentry_trace_header_baggage():
         [baggage_header],
     ]
 
-    modified_context = SentryPropagator().extract(carrier, context, getter)
+    modified_context = DebuggAIPropagator().extract(carrier, context, getter)
 
     assert len(modified_context.keys()) == 4
 
-    assert modified_context[SENTRY_TRACE_KEY] == {
+    assert modified_context[DEBUGG_AI_TRACE_KEY] == {
         "trace_id": "1234567890abcdef1234567890abcdef",
         "parent_span_id": "1234567890abcdef",
         "parent_sampled": True,
     }
 
-    assert modified_context[SENTRY_BAGGAGE_KEY].serialize() == (
-        "sentry-trace_id=771a43a4192642f0b136d5159a501700,"
-        "sentry-public_key=49d0f7386ad645858ae85020e393bef3,"
-        "sentry-sample_rate=0.01337,sentry-user_id=Am%C3%A9lie"
+    assert modified_context[DEBUGG_AI_BAGGAGE_KEY].serialize() == (
+        "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700,"
+        "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3,"
+        "debugg-ai-sample_rate=0.01337,debugg-ai-user_id=Am%C3%A9lie"
     )
 
     span_context = get_current_span(modified_context).get_span_context()
@@ -127,7 +127,7 @@ def test_extract_context_sentry_trace_header_baggage():
 def test_inject_empty_otel_span_map():
     """
     Empty otel_span_map.
-    So there is no sentry_span to be found in inject()
+    So there is no debugg_ai_span to be found in inject()
     and the function is returned early and no setters are called.
     """
     carrier = None
@@ -149,15 +149,15 @@ def test_inject_empty_otel_span_map():
         return_value=span,
     ):
         full_context = set_span_in_context(span, context)
-        SentryPropagator().inject(carrier, full_context, setter)
+        DebuggAIPropagator().inject(carrier, full_context, setter)
 
         setter.set.assert_not_called()
 
 
 @pytest.mark.forked
-def test_inject_sentry_span_no_baggage():
+def test_inject_debugg_ai_span_no_baggage():
     """
-    Inject a sentry span with no baggage.
+    Inject a debugg-ai span with no baggage.
     """
     carrier = None
     context = get_current()
@@ -176,32 +176,32 @@ def test_inject_sentry_span_no_baggage():
     span = MagicMock()
     span.get_span_context.return_value = span_context
 
-    sentry_span = MagicMock()
-    sentry_span.to_traceparent = mock.Mock(
+    debugg_ai_span = MagicMock()
+    debugg_ai_span.to_traceparent = mock.Mock(
         return_value="1234567890abcdef1234567890abcdef-1234567890abcdef-1"
     )
-    sentry_span.containing_transaction.get_baggage = mock.Mock(return_value=None)
+    debugg_ai_span.containing_transaction.get_baggage = mock.Mock(return_value=None)
 
-    span_processor = SentrySpanProcessor()
-    span_processor.otel_span_map[span_id] = sentry_span
+    span_processor = DebuggAISpanProcessor()
+    span_processor.otel_span_map[span_id] = debugg_ai_span
 
     with mock.patch(
         "debugg_ai_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
         return_value=span,
     ):
         full_context = set_span_in_context(span, context)
-        SentryPropagator().inject(carrier, full_context, setter)
+        DebuggAIPropagator().inject(carrier, full_context, setter)
 
         setter.set.assert_called_once_with(
             carrier,
-            "sentry-trace",
+            "debugg-ai-trace",
             "1234567890abcdef1234567890abcdef-1234567890abcdef-1",
         )
 
 
-def test_inject_sentry_span_empty_baggage():
+def test_inject_debugg_ai_span_empty_baggage():
     """
-    Inject a sentry span with no baggage.
+    Inject a debugg-ai span with no baggage.
     """
     carrier = None
     context = get_current()
@@ -220,32 +220,32 @@ def test_inject_sentry_span_empty_baggage():
     span = MagicMock()
     span.get_span_context.return_value = span_context
 
-    sentry_span = MagicMock()
-    sentry_span.to_traceparent = mock.Mock(
+    debugg_ai_span = MagicMock()
+    debugg_ai_span.to_traceparent = mock.Mock(
         return_value="1234567890abcdef1234567890abcdef-1234567890abcdef-1"
     )
-    sentry_span.containing_transaction.get_baggage = mock.Mock(return_value=Baggage({}))
+    debugg_ai_span.containing_transaction.get_baggage = mock.Mock(return_value=Baggage({}))
 
-    span_processor = SentrySpanProcessor()
-    span_processor.otel_span_map[span_id] = sentry_span
+    span_processor = DebuggAISpanProcessor()
+    span_processor.otel_span_map[span_id] = debugg_ai_span
 
     with mock.patch(
         "debugg_ai_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
         return_value=span,
     ):
         full_context = set_span_in_context(span, context)
-        SentryPropagator().inject(carrier, full_context, setter)
+        DebuggAIPropagator().inject(carrier, full_context, setter)
 
         setter.set.assert_called_once_with(
             carrier,
-            "sentry-trace",
+            "debugg-ai-trace",
             "1234567890abcdef1234567890abcdef-1234567890abcdef-1",
         )
 
 
-def test_inject_sentry_span_baggage():
+def test_inject_debugg_ai_span_baggage():
     """
-    Inject a sentry span with baggage.
+    Inject a debugg-ai span with baggage.
     """
     carrier = None
     context = get_current()
@@ -264,32 +264,32 @@ def test_inject_sentry_span_baggage():
     span = MagicMock()
     span.get_span_context.return_value = span_context
 
-    sentry_span = MagicMock()
-    sentry_span.to_traceparent = mock.Mock(
+    debugg_ai_span = MagicMock()
+    debugg_ai_span.to_traceparent = mock.Mock(
         return_value="1234567890abcdef1234567890abcdef-1234567890abcdef-1"
     )
-    sentry_items = {
-        "sentry-trace_id": "771a43a4192642f0b136d5159a501700",
-        "sentry-public_key": "49d0f7386ad645858ae85020e393bef3",
-        "sentry-sample_rate": 0.01337,
-        "sentry-user_id": "Amélie",
+    debugg_ai_items = {
+        "debugg-ai-trace_id": "771a43a4192642f0b136d5159a501700",
+        "debugg-ai-public_key": "49d0f7386ad645858ae85020e393bef3",
+        "debugg-ai-sample_rate": 0.01337,
+        "debugg-ai-user_id": "Amélie",
     }
-    baggage = Baggage(sentry_items=sentry_items)
-    sentry_span.containing_transaction.get_baggage = MagicMock(return_value=baggage)
+    baggage = Baggage(debugg_ai_items=debugg_ai_items)
+    debugg_ai_span.containing_transaction.get_baggage = MagicMock(return_value=baggage)
 
-    span_processor = SentrySpanProcessor()
-    span_processor.otel_span_map[span_id] = sentry_span
+    span_processor = DebuggAISpanProcessor()
+    span_processor.otel_span_map[span_id] = debugg_ai_span
 
     with mock.patch(
         "debugg_ai_sdk.integrations.opentelemetry.propagator.trace.get_current_span",
         return_value=span,
     ):
         full_context = set_span_in_context(span, context)
-        SentryPropagator().inject(carrier, full_context, setter)
+        DebuggAIPropagator().inject(carrier, full_context, setter)
 
         setter.set.assert_any_call(
             carrier,
-            "sentry-trace",
+            "debugg-ai-trace",
             "1234567890abcdef1234567890abcdef-1234567890abcdef-1",
         )
 

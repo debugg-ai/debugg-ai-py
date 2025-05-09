@@ -65,12 +65,12 @@ def tiktoken_encoding_if_installed():
     ],
 )
 def test_langchain_agent(
-    sentry_init, capture_events, send_default_pii, include_prompts, use_unknown_llm_type
+    debugg_ai_init, capture_events, send_default_pii, include_prompts, use_unknown_llm_type
 ):
     global llm_type
     llm_type = "acme-llm" if use_unknown_llm_type else "openai-chat"
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             LangchainIntegration(
                 include_prompts=include_prompts,
@@ -208,8 +208,8 @@ def test_langchain_agent(
         assert "ai.responses" not in tool_exec_span.get("data", {})
 
 
-def test_langchain_error(sentry_init, capture_events):
-    sentry_init(
+def test_langchain_error(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[LangchainIntegration(include_prompts=True)],
         traces_sample_rate=1.0,
         send_default_pii=True,
@@ -244,8 +244,8 @@ def test_langchain_error(sentry_init, capture_events):
     assert error["level"] == "error"
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[LangchainIntegration()],
         traces_sample_rate=1.0,
     )

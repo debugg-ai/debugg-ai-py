@@ -47,14 +47,14 @@ class RqIntegration(Integration):
         old_perform_job = Worker.perform_job
 
         @ensure_integration_enabled(RqIntegration, old_perform_job)
-        def sentry_patched_perform_job(self, job, *args, **kwargs):
+        def debugg_ai_patched_perform_job(self, job, *args, **kwargs):
             # type: (Any, Job, *Queue, **Any) -> bool
             with debugg_ai_sdk.new_scope() as scope:
                 scope.clear_breadcrumbs()
                 scope.add_event_processor(_make_event_processor(weakref.ref(job)))
 
                 transaction = continue_trace(
-                    job.meta.get("_sentry_trace_headers") or {},
+                    job.meta.get("_debugg_ai_trace_headers") or {},
                     op=OP.QUEUE_TASK_RQ,
                     name="unknown RQ task",
                     source=TransactionSource.TASK,
@@ -78,11 +78,11 @@ class RqIntegration(Integration):
 
             return rv
 
-        Worker.perform_job = sentry_patched_perform_job
+        Worker.perform_job = debugg_ai_patched_perform_job
 
         old_handle_exception = Worker.handle_exception
 
-        def sentry_patched_handle_exception(self, job, *exc_info, **kwargs):
+        def debugg_ai_patched_handle_exception(self, job, *exc_info, **kwargs):
             # type: (Worker, Any, *Any, **Any) -> Any
             retry = (
                 hasattr(job, "retries_left")
@@ -95,22 +95,22 @@ class RqIntegration(Integration):
 
             return old_handle_exception(self, job, *exc_info, **kwargs)
 
-        Worker.handle_exception = sentry_patched_handle_exception
+        Worker.handle_exception = debugg_ai_patched_handle_exception
 
         old_enqueue_job = Queue.enqueue_job
 
         @ensure_integration_enabled(RqIntegration, old_enqueue_job)
-        def sentry_patched_enqueue_job(self, job, **kwargs):
+        def debugg_ai_patched_enqueue_job(self, job, **kwargs):
             # type: (Queue, Any, **Any) -> Any
             scope = debugg_ai_sdk.get_current_scope()
             if scope.span is not None:
-                job.meta["_sentry_trace_headers"] = dict(
+                job.meta["_debugg_ai_trace_headers"] = dict(
                     scope.iter_trace_propagation_headers()
                 )
 
             return old_enqueue_job(self, job, **kwargs)
 
-        Queue.enqueue_job = sentry_patched_enqueue_job
+        Queue.enqueue_job = debugg_ai_patched_enqueue_job
 
         ignore_logger("rq.worker")
 

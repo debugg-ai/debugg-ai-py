@@ -10,8 +10,8 @@ def sorted_aggregates(item):
     return aggregates
 
 
-def test_basic(sentry_init, capture_envelopes):
-    sentry_init(release="fun-release", environment="not-fun-env")
+def test_basic(debugg_ai_init, capture_envelopes):
+    debugg_ai_init(release="fun-release", environment="not-fun-env")
     envelopes = capture_envelopes()
 
     debugg_ai_sdk.get_isolation_scope().start_session()
@@ -43,8 +43,8 @@ def test_basic(sentry_init, capture_envelopes):
     assert sess_event["errors"] == 1
 
 
-def test_aggregates(sentry_init, capture_envelopes):
-    sentry_init(
+def test_aggregates(debugg_ai_init, capture_envelopes):
+    debugg_ai_init(
         release="fun-release",
         environment="not-fun-env",
     )
@@ -84,9 +84,9 @@ def test_aggregates(sentry_init, capture_envelopes):
 
 
 def test_aggregates_deprecated(
-    sentry_init, capture_envelopes, suppress_deprecation_warnings
+    debugg_ai_init, capture_envelopes, suppress_deprecation_warnings
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release",
         environment="not-fun-env",
     )
@@ -125,9 +125,9 @@ def test_aggregates_deprecated(
 
 
 def test_aggregates_explicitly_disabled_session_tracking_request_mode(
-    sentry_init, capture_envelopes
+    debugg_ai_init, capture_envelopes
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release", environment="not-fun-env", auto_session_tracking=False
     )
     envelopes = capture_envelopes()
@@ -158,9 +158,9 @@ def test_aggregates_explicitly_disabled_session_tracking_request_mode(
 
 
 def test_aggregates_explicitly_disabled_session_tracking_request_mode_deprecated(
-    sentry_init, capture_envelopes, suppress_deprecation_warnings
+    debugg_ai_init, capture_envelopes, suppress_deprecation_warnings
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release", environment="not-fun-env", auto_session_tracking=False
     )
     envelopes = capture_envelopes()
@@ -189,8 +189,8 @@ def test_aggregates_explicitly_disabled_session_tracking_request_mode_deprecated
     assert "errored" not in aggregates[0]
 
 
-def test_no_thread_on_shutdown_no_errors(sentry_init):
-    sentry_init(
+def test_no_thread_on_shutdown_no_errors(debugg_ai_init):
+    debugg_ai_init(
         release="fun-release",
         environment="not-fun-env",
     )
@@ -219,9 +219,9 @@ def test_no_thread_on_shutdown_no_errors(sentry_init):
 
 
 def test_no_thread_on_shutdown_no_errors_deprecated(
-    sentry_init, suppress_deprecation_warnings
+    debugg_ai_init, suppress_deprecation_warnings
 ):
-    sentry_init(
+    debugg_ai_init(
         release="fun-release",
         environment="not-fun-env",
     )

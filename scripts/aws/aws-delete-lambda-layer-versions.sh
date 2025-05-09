@@ -9,7 +9,7 @@ set -euo pipefail
 # override default AWS region
 export AWS_REGION=eu-central-1
 
-LAYER_NAME=SentryPythonServerlessSDK-local-dev
+LAYER_NAME=DebuggAIPythonServerlessSDK-local-dev
 VERSION="0"
 
 while [[ $VERSION != "1" ]]

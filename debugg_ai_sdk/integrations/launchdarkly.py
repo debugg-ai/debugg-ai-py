@@ -48,7 +48,7 @@ class LaunchDarklyHook(Hook):
     @property
     def metadata(self):
         # type: () -> Metadata
-        return Metadata(name="sentry-flag-auditor")
+        return Metadata(name="debugg-ai-flag-auditor")
 
     def after_evaluation(self, series_context, data, detail):
         # type: (EvaluationSeriesContext, dict[Any, Any], EvaluationDetail) -> dict[Any, Any]

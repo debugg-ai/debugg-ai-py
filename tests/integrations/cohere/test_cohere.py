@@ -16,9 +16,9 @@ from httpx import Client as HTTPXClient
     [(True, True), (True, False), (False, True), (False, False)],
 )
 def test_nonstreaming_chat(
-    sentry_init, capture_events, send_default_pii, include_prompts
+    debugg_ai_init, capture_events, send_default_pii, include_prompts
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[CohereIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -73,8 +73,8 @@ def test_nonstreaming_chat(
     "send_default_pii, include_prompts",
     [(True, True), (True, False), (False, True), (False, False)],
 )
-def test_streaming_chat(sentry_init, capture_events, send_default_pii, include_prompts):
-    sentry_init(
+def test_streaming_chat(debugg_ai_init, capture_events, send_default_pii, include_prompts):
+    debugg_ai_init(
         integrations=[CohereIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -139,8 +139,8 @@ def test_streaming_chat(sentry_init, capture_events, send_default_pii, include_p
     assert span["measurements"]["ai_total_tokens_used"]["value"] == 30
 
 
-def test_bad_chat(sentry_init, capture_events):
-    sentry_init(integrations=[CohereIntegration()], traces_sample_rate=1.0)
+def test_bad_chat(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[CohereIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     client = Client(api_key="z")
@@ -158,8 +158,8 @@ def test_bad_chat(sentry_init, capture_events):
     "send_default_pii, include_prompts",
     [(True, True), (True, False), (False, True), (False, False)],
 )
-def test_embed(sentry_init, capture_events, send_default_pii, include_prompts):
-    sentry_init(
+def test_embed(debugg_ai_init, capture_events, send_default_pii, include_prompts):
+    debugg_ai_init(
         integrations=[CohereIntegration(include_prompts=include_prompts)],
         traces_sample_rate=1.0,
         send_default_pii=send_default_pii,
@@ -202,8 +202,8 @@ def test_embed(sentry_init, capture_events, send_default_pii, include_prompts):
     assert span["measurements"]["ai_total_tokens_used"]["value"] == 10
 
 
-def test_span_origin_chat(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin_chat(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[CohereIntegration()],
         traces_sample_rate=1.0,
     )
@@ -238,8 +238,8 @@ def test_span_origin_chat(sentry_init, capture_events):
     assert event["spans"][0]["origin"] == "auto.ai.cohere"
 
 
-def test_span_origin_embed(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin_embed(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[CohereIntegration()],
         traces_sample_rate=1.0,
     )

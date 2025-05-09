@@ -30,8 +30,8 @@ if django.VERSION >= (3, 0):
 @pytest.mark.parametrize("application", APPS)
 @pytest.mark.asyncio
 @pytest.mark.forked
-async def test_basic(sentry_init, capture_events, application):
-    sentry_init(
+async def test_basic(debugg_ai_init, capture_events, application):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
     )
@@ -87,8 +87,8 @@ async def test_basic(sentry_init, capture_events, application):
 @pytest.mark.skipif(
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
-async def test_async_views(sentry_init, capture_events, application):
-    sentry_init(
+async def test_async_views(debugg_ai_init, capture_events, application):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
     )
@@ -121,12 +121,12 @@ async def test_async_views(sentry_init, capture_events, application):
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
 async def test_active_thread_id(
-    sentry_init, capture_envelopes, teardown_profiling, endpoint, application
+    debugg_ai_init, capture_envelopes, teardown_profiling, endpoint, application
 ):
     with mock.patch(
         "debugg_ai_sdk.profiler.transaction_profiler.PROFILE_MINIMUM_SAMPLES", 0
     ):
-        sentry_init(
+        debugg_ai_init(
             integrations=[DjangoIntegration()],
             traces_sample_rate=1.0,
             profiles_sample_rate=1.0,
@@ -166,14 +166,14 @@ async def test_active_thread_id(
 @pytest.mark.skipif(
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
-async def test_async_views_concurrent_execution(sentry_init, settings):
+async def test_async_views_concurrent_execution(debugg_ai_init, settings):
     import asyncio
     import time
 
     settings.MIDDLEWARE = []
     asgi_application.load_middleware(is_async=True)
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
     )
@@ -210,7 +210,7 @@ async def test_async_views_concurrent_execution(sentry_init, settings):
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
 async def test_async_middleware_that_is_function_concurrent_execution(
-    sentry_init, settings
+    debugg_ai_init, settings
 ):
     import asyncio
     import time
@@ -220,7 +220,7 @@ async def test_async_middleware_that_is_function_concurrent_execution(
     ]
     asgi_application.load_middleware(is_async=True)
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=True,
     )
@@ -257,7 +257,7 @@ async def test_async_middleware_that_is_function_concurrent_execution(
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
 async def test_async_middleware_spans(
-    sentry_init, render_span_tree, capture_events, settings
+    debugg_ai_init, render_span_tree, capture_events, settings
 ):
     settings.MIDDLEWARE = [
         "django.contrib.sessions.middleware.SessionMiddleware",
@@ -267,7 +267,7 @@ async def test_async_middleware_spans(
     ]
     asgi_application.load_middleware(is_async=True)
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration(middleware_spans=True)],
         traces_sample_rate=1.0,
         _experiments={"record_sql_params": True},
@@ -306,8 +306,8 @@ async def test_async_middleware_spans(
 @pytest.mark.skipif(
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
-async def test_has_trace_if_performance_enabled(sentry_init, capture_events):
-    sentry_init(
+async def test_has_trace_if_performance_enabled(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
     )
@@ -334,8 +334,8 @@ async def test_has_trace_if_performance_enabled(sentry_init, capture_events):
 @pytest.mark.skipif(
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
-async def test_has_trace_if_performance_disabled(sentry_init, capture_events):
-    sentry_init(
+async def test_has_trace_if_performance_disabled(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
     )
 
@@ -365,8 +365,8 @@ async def test_has_trace_if_performance_disabled(sentry_init, capture_events):
 @pytest.mark.skipif(
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
-async def test_trace_from_headers_if_performance_enabled(sentry_init, capture_events):
-    sentry_init(
+async def test_trace_from_headers_if_performance_enabled(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
     )
@@ -374,13 +374,13 @@ async def test_trace_from_headers_if_performance_enabled(sentry_init, capture_ev
     events = capture_events()
 
     trace_id = "582b43a4192642f0b136d5159a501701"
-    sentry_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
 
     comm = HttpCommunicator(
         asgi_application,
         "GET",
         "/view-exc-with-msg",
-        headers=[(b"sentry-trace", sentry_trace_header.encode())],
+        headers=[(b"debugg-ai-trace", debugg_ai_trace_header.encode())],
     )
     response = await comm.get_response()
     await comm.wait()
@@ -399,21 +399,21 @@ async def test_trace_from_headers_if_performance_enabled(sentry_init, capture_ev
 @pytest.mark.skipif(
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
-async def test_trace_from_headers_if_performance_disabled(sentry_init, capture_events):
-    sentry_init(
+async def test_trace_from_headers_if_performance_disabled(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
     )
 
     events = capture_events()
 
     trace_id = "582b43a4192642f0b136d5159a501701"
-    sentry_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
+    debugg_ai_trace_header = "{}-{}-{}".format(trace_id, "6e8f22c393e68f19", 1)
 
     comm = HttpCommunicator(
         asgi_application,
         "GET",
         "/view-exc-with-msg",
-        headers=[(b"sentry-trace", sentry_trace_header.encode())],
+        headers=[(b"debugg-ai-trace", debugg_ai_trace_header.encode())],
     )
     response = await comm.get_response()
     await comm.wait()
@@ -533,7 +533,7 @@ BODY_FORM_CONTENT_LENGTH = str(len(BODY_FORM)).encode("utf-8")
     django.VERSION < (3, 1), reason="async views have been introduced in Django 3.1"
 )
 async def test_asgi_request_body(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     application,
     send_default_pii,
@@ -543,7 +543,7 @@ async def test_asgi_request_body(
     body,
     expected_data,
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         send_default_pii=send_default_pii,
     )
@@ -580,11 +580,11 @@ async def test_asgi_request_body(
     ),
 )
 async def test_asgi_mixin_iscoroutinefunction_before_3_12():
-    sentry_asgi_mixin = _asgi_middleware_mixin_factory(lambda: None)
+    debugg_ai_asgi_mixin = _asgi_middleware_mixin_factory(lambda: None)
 
     async def get_response(): ...
 
-    instance = sentry_asgi_mixin(get_response)
+    instance = debugg_ai_asgi_mixin(get_response)
     assert asyncio.iscoroutinefunction(instance)
 
 
@@ -595,11 +595,11 @@ async def test_asgi_mixin_iscoroutinefunction_before_3_12():
     ),
 )
 def test_asgi_mixin_iscoroutinefunction_when_not_async_before_3_12():
-    sentry_asgi_mixin = _asgi_middleware_mixin_factory(lambda: None)
+    debugg_ai_asgi_mixin = _asgi_middleware_mixin_factory(lambda: None)
 
     def get_response(): ...
 
-    instance = sentry_asgi_mixin(get_response)
+    instance = debugg_ai_asgi_mixin(get_response)
     assert not asyncio.iscoroutinefunction(instance)
 
 
@@ -611,11 +611,11 @@ def test_asgi_mixin_iscoroutinefunction_when_not_async_before_3_12():
     ),
 )
 async def test_asgi_mixin_iscoroutinefunction_after_3_12():
-    sentry_asgi_mixin = _asgi_middleware_mixin_factory(lambda: None)
+    debugg_ai_asgi_mixin = _asgi_middleware_mixin_factory(lambda: None)
 
     async def get_response(): ...
 
-    instance = sentry_asgi_mixin(get_response)
+    instance = debugg_ai_asgi_mixin(get_response)
     assert inspect.iscoroutinefunction(instance)
 
 
@@ -626,18 +626,18 @@ async def test_asgi_mixin_iscoroutinefunction_after_3_12():
     ),
 )
 def test_asgi_mixin_iscoroutinefunction_when_not_async_after_3_12():
-    sentry_asgi_mixin = _asgi_middleware_mixin_factory(lambda: None)
+    debugg_ai_asgi_mixin = _asgi_middleware_mixin_factory(lambda: None)
 
     def get_response(): ...
 
-    instance = sentry_asgi_mixin(get_response)
+    instance = debugg_ai_asgi_mixin(get_response)
     assert not inspect.iscoroutinefunction(instance)
 
 
 @pytest.mark.parametrize("application", APPS)
 @pytest.mark.asyncio
-async def test_async_view(sentry_init, capture_events, application):
-    sentry_init(
+async def test_async_view(debugg_ai_init, capture_events, application):
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
     )
@@ -656,12 +656,12 @@ async def test_async_view(sentry_init, capture_events, application):
 @pytest.mark.parametrize("application", APPS)
 @pytest.mark.asyncio
 async def test_transaction_http_method_default(
-    sentry_init, capture_events, application
+    debugg_ai_init, capture_events, application
 ):
     """
     By default OPTIONS and HEAD requests do not create a transaction.
     """
-    sentry_init(
+    debugg_ai_init(
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
     )
@@ -687,8 +687,8 @@ async def test_transaction_http_method_default(
 
 @pytest.mark.parametrize("application", APPS)
 @pytest.mark.asyncio
-async def test_transaction_http_method_custom(sentry_init, capture_events, application):
-    sentry_init(
+async def test_transaction_http_method_custom(debugg_ai_init, capture_events, application):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 http_methods_to_capture=(

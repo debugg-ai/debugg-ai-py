@@ -31,7 +31,7 @@ def patch_redis_pipeline(
 
     from debugg_ai_sdk.integrations.redis import RedisIntegration
 
-    def sentry_patched_execute(self, *args, **kwargs):
+    def debugg_ai_patched_execute(self, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Any
         if debugg_ai_sdk.get_client().get_integration(RedisIntegration) is None:
             return old_execute(self, *args, **kwargs)
@@ -53,7 +53,7 @@ def patch_redis_pipeline(
 
             return old_execute(self, *args, **kwargs)
 
-    pipeline_cls.execute = sentry_patched_execute
+    pipeline_cls.execute = debugg_ai_patched_execute
 
 
 def patch_redis_client(cls, is_cluster, set_db_data_fn):
@@ -66,7 +66,7 @@ def patch_redis_client(cls, is_cluster, set_db_data_fn):
 
     from debugg_ai_sdk.integrations.redis import RedisIntegration
 
-    def sentry_patched_execute_command(self, name, *args, **kwargs):
+    def debugg_ai_patched_execute_command(self, name, *args, **kwargs):
         # type: (Any, str, *Any, **Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(RedisIntegration)
         if integration is None:
@@ -110,4 +110,4 @@ def patch_redis_client(cls, is_cluster, set_db_data_fn):
 
         return value
 
-    cls.execute_command = sentry_patched_execute_command
+    cls.execute_command = debugg_ai_patched_execute_command

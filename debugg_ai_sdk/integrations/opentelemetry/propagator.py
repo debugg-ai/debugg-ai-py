@@ -19,17 +19,17 @@ from opentelemetry.trace import (
 )
 
 from debugg_ai_sdk.integrations.opentelemetry.consts import (
-    SENTRY_BAGGAGE_KEY,
-    SENTRY_TRACE_KEY,
+    DEBUGG_AI_BAGGAGE_KEY,
+    DEBUGG_AI_TRACE_KEY,
 )
 from debugg_ai_sdk.integrations.opentelemetry.span_processor import (
-    SentrySpanProcessor,
+    DebuggAISpanProcessor,
 )
 from debugg_ai_sdk.tracing import (
     BAGGAGE_HEADER_NAME,
-    SENTRY_TRACE_HEADER_NAME,
+    DEBUGG_AI_TRACE_HEADER_NAME,
 )
-from debugg_ai_sdk.tracing_utils import Baggage, extract_sentrytrace_data
+from debugg_ai_sdk.tracing_utils import Baggage, extract_debugg_ai_trace_data
 
 from typing import TYPE_CHECKING
 
@@ -37,9 +37,9 @@ if TYPE_CHECKING:
     from typing import Optional, Set
 
 
-class SentryPropagator(TextMapPropagator):
+class DebuggAIPropagator(TextMapPropagator):
     """
-    Propagates tracing headers for Sentry's tracing system in a way OTel understands.
+    Propagates tracing headers for DebuggAI's tracing system in a way OTel understands.
     """
 
     def extract(self, carrier, context=None, getter=default_getter):
@@ -47,22 +47,22 @@ class SentryPropagator(TextMapPropagator):
         if context is None:
             context = get_current()
 
-        sentry_trace = getter.get(carrier, SENTRY_TRACE_HEADER_NAME)
-        if not sentry_trace:
+        debugg_ai_trace = getter.get(carrier, DEBUGG_AI_TRACE_HEADER_NAME)
+        if not debugg_ai_trace:
             return context
 
-        sentrytrace = extract_sentrytrace_data(sentry_trace[0])
-        if not sentrytrace:
+        debugg_ai_trace = extract_debugg_ai_trace_data(debugg_ai_trace[0])
+        if not debugg_ai_trace:
             return context
 
-        context = set_value(SENTRY_TRACE_KEY, sentrytrace, context)
+        context = set_value(DEBUGG_AI_TRACE_KEY, debugg_ai_trace, context)
 
-        trace_id, span_id = sentrytrace["trace_id"], sentrytrace["parent_span_id"]
+        trace_id, span_id = debugg_ai_trace["trace_id"], debugg_ai_trace["parent_span_id"]
 
         span_context = SpanContext(
             trace_id=int(trace_id, 16),  # type: ignore
             span_id=int(span_id, 16),  # type: ignore
-            # we simulate a sampled trace on the otel side and leave the sampling to sentry
+            # we simulate a sampled trace on the otel side and leave the sampling to debugg-ai
             trace_flags=TraceFlags(TraceFlags.SAMPLED),
             is_remote=True,
         )
@@ -72,13 +72,13 @@ class SentryPropagator(TextMapPropagator):
         if baggage_header:
             baggage = Baggage.from_incoming_header(baggage_header[0])
         else:
-            # If there's an incoming sentry-trace but no incoming baggage header,
+            # If there's an incoming debugg-ai-trace but no incoming baggage header,
             # for instance in traces coming from older SDKs,
             # baggage will be empty and frozen and won't be populated as head SDK.
-            baggage = Baggage(sentry_items={})
+            baggage = Baggage(debugg_ai_items={})
 
         baggage.freeze()
-        context = set_value(SENTRY_BAGGAGE_KEY, baggage, context)
+        context = set_value(DEBUGG_AI_BAGGAGE_KEY, baggage, context)
 
         span = NonRecordingSpan(span_context)
         modified_context = trace.set_span_in_context(span, context)
@@ -97,15 +97,15 @@ class SentryPropagator(TextMapPropagator):
 
         span_id = trace.format_span_id(current_span_context.span_id)
 
-        span_map = SentrySpanProcessor().otel_span_map
-        sentry_span = span_map.get(span_id, None)
-        if not sentry_span:
+        span_map = DebuggAISpanProcessor().otel_span_map
+        debugg_ai_span = span_map.get(span_id, None)
+        if not debugg_ai_span:
             return
 
-        setter.set(carrier, SENTRY_TRACE_HEADER_NAME, sentry_span.to_traceparent())
+        setter.set(carrier, DEBUGG_AI_TRACE_HEADER_NAME, debugg_ai_span.to_traceparent())
 
-        if sentry_span.containing_transaction:
-            baggage = sentry_span.containing_transaction.get_baggage()
+        if debugg_ai_span.containing_transaction:
+            baggage = debugg_ai_span.containing_transaction.get_baggage()
             if baggage:
                 baggage_data = baggage.serialize()
                 if baggage_data:
@@ -114,4 +114,4 @@ class SentryPropagator(TextMapPropagator):
     @property
     def fields(self):
         # type: () -> Set[str]
-        return {SENTRY_TRACE_HEADER_NAME, BAGGAGE_HEADER_NAME}
+        return {DEBUGG_AI_TRACE_HEADER_NAME, BAGGAGE_HEADER_NAME}

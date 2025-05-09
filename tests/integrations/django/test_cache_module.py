@@ -94,9 +94,9 @@ def use_django_caching_with_cluster(settings):
 @pytest_mark_django_db_decorator()
 @pytest.mark.skipif(DJANGO_VERSION < (1, 9), reason="Requires Django >= 1.9")
 def test_cache_spans_disabled_middleware(
-    sentry_init, client, capture_events, use_django_caching_with_middlewares
+    debugg_ai_init, client, capture_events, use_django_caching_with_middlewares
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=False,
@@ -120,9 +120,9 @@ def test_cache_spans_disabled_middleware(
 @pytest_mark_django_db_decorator()
 @pytest.mark.skipif(DJANGO_VERSION < (1, 9), reason="Requires Django >= 1.9")
 def test_cache_spans_disabled_decorator(
-    sentry_init, client, capture_events, use_django_caching
+    debugg_ai_init, client, capture_events, use_django_caching
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=False,
@@ -146,9 +146,9 @@ def test_cache_spans_disabled_decorator(
 @pytest_mark_django_db_decorator()
 @pytest.mark.skipif(DJANGO_VERSION < (1, 9), reason="Requires Django >= 1.9")
 def test_cache_spans_disabled_templatetag(
-    sentry_init, client, capture_events, use_django_caching
+    debugg_ai_init, client, capture_events, use_django_caching
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=False,
@@ -172,9 +172,9 @@ def test_cache_spans_disabled_templatetag(
 @pytest_mark_django_db_decorator()
 @pytest.mark.skipif(DJANGO_VERSION < (1, 9), reason="Requires Django >= 1.9")
 def test_cache_spans_middleware(
-    sentry_init, client, capture_events, use_django_caching_with_middlewares
+    debugg_ai_init, client, capture_events, use_django_caching_with_middlewares
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=True,
@@ -241,8 +241,8 @@ def test_cache_spans_middleware(
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
 @pytest.mark.skipif(DJANGO_VERSION < (1, 9), reason="Requires Django >= 1.9")
-def test_cache_spans_decorator(sentry_init, client, capture_events, use_django_caching):
-    sentry_init(
+def test_cache_spans_decorator(debugg_ai_init, client, capture_events, use_django_caching):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=True,
@@ -297,9 +297,9 @@ def test_cache_spans_decorator(sentry_init, client, capture_events, use_django_c
 @pytest_mark_django_db_decorator()
 @pytest.mark.skipif(DJANGO_VERSION < (1, 9), reason="Requires Django >= 1.9")
 def test_cache_spans_templatetag(
-    sentry_init, client, capture_events, use_django_caching
+    debugg_ai_init, client, capture_events, use_django_caching
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=True,
@@ -389,9 +389,9 @@ def test_cache_spans_get_span_description(
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
 def test_cache_spans_location_with_port(
-    sentry_init, client, capture_events, use_django_caching_with_port
+    debugg_ai_init, client, capture_events, use_django_caching_with_port
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=True,
@@ -417,9 +417,9 @@ def test_cache_spans_location_with_port(
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
 def test_cache_spans_location_without_port(
-    sentry_init, client, capture_events, use_django_caching_without_port
+    debugg_ai_init, client, capture_events, use_django_caching_without_port
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=True,
@@ -443,9 +443,9 @@ def test_cache_spans_location_without_port(
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
 def test_cache_spans_location_with_cluster(
-    sentry_init, client, capture_events, use_django_caching_with_cluster
+    debugg_ai_init, client, capture_events, use_django_caching_with_cluster
 ):
-    sentry_init(
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=True,
@@ -469,8 +469,8 @@ def test_cache_spans_location_with_cluster(
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
-def test_cache_spans_item_size(sentry_init, client, capture_events, use_django_caching):
-    sentry_init(
+def test_cache_spans_item_size(debugg_ai_init, client, capture_events, use_django_caching):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=True,
@@ -511,8 +511,8 @@ def test_cache_spans_item_size(sentry_init, client, capture_events, use_django_c
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
-def test_cache_spans_get_many(sentry_init, capture_events, use_django_caching):
-    sentry_init(
+def test_cache_spans_get_many(debugg_ai_init, capture_events, use_django_caching):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=True,
@@ -560,8 +560,8 @@ def test_cache_spans_get_many(sentry_init, capture_events, use_django_caching):
 
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
-def test_cache_spans_set_many(sentry_init, capture_events, use_django_caching):
-    sentry_init(
+def test_cache_spans_set_many(debugg_ai_init, capture_events, use_django_caching):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 cache_spans=True,
@@ -600,8 +600,8 @@ def test_cache_spans_set_many(sentry_init, capture_events, use_django_caching):
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
 @pytest.mark.skipif(DJANGO_VERSION <= (1, 11), reason="Requires Django > 1.11")
-def test_span_origin_cache(sentry_init, client, capture_events, use_django_caching):
-    sentry_init(
+def test_span_origin_cache(debugg_ai_init, client, capture_events, use_django_caching):
+    debugg_ai_init(
         integrations=[
             DjangoIntegration(
                 middleware_spans=True,

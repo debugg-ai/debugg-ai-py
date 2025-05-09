@@ -130,7 +130,7 @@ def _add_ai_data_to_span(
         span.set_data(SPANDATA.AI_STREAMING, True)
 
 
-def _sentry_patched_create_common(f, *args, **kwargs):
+def _debugg_ai_patched_create_common(f, *args, **kwargs):
     # type: (Any, *Any, **Any) -> Any
     integration = kwargs.pop("integration")
     if integration is None:
@@ -224,7 +224,7 @@ def _wrap_message_create(f):
     # type: (Any) -> Any
     def _execute_sync(f, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Any
-        gen = _sentry_patched_create_common(f, *args, **kwargs)
+        gen = _debugg_ai_patched_create_common(f, *args, **kwargs)
 
         try:
             f, args, kwargs = next(gen)
@@ -243,21 +243,21 @@ def _wrap_message_create(f):
             return e.value
 
     @wraps(f)
-    def _sentry_patched_create_sync(*args, **kwargs):
+    def _debugg_ai_patched_create_sync(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(AnthropicIntegration)
         kwargs["integration"] = integration
 
         return _execute_sync(f, *args, **kwargs)
 
-    return _sentry_patched_create_sync
+    return _debugg_ai_patched_create_sync
 
 
 def _wrap_message_create_async(f):
     # type: (Any) -> Any
     async def _execute_async(f, *args, **kwargs):
         # type: (Any, *Any, **Any) -> Any
-        gen = _sentry_patched_create_common(f, *args, **kwargs)
+        gen = _debugg_ai_patched_create_common(f, *args, **kwargs)
 
         try:
             f, args, kwargs = next(gen)
@@ -276,11 +276,11 @@ def _wrap_message_create_async(f):
             return e.value
 
     @wraps(f)
-    async def _sentry_patched_create_async(*args, **kwargs):
+    async def _debugg_ai_patched_create_async(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(AnthropicIntegration)
         kwargs["integration"] = integration
 
         return await _execute_async(f, *args, **kwargs)
 
-    return _sentry_patched_create_async
+    return _debugg_ai_patched_create_async

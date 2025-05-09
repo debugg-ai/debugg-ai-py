@@ -5,8 +5,8 @@ from debugg_ai_sdk.integrations.socket import SocketIntegration
 from tests.conftest import ApproxDict
 
 
-def test_getaddrinfo_trace(sentry_init, capture_events):
-    sentry_init(integrations=[SocketIntegration()], traces_sample_rate=1.0)
+def test_getaddrinfo_trace(debugg_ai_init, capture_events):
+    debugg_ai_init(integrations=[SocketIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction():
@@ -25,10 +25,10 @@ def test_getaddrinfo_trace(sentry_init, capture_events):
     )
 
 
-def test_create_connection_trace(sentry_init, capture_events):
+def test_create_connection_trace(debugg_ai_init, capture_events):
     timeout = 10
 
-    sentry_init(integrations=[SocketIntegration()], traces_sample_rate=1.0)
+    debugg_ai_init(integrations=[SocketIntegration()], traces_sample_rate=1.0)
     events = capture_events()
 
     with start_transaction():
@@ -58,8 +58,8 @@ def test_create_connection_trace(sentry_init, capture_events):
     )
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[SocketIntegration()],
         traces_sample_rate=1.0,
     )

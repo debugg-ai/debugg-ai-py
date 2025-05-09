@@ -74,8 +74,8 @@ def _with_monitor_config():
     return
 
 
-def test_decorator(sentry_init):
-    sentry_init()
+def test_decorator(debugg_ai_init):
+    debugg_ai_init()
 
     with mock.patch(
         "debugg_ai_sdk.crons.decorator.capture_checkin"
@@ -99,8 +99,8 @@ def test_decorator(sentry_init):
         assert fake_capture_checkin.call_args[1]["check_in_id"]
 
 
-def test_decorator_error(sentry_init):
-    sentry_init()
+def test_decorator_error(debugg_ai_init):
+    debugg_ai_init()
 
     with mock.patch(
         "debugg_ai_sdk.crons.decorator.capture_checkin"
@@ -126,8 +126,8 @@ def test_decorator_error(sentry_init):
         assert fake_capture_checkin.call_args[1]["check_in_id"]
 
 
-def test_contextmanager(sentry_init):
-    sentry_init()
+def test_contextmanager(debugg_ai_init):
+    debugg_ai_init()
 
     with mock.patch(
         "debugg_ai_sdk.crons.decorator.capture_checkin"
@@ -151,8 +151,8 @@ def test_contextmanager(sentry_init):
         assert fake_capture_checkin.call_args[1]["check_in_id"]
 
 
-def test_contextmanager_error(sentry_init):
-    sentry_init()
+def test_contextmanager_error(debugg_ai_init):
+    debugg_ai_init()
 
     with mock.patch(
         "debugg_ai_sdk.crons.decorator.capture_checkin"
@@ -178,8 +178,8 @@ def test_contextmanager_error(sentry_init):
         assert fake_capture_checkin.call_args[1]["check_in_id"]
 
 
-def test_capture_checkin_simple(sentry_init):
-    sentry_init()
+def test_capture_checkin_simple(debugg_ai_init):
+    debugg_ai_init()
 
     check_in_id = capture_checkin(
         monitor_slug="abc123",
@@ -190,8 +190,8 @@ def test_capture_checkin_simple(sentry_init):
     assert check_in_id == "112233"
 
 
-def test_sample_rate_doesnt_affect_crons(sentry_init, capture_envelopes):
-    sentry_init(sample_rate=0)
+def test_sample_rate_doesnt_affect_crons(debugg_ai_init, capture_envelopes):
+    debugg_ai_init(sample_rate=0)
     envelopes = capture_envelopes()
 
     capture_checkin(check_in_id="112233")
@@ -202,8 +202,8 @@ def test_sample_rate_doesnt_affect_crons(sentry_init, capture_envelopes):
     assert check_in["check_in_id"] == "112233"
 
 
-def test_capture_checkin_new_id(sentry_init):
-    sentry_init()
+def test_capture_checkin_new_id(debugg_ai_init):
+    debugg_ai_init()
 
     with mock.patch("uuid.uuid4") as mock_uuid:
         mock_uuid.return_value = uuid.UUID("a8098c1a-f86e-11da-bd1a-00112444be1e")
@@ -217,8 +217,8 @@ def test_capture_checkin_new_id(sentry_init):
         assert check_in_id == "a8098c1af86e11dabd1a00112444be1e"
 
 
-def test_end_to_end(sentry_init, capture_envelopes):
-    sentry_init()
+def test_end_to_end(debugg_ai_init, capture_envelopes):
+    debugg_ai_init()
     envelopes = capture_envelopes()
 
     capture_checkin(
@@ -237,8 +237,8 @@ def test_end_to_end(sentry_init, capture_envelopes):
     assert check_in["duration"] == 123
 
 
-def test_monitor_config(sentry_init, capture_envelopes):
-    sentry_init()
+def test_monitor_config(debugg_ai_init, capture_envelopes):
+    debugg_ai_init()
     envelopes = capture_envelopes()
 
     monitor_config = {
@@ -262,8 +262,8 @@ def test_monitor_config(sentry_init, capture_envelopes):
     assert "monitor_config" not in check_in
 
 
-def test_decorator_monitor_config(sentry_init, capture_envelopes):
-    sentry_init()
+def test_decorator_monitor_config(debugg_ai_init, capture_envelopes):
+    debugg_ai_init()
     envelopes = capture_envelopes()
 
     _with_monitor_config()
@@ -281,8 +281,8 @@ def test_decorator_monitor_config(sentry_init, capture_envelopes):
         }
 
 
-def test_decorator_no_monitor_config(sentry_init, capture_envelopes):
-    sentry_init()
+def test_decorator_no_monitor_config(debugg_ai_init, capture_envelopes):
+    debugg_ai_init()
     envelopes = capture_envelopes()
 
     _no_monitor_config()
@@ -298,8 +298,8 @@ def test_decorator_no_monitor_config(sentry_init, capture_envelopes):
 
 
 def test_capture_checkin_sdk_not_initialized():
-    # Tests that the capture_checkin does not raise an error when Sentry SDK is not initialized.
-    # sentry_init() is intentionally omitted.
+    # Tests that the capture_checkin does not raise an error when DebuggAI SDK is not initialized.
+    # debugg_ai_init() is intentionally omitted.
     check_in_id = capture_checkin(
         monitor_slug="abc123",
         check_in_id="112233",
@@ -309,8 +309,8 @@ def test_capture_checkin_sdk_not_initialized():
     assert check_in_id == "112233"
 
 
-def test_scope_data_in_checkin(sentry_init, capture_envelopes):
-    sentry_init()
+def test_scope_data_in_checkin(debugg_ai_init, capture_envelopes):
+    debugg_ai_init()
     envelopes = capture_envelopes()
 
     valid_keys = [
@@ -363,8 +363,8 @@ def test_scope_data_in_checkin(sentry_init, capture_envelopes):
 
 
 @pytest.mark.asyncio
-async def test_decorator_async(sentry_init):
-    sentry_init()
+async def test_decorator_async(debugg_ai_init):
+    debugg_ai_init()
 
     with mock.patch(
         "debugg_ai_sdk.crons.decorator.capture_checkin"
@@ -389,8 +389,8 @@ async def test_decorator_async(sentry_init):
 
 
 @pytest.mark.asyncio
-async def test_decorator_error_async(sentry_init):
-    sentry_init()
+async def test_decorator_error_async(debugg_ai_init):
+    debugg_ai_init()
 
     with mock.patch(
         "debugg_ai_sdk.crons.decorator.capture_checkin"
@@ -417,8 +417,8 @@ async def test_decorator_error_async(sentry_init):
 
 
 @pytest.mark.asyncio
-async def test_contextmanager_async(sentry_init):
-    sentry_init()
+async def test_contextmanager_async(debugg_ai_init):
+    debugg_ai_init()
 
     with mock.patch(
         "debugg_ai_sdk.crons.decorator.capture_checkin"
@@ -443,8 +443,8 @@ async def test_contextmanager_async(sentry_init):
 
 
 @pytest.mark.asyncio
-async def test_contextmanager_error_async(sentry_init):
-    sentry_init()
+async def test_contextmanager_error_async(debugg_ai_init):
+    debugg_ai_init()
 
     with mock.patch(
         "debugg_ai_sdk.crons.decorator.capture_checkin"

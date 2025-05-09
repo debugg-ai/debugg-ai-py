@@ -8,7 +8,7 @@ from debugg_ai_sdk.integrations import DidNotEnable, Integration
 from debugg_ai_sdk.scope import should_send_default_pii
 from debugg_ai_sdk.tracing import (
     BAGGAGE_HEADER_NAME,
-    SENTRY_TRACE_HEADER_NAME,
+    DEBUGG_AI_TRACE_HEADER_NAME,
     TransactionSource,
 )
 from debugg_ai_sdk.utils import (
@@ -55,7 +55,7 @@ def patch_enqueue():
     old_enqueue = Huey.enqueue
 
     @ensure_integration_enabled(HueyIntegration, old_enqueue)
-    def _sentry_enqueue(self, task):
+    def _debugg_ai_enqueue(self, task):
         # type: (Huey, Task) -> Optional[Union[Result, ResultGroup]]
         with debugg_ai_sdk.start_span(
             op=OP.QUEUE_SUBMIT_HUEY,
@@ -66,13 +66,13 @@ def patch_enqueue():
                 # Attach trace propagation data to task kwargs. We do
                 # not do this for periodic tasks, as these don't
                 # really have an originating transaction.
-                task.kwargs["sentry_headers"] = {
+                task.kwargs["debugg_ai_headers"] = {
                     BAGGAGE_HEADER_NAME: get_baggage(),
-                    SENTRY_TRACE_HEADER_NAME: get_traceparent(),
+                    DEBUGG_AI_TRACE_HEADER_NAME: get_traceparent(),
                 }
             return old_enqueue(self, task)
 
-    Huey.enqueue = _sentry_enqueue
+    Huey.enqueue = _debugg_ai_enqueue
 
 
 def _make_event_processor(task):
@@ -126,7 +126,7 @@ def _wrap_task_execute(func):
     # type: (F) -> F
 
     @ensure_integration_enabled(HueyIntegration, func)
-    def _sentry_execute(*args, **kwargs):
+    def _debugg_ai_execute(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         try:
             result = func(*args, **kwargs)
@@ -137,7 +137,7 @@ def _wrap_task_execute(func):
 
         return result
 
-    return _sentry_execute  # type: ignore
+    return _debugg_ai_execute  # type: ignore
 
 
 def patch_execute():
@@ -145,7 +145,7 @@ def patch_execute():
     old_execute = Huey._execute
 
     @ensure_integration_enabled(HueyIntegration, old_execute)
-    def _sentry_execute(self, task, timestamp=None):
+    def _debugg_ai_execute(self, task, timestamp=None):
         # type: (Huey, Task, Optional[datetime]) -> Any
         with debugg_ai_sdk.isolation_scope() as scope:
             with capture_internal_exceptions():
@@ -153,10 +153,10 @@ def patch_execute():
                 scope.clear_breadcrumbs()
                 scope.add_event_processor(_make_event_processor(task))
 
-            sentry_headers = task.kwargs.pop("sentry_headers", None)
+            debugg_ai_headers = task.kwargs.pop("debugg_ai_headers", None)
 
             transaction = continue_trace(
-                sentry_headers or {},
+                debugg_ai_headers or {},
                 name=task.name,
                 op=OP.QUEUE_TASK_HUEY,
                 source=TransactionSource.TASK,
@@ -164,11 +164,11 @@ def patch_execute():
             )
             transaction.set_status(SPANSTATUS.OK)
 
-            if not getattr(task, "_sentry_is_patched", False):
+            if not getattr(task, "_debugg_ai_is_patched", False):
                 task.execute = _wrap_task_execute(task.execute)
-                task._sentry_is_patched = True
+                task._debugg_ai_is_patched = True
 
             with debugg_ai_sdk.start_transaction(transaction):
                 return old_execute(self, task, timestamp)
 
-    Huey._execute = _sentry_execute
+    Huey._execute = _debugg_ai_execute

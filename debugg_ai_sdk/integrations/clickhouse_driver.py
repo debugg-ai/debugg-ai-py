@@ -86,7 +86,7 @@ def _wrap_start(f: Callable[P, T]) -> Callable[P, T]:
             origin=ClickhouseDriverIntegration.origin,
         )
 
-        connection._sentry_span = span  # type: ignore[attr-defined]
+        connection._debugg_ai_span = span  # type: ignore[attr-defined]
 
         _set_db_data(span, connection)
 
@@ -110,7 +110,7 @@ def _wrap_end(f: Callable[P, T]) -> Callable[P, T]:
     def _inner_end(*args: P.args, **kwargs: P.kwargs) -> T:
         res = f(*args, **kwargs)
         instance = args[0]
-        span = getattr(instance.connection, "_sentry_span", None)  # type: ignore[attr-defined]
+        span = getattr(instance.connection, "_debugg_ai_span", None)  # type: ignore[attr-defined]
 
         if span is not None:
             if res is not None and should_send_default_pii():
@@ -132,7 +132,7 @@ def _wrap_send_data(f: Callable[P, T]) -> Callable[P, T]:
     def _inner_send_data(*args: P.args, **kwargs: P.kwargs) -> T:
         instance = args[0]  # type: clickhouse_driver.client.Client
         data = args[2]
-        span = getattr(instance.connection, "_sentry_span", None)
+        span = getattr(instance.connection, "_debugg_ai_span", None)
 
         if span is not None:
             _set_db_data(span, instance.connection)

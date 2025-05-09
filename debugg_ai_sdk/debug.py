@@ -26,7 +26,7 @@ def init_debug_support():
 def configure_logger():
     # type: () -> None
     _handler = logging.StreamHandler(sys.stderr)
-    _handler.setFormatter(logging.Formatter(" [sentry] %(levelname)s: %(message)s"))
+    _handler.setFormatter(logging.Formatter(" [debugg-ai] %(levelname)s: %(message)s"))
     logger.addHandler(_handler)
     logger.setLevel(logging.DEBUG)
     logger.addFilter(_DebugFilter())

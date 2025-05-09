@@ -28,11 +28,11 @@ def mock_statsig(gate_dict):
     statsig.check_gate = old_check_gate
 
 
-def test_check_gate(sentry_init, capture_events, uninstall_integration):
+def test_check_gate(debugg_ai_init, capture_events, uninstall_integration):
     uninstall_integration(StatsigIntegration.identifier)
 
     with mock_statsig({"hello": True, "world": False}):
-        sentry_init(integrations=[StatsigIntegration()])
+        debugg_ai_init(integrations=[StatsigIntegration()])
         events = capture_events()
         user = StatsigUser(user_id="user-id")
 
@@ -52,11 +52,11 @@ def test_check_gate(sentry_init, capture_events, uninstall_integration):
         }
 
 
-def test_check_gate_threaded(sentry_init, capture_events, uninstall_integration):
+def test_check_gate_threaded(debugg_ai_init, capture_events, uninstall_integration):
     uninstall_integration(StatsigIntegration.identifier)
 
     with mock_statsig({"hello": True, "world": False}):
-        sentry_init(integrations=[StatsigIntegration()])
+        debugg_ai_init(integrations=[StatsigIntegration()])
         events = capture_events()
         user = StatsigUser(user_id="user-id")
 
@@ -102,12 +102,12 @@ def test_check_gate_threaded(sentry_init, capture_events, uninstall_integration)
 
 
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
-def test_check_gate_asyncio(sentry_init, capture_events, uninstall_integration):
+def test_check_gate_asyncio(debugg_ai_init, capture_events, uninstall_integration):
     asyncio = pytest.importorskip("asyncio")
     uninstall_integration(StatsigIntegration.identifier)
 
     with mock_statsig({"hello": True, "world": False}):
-        sentry_init(integrations=[StatsigIntegration()])
+        debugg_ai_init(integrations=[StatsigIntegration()])
         events = capture_events()
         user = StatsigUser(user_id="user-id")
 
@@ -152,7 +152,7 @@ def test_check_gate_asyncio(sentry_init, capture_events, uninstall_integration):
         }
 
 
-def test_wraps_original(sentry_init, uninstall_integration):
+def test_wraps_original(debugg_ai_init, uninstall_integration):
     uninstall_integration(StatsigIntegration.identifier)
     flag_value = random() < 0.5
 
@@ -160,7 +160,7 @@ def test_wraps_original(sentry_init, uninstall_integration):
         {"test-flag": flag_value}
     ):  # patches check_gate with a Mock object.
         mock_check_gate = statsig.check_gate
-        sentry_init(integrations=[StatsigIntegration()])  # wraps check_gate.
+        debugg_ai_init(integrations=[StatsigIntegration()])  # wraps check_gate.
         user = StatsigUser(user_id="user-id")
 
         res = statsig.check_gate(user, "test-flag", "extra-arg", kwarg=1)  # type: ignore[arg-type]
@@ -172,10 +172,10 @@ def test_wraps_original(sentry_init, uninstall_integration):
         )
 
 
-def test_wrapper_attributes(sentry_init, uninstall_integration):
+def test_wrapper_attributes(debugg_ai_init, uninstall_integration):
     uninstall_integration(StatsigIntegration.identifier)
     original_check_gate = statsig.check_gate
-    sentry_init(integrations=[StatsigIntegration()])
+    debugg_ai_init(integrations=[StatsigIntegration()])
 
     # Methods have not lost their qualified names after decoration.
     assert statsig.check_gate.__name__ == "check_gate"
@@ -185,11 +185,11 @@ def test_wrapper_attributes(sentry_init, uninstall_integration):
     statsig.check_gate = original_check_gate
 
 
-def test_statsig_span_integration(sentry_init, capture_events, uninstall_integration):
+def test_statsig_span_integration(debugg_ai_init, capture_events, uninstall_integration):
     uninstall_integration(StatsigIntegration.identifier)
 
     with mock_statsig({"hello": True}):
-        sentry_init(traces_sample_rate=1.0, integrations=[StatsigIntegration()])
+        debugg_ai_init(traces_sample_rate=1.0, integrations=[StatsigIntegration()])
         events = capture_events()
         user = StatsigUser(user_id="user-id")
         with start_transaction(name="hi"):

@@ -27,11 +27,11 @@ class RayLoggingTransport(TestTransport):
         print(envelope.serialize().decode("utf-8", "replace"))
 
 
-def setup_sentry_with_logging_transport():
-    setup_sentry(transport=RayLoggingTransport())
+def setup_debugg_ai_with_logging_transport():
+    setup_debugg-ai(transport=RayLoggingTransport())
 
 
-def setup_sentry(transport=None):
+def setup_debugg-ai(transport=None):
     debugg_ai_sdk.init(
         integrations=[RayIntegration()],
         transport=RayTestTransport() if transport is None else transport,
@@ -60,11 +60,11 @@ def read_error_from_log(job_id):
 
 @pytest.mark.forked
 def test_tracing_in_ray_tasks():
-    setup_sentry()
+    setup_debugg-ai()
 
     ray.init(
         runtime_env={
-            "worker_process_setup_hook": setup_sentry,
+            "worker_process_setup_hook": setup_debugg-ai,
             "working_dir": "./",
         }
     )
@@ -118,11 +118,11 @@ def test_tracing_in_ray_tasks():
 
 @pytest.mark.forked
 def test_errors_in_ray_tasks():
-    setup_sentry_with_logging_transport()
+    setup_debugg_ai_with_logging_transport()
 
     ray.init(
         runtime_env={
-            "worker_process_setup_hook": setup_sentry_with_logging_transport,
+            "worker_process_setup_hook": setup_debugg_ai_with_logging_transport,
             "working_dir": "./",
         }
     )
@@ -151,11 +151,11 @@ def test_errors_in_ray_tasks():
 
 @pytest.mark.forked
 def test_tracing_in_ray_actors():
-    setup_sentry()
+    setup_debugg-ai()
 
     ray.init(
         runtime_env={
-            "worker_process_setup_hook": setup_sentry,
+            "worker_process_setup_hook": setup_debugg-ai,
             "working_dir": "./",
         }
     )
@@ -188,11 +188,11 @@ def test_tracing_in_ray_actors():
 
 @pytest.mark.forked
 def test_errors_in_ray_actors():
-    setup_sentry_with_logging_transport()
+    setup_debugg_ai_with_logging_transport()
 
     ray.init(
         runtime_env={
-            "worker_process_setup_hook": setup_sentry_with_logging_transport,
+            "worker_process_setup_hook": setup_debugg_ai_with_logging_transport,
             "working_dir": "./",
         }
     )

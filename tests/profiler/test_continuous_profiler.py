@@ -52,9 +52,9 @@ def get_client_options(use_top_level_profiler_mode):
 
 
 mock_sdk_info = {
-    "name": "sentry.python",
+    "name": "debugg-ai.python",
     "version": VERSION,
-    "packages": [{"name": "pypi:sentry-sdk", "version": VERSION}],
+    "packages": [{"name": "pypi:debugg-ai-sdk", "version": VERSION}],
 }
 
 
@@ -238,7 +238,7 @@ def assert_single_transaction_without_profile_chunks(envelopes):
 )
 @mock.patch("debugg_ai_sdk.profiler.continuous_profiler.PROFILE_BUFFER_SECONDS", 0.01)
 def test_continuous_profiler_auto_start_and_manual_stop(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     mode,
     start_profiler_func,
@@ -247,7 +247,7 @@ def test_continuous_profiler_auto_start_and_manual_stop(
     teardown_profiling,
 ):
     options = make_options(mode=mode, auto_start=True)
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         **options,
     )
@@ -315,7 +315,7 @@ def test_continuous_profiler_auto_start_and_manual_stop(
 )
 @mock.patch("debugg_ai_sdk.profiler.continuous_profiler.PROFILE_BUFFER_SECONDS", 0.01)
 def test_continuous_profiler_manual_start_and_stop_sampled(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     mode,
     start_profiler_func,
@@ -326,7 +326,7 @@ def test_continuous_profiler_manual_start_and_stop_sampled(
     options = make_options(
         mode=mode, profile_session_sample_rate=1.0, lifecycle="manual"
     )
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         **options,
     )
@@ -396,7 +396,7 @@ def test_continuous_profiler_manual_start_and_stop_sampled(
     ],
 )
 def test_continuous_profiler_manual_start_and_stop_unsampled(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     mode,
     start_profiler_func,
@@ -407,7 +407,7 @@ def test_continuous_profiler_manual_start_and_stop_unsampled(
     options = make_options(
         mode=mode, profile_session_sample_rate=0.0, lifecycle="manual"
     )
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         **options,
     )
@@ -441,7 +441,7 @@ def test_continuous_profiler_manual_start_and_stop_unsampled(
 )
 @mock.patch("debugg_ai_sdk.profiler.continuous_profiler.DEFAULT_SAMPLING_FREQUENCY", 21)
 def test_continuous_profiler_auto_start_and_stop_sampled(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     mode,
     make_options,
@@ -450,7 +450,7 @@ def test_continuous_profiler_auto_start_and_stop_sampled(
     options = make_options(
         mode=mode, profile_session_sample_rate=1.0, lifecycle="trace"
     )
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         **options,
     )
@@ -503,7 +503,7 @@ def test_continuous_profiler_auto_start_and_stop_sampled(
 )
 @mock.patch("debugg_ai_sdk.profiler.continuous_profiler.PROFILE_BUFFER_SECONDS", 0.01)
 def test_continuous_profiler_auto_start_and_stop_unsampled(
-    sentry_init,
+    debugg_ai_init,
     capture_envelopes,
     mode,
     make_options,
@@ -512,7 +512,7 @@ def test_continuous_profiler_auto_start_and_stop_unsampled(
     options = make_options(
         mode=mode, profile_session_sample_rate=0.0, lifecycle="trace"
     )
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         **options,
     )
@@ -566,7 +566,7 @@ def test_continuous_profiler_auto_start_and_stop_unsampled(
     ],
 )
 def test_continuous_profiler_manual_start_and_stop_noop_when_using_trace_lifecyle(
-    sentry_init,
+    debugg_ai_init,
     mode,
     start_profiler_func,
     stop_profiler_func,
@@ -577,7 +577,7 @@ def test_continuous_profiler_manual_start_and_stop_noop_when_using_trace_lifecyl
     options = make_options(
         mode=mode, profile_session_sample_rate=0.0, lifecycle="trace"
     )
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         **options,
     )

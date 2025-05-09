@@ -1,7 +1,7 @@
 import debugg_ai_sdk
 from debugg_ai_sdk.integrations import _check_minimum_version, Integration, DidNotEnable
 from debugg_ai_sdk.integrations._wsgi_common import RequestExtractor
-from debugg_ai_sdk.integrations.wsgi import SentryWsgiMiddleware
+from debugg_ai_sdk.integrations.wsgi import DebuggAIWsgiMiddleware
 from debugg_ai_sdk.tracing import SOURCE_FOR_STYLE
 from debugg_ai_sdk.utils import (
     capture_internal_exceptions,
@@ -70,7 +70,7 @@ class FalconRequestExtractor(RequestExtractor):
         # type: () -> Optional[str]
 
         # As request data can only be read once we won't make this available
-        # to Sentry. Just send back a dummy string in case there was a
+        # to DebuggAI. Just send back a dummy string in case there was a
         # content length.
         # TODO(jmagnusson): Figure out if there's a way to support this
         content_length = self.content_length()
@@ -98,8 +98,8 @@ class FalconRequestExtractor(RequestExtractor):
         return None
 
 
-class SentryFalconMiddleware:
-    """Captures exceptions in Falcon requests and send to Sentry"""
+class DebuggAIFalconMiddleware:
+    """Captures exceptions in Falcon requests and send to DebuggAI"""
 
     def process_request(self, req, resp, *args, **kwargs):
         # type: (Any, Any, *Any, **Any) -> None
@@ -146,20 +146,20 @@ def _patch_wsgi_app():
     # type: () -> None
     original_wsgi_app = falcon_app_class.__call__
 
-    def sentry_patched_wsgi_app(self, env, start_response):
+    def debugg_ai_patched_wsgi_app(self, env, start_response):
         # type: (falcon.API, Any, Any) -> Any
         integration = debugg_ai_sdk.get_client().get_integration(FalconIntegration)
         if integration is None:
             return original_wsgi_app(self, env, start_response)
 
-        sentry_wrapped = SentryWsgiMiddleware(
+        debugg_ai_wrapped = DebuggAIWsgiMiddleware(
             lambda envi, start_resp: original_wsgi_app(self, envi, start_resp),
             span_origin=FalconIntegration.origin,
         )
 
-        return sentry_wrapped(env, start_response)
+        return debugg_ai_wrapped(env, start_response)
 
-    falcon_app_class.__call__ = sentry_patched_wsgi_app
+    falcon_app_class.__call__ = debugg_ai_patched_wsgi_app
 
 
 def _patch_handle_exception():
@@ -167,7 +167,7 @@ def _patch_handle_exception():
     original_handle_exception = falcon_app_class._handle_exception
 
     @ensure_integration_enabled(FalconIntegration, original_handle_exception)
-    def sentry_patched_handle_exception(self, *args):
+    def debugg_ai_patched_handle_exception(self, *args):
         # type: (falcon.API, *Any) -> Any
         # NOTE(jmagnusson): falcon 2.0 changed falcon.API._handle_exception
         # method signature from `(ex, req, resp, params)` to
@@ -197,14 +197,14 @@ def _patch_handle_exception():
 
         return was_handled
 
-    falcon_app_class._handle_exception = sentry_patched_handle_exception
+    falcon_app_class._handle_exception = debugg_ai_patched_handle_exception
 
 
 def _patch_prepare_middleware():
     # type: () -> None
     original_prepare_middleware = falcon_helpers.prepare_middleware
 
-    def sentry_patched_prepare_middleware(
+    def debugg_ai_patched_prepare_middleware(
         middleware=None, independent_middleware=False, asgi=False
     ):
         # type: (Any, Any, bool) -> Any
@@ -214,13 +214,13 @@ def _patch_prepare_middleware():
 
         integration = debugg_ai_sdk.get_client().get_integration(FalconIntegration)
         if integration is not None:
-            middleware = [SentryFalconMiddleware()] + (middleware or [])
+            middleware = [DebuggAIFalconMiddleware()] + (middleware or [])
 
         # We intentionally omit the asgi argument here, since the default is False anyways,
         # and this way, we remain backwards-compatible with pre-3.0.0 Falcon versions.
         return original_prepare_middleware(middleware, independent_middleware)
 
-    falcon_helpers.prepare_middleware = sentry_patched_prepare_middleware
+    falcon_helpers.prepare_middleware = debugg_ai_patched_prepare_middleware
 
 
 def _exception_leads_to_http_5xx(ex, response):
@@ -236,7 +236,7 @@ def _exception_leads_to_http_5xx(ex, response):
     # at the stage where we capture it is listed as 200, even though we would expect to see a 500
     # status. Since at the time of this change, Falcon 2 is ca. 4 years old, we have decided to
     # only perform this check on Falcon 3+, despite the risk that some handled errors might be
-    # reported to Sentry as unhandled on Falcon 2.
+    # reported to DebuggAI as unhandled on Falcon 2.
     return (is_server_error or is_unhandled_error) and (
         not FALCON3 or _has_http_5xx_status(response)
     )

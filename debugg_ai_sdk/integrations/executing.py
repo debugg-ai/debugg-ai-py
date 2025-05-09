@@ -50,18 +50,18 @@ class ExecutingIntegration(Integration):
             for exception, (_exc_type, _exc_value, exc_tb) in zip(
                 reversed(values), walk_exception_chain(exc_info)
             ):
-                sentry_frames = [
+                debugg_ai_frames = [
                     frame
                     for frame in exception.get("stacktrace", {}).get("frames", [])
                     if frame.get("function")
                 ]
                 tbs = list(iter_stacks(exc_tb))
-                if len(sentry_frames) != len(tbs):
+                if len(debugg_ai_frames) != len(tbs):
                     continue
 
-                for sentry_frame, tb in zip(sentry_frames, tbs):
+                for debugg_ai_frame, tb in zip(debugg_ai_frames, tbs):
                     frame = tb.tb_frame
                     source = executing.Source.for_frame(frame)
-                    sentry_frame["function"] = source.code_qualname(frame.f_code)
+                    debugg_ai_frame["function"] = source.code_qualname(frame.f_code)
 
             return event

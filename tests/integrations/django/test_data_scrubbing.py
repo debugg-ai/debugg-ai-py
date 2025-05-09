@@ -21,11 +21,11 @@ def client():
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
 def test_scrub_django_session_cookies_removed(
-    sentry_init,
+    debugg_ai_init,
     client,
     capture_events,
 ):
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=False)
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=False)
     events = capture_events()
     werkzeug_set_cookie(client, "localhost", "sessionid", "123")
     werkzeug_set_cookie(client, "localhost", "csrftoken", "456")
@@ -39,11 +39,11 @@ def test_scrub_django_session_cookies_removed(
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
 def test_scrub_django_session_cookies_filtered(
-    sentry_init,
+    debugg_ai_init,
     client,
     capture_events,
 ):
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
     events = capture_events()
     werkzeug_set_cookie(client, "localhost", "sessionid", "123")
     werkzeug_set_cookie(client, "localhost", "csrftoken", "456")
@@ -61,7 +61,7 @@ def test_scrub_django_session_cookies_filtered(
 @pytest.mark.forked
 @pytest_mark_django_db_decorator()
 def test_scrub_django_custom_session_cookies_filtered(
-    sentry_init,
+    debugg_ai_init,
     client,
     capture_events,
     settings,
@@ -69,7 +69,7 @@ def test_scrub_django_custom_session_cookies_filtered(
     settings.SESSION_COOKIE_NAME = "my_sess"
     settings.CSRF_COOKIE_NAME = "csrf_secret"
 
-    sentry_init(integrations=[DjangoIntegration()], send_default_pii=True)
+    debugg_ai_init(integrations=[DjangoIntegration()], send_default_pii=True)
     events = capture_events()
     werkzeug_set_cookie(client, "localhost", "my_sess", "123")
     werkzeug_set_cookie(client, "localhost", "csrf_secret", "456")

@@ -23,7 +23,7 @@ from debugg_ai_sdk.utils import (
 from typing import TYPE_CHECKING
 
 # Constants
-TIMEOUT_WARNING_BUFFER = 1.5  # Buffer time required to send timeout warning to Sentry
+TIMEOUT_WARNING_BUFFER = 1.5  # Buffer time required to send timeout warning to DebuggAI
 MILLIS_TO_SECONDS = 1000.0
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 def _wrap_func(func):
     # type: (F) -> F
     @functools.wraps(func)
-    def sentry_func(functionhandler, gcp_event, *args, **kwargs):
+    def debugg_ai_func(functionhandler, gcp_event, *args, **kwargs):
         # type: (Any, Any, *Any, **Any) -> Any
         client = debugg_ai_sdk.get_client()
 
@@ -108,12 +108,12 @@ def _wrap_func(func):
                     return func(functionhandler, gcp_event, *args, **kwargs)
                 except Exception:
                     exc_info = sys.exc_info()
-                    sentry_event, hint = event_from_exception(
+                    debugg_ai_event, hint = event_from_exception(
                         exc_info,
                         client_options=client.options,
                         mechanism={"type": "gcp", "handled": False},
                     )
-                    debugg_ai_sdk.capture_event(sentry_event, hint=hint)
+                    debugg_ai_sdk.capture_event(debugg_ai_event, hint=hint)
                     reraise(*exc_info)
                 finally:
                     if timeout_thread:
@@ -121,7 +121,7 @@ def _wrap_func(func):
                     # Flush out the event queue
                     client.flush()
 
-    return sentry_func  # type: ignore
+    return debugg_ai_func  # type: ignore
 
 
 class GcpIntegration(Integration):

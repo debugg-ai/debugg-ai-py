@@ -70,7 +70,7 @@ if TYPE_CHECKING:
         op: str
         """
         The span's operation. A list of recommended values is available here:
-        https://develop.sentry.dev/sdk/performance/span-operations/
+        https://develop.debugg-ai.dev/sdk/performance/span-operations/
         """
 
         description: str
@@ -80,7 +80,7 @@ if TYPE_CHECKING:
         """The hub to use for this span. This argument is DEPRECATED. Please use the `scope` parameter, instead."""
 
         status: str
-        """The span's status. Possible values are listed at https://develop.sentry.dev/sdk/event-payloads/span/"""
+        """The span's status. Possible values are listed at https://develop.debugg-ai.dev/sdk/event-payloads/span/"""
 
         containing_transaction: Optional["Transaction"]
         """The transaction that this span belongs to."""
@@ -97,7 +97,7 @@ if TYPE_CHECKING:
         origin: str
         """
         The origin of the span.
-        See https://develop.sentry.dev/sdk/performance/trace-origin/
+        See https://develop.debugg-ai.dev/sdk/performance/trace-origin/
         Default "manual".
         """
 
@@ -108,7 +108,7 @@ if TYPE_CHECKING:
         source: str
         """
         A string describing the source of the transaction name. This will be used to determine the transaction's type.
-        See https://develop.sentry.dev/sdk/event-payloads/transaction/#transaction-annotations for more information.
+        See https://develop.debugg-ai.dev/sdk/event-payloads/transaction/#transaction-annotations for more information.
         Default "custom".
         """
 
@@ -126,11 +126,11 @@ if TYPE_CHECKING:
     )
 
 BAGGAGE_HEADER_NAME = "baggage"
-SENTRY_TRACE_HEADER_NAME = "sentry-trace"
+DEBUGG_AI_TRACE_HEADER_NAME = "debugg-ai-trace"
 
 
 # Transaction source
-# see https://develop.sentry.dev/sdk/event-payloads/transaction/#transaction-annotations
+# see https://develop.debugg-ai.dev/sdk/event-payloads/transaction/#transaction-annotations
 class TransactionSource(str, Enum):
     COMPONENT = "component"
     CUSTOM = "custom"
@@ -165,9 +165,9 @@ SOURCE_FOR_STYLE = {
 def get_span_status_from_http_code(http_status_code):
     # type: (int) -> str
     """
-    Returns the Sentry status corresponding to the given HTTP status code.
+    Returns the DebuggAI status corresponding to the given HTTP status code.
 
-    See: https://develop.sentry.dev/sdk/event-payloads/contexts/#trace-context
+    See: https://develop.debugg-ai.dev/sdk/event-payloads/contexts/#trace-context
     """
     if http_status_code < 400:
         return SPANSTATUS.OK
@@ -238,7 +238,7 @@ class Span:
     :param sampled: Whether the span should be sampled. Overrides the default sampling decision
         for this span when provided.
     :param op: The span's operation. A list of recommended values is available here:
-        https://develop.sentry.dev/sdk/performance/span-operations/
+        https://develop.debugg-ai.dev/sdk/performance/span-operations/
     :param description: A description of what operation is being performed within the span.
 
         .. deprecated:: 2.15.0
@@ -249,7 +249,7 @@ class Span:
         .. deprecated:: 2.0.0
             Please use the `scope` parameter, instead.
     :param status: The span's status. Possible values are listed at
-        https://develop.sentry.dev/sdk/event-payloads/span/
+        https://develop.debugg-ai.dev/sdk/event-payloads/span/
     :param containing_transaction: The transaction that this span belongs to.
     :param start_timestamp: The timestamp when the span started. If omitted, the current time
         will be used.
@@ -409,7 +409,7 @@ class Span:
         # referencing themselves)
         return self._containing_transaction
 
-    def start_child(self, instrumenter=INSTRUMENTER.SENTRY, **kwargs):
+    def start_child(self, instrumenter=INSTRUMENTER.DEBUGG_AI, **kwargs):
         # type: (str, **Any) -> Span
         """
         Start a sub-span from the current span or transaction.
@@ -460,7 +460,7 @@ class Span:
         # type: (...) -> Transaction
         """
         Create a Transaction with the given params, then add in data pulled from
-        the ``sentry-trace`` and ``baggage`` headers from the environ (if any)
+        the ``debugg-ai-trace`` and ``baggage`` headers from the environ (if any)
         before returning the Transaction.
 
         This is different from :py:meth:`~debugg_ai_sdk.tracing.Span.continue_from_headers`
@@ -488,7 +488,7 @@ class Span:
         # type: (...) -> Transaction
         """
         Create a transaction with the given params (including any data pulled from
-        the ``sentry-trace`` and ``baggage`` headers).
+        the ``debugg-ai-trace`` and ``baggage`` headers).
 
         :param headers: The dictionary with the HTTP headers to pull information from.
         :param _sample_rand: If provided, we override the sample_rand value from the
@@ -508,14 +508,14 @@ class Span:
         )
         kwargs.update({BAGGAGE_HEADER_NAME: baggage})
 
-        sentrytrace_kwargs = extract_sentrytrace_data(
-            headers.get(SENTRY_TRACE_HEADER_NAME)
+        debugg_ai_trace_kwargs = extract_debugg_ai_trace_data(
+            headers.get(DEBUGG_AI_TRACE_HEADER_NAME)
         )
 
-        if sentrytrace_kwargs is not None:
-            kwargs.update(sentrytrace_kwargs)
+        if debugg_ai_trace_kwargs is not None:
+            kwargs.update(debugg_ai_trace_kwargs)
 
-            # If there's an incoming sentry-trace but no incoming baggage header,
+            # If there's an incoming debugg-ai-trace but no incoming baggage header,
             # for instance in traces coming from older SDKs,
             # baggage will be empty and immutable and won't be populated as head SDK.
             baggage.freeze()
@@ -528,18 +528,18 @@ class Span:
     def iter_headers(self):
         # type: () -> Iterator[Tuple[str, str]]
         """
-        Creates a generator which returns the span's ``sentry-trace`` and ``baggage`` headers.
+        Creates a generator which returns the span's ``debugg-ai-trace`` and ``baggage`` headers.
         If the span's containing transaction doesn't yet have a ``baggage`` value,
         this will cause one to be generated and stored.
         """
         if not self.containing_transaction:
             # Do not propagate headers if there is no containing transaction. Otherwise, this
             # span ends up being the root span of a new trace, and since it does not get sent
-            # to Sentry, the trace will be missing a root transaction. The dynamic sampling
+            # to DebuggAI, the trace will be missing a root transaction. The dynamic sampling
             # context will also be missing, breaking dynamic sampling & traces.
             return
 
-        yield SENTRY_TRACE_HEADER_NAME, self.to_traceparent()
+        yield DEBUGG_AI_TRACE_HEADER_NAME, self.to_traceparent()
 
         baggage = self.containing_transaction.get_baggage().serialize()
         if baggage:
@@ -556,7 +556,7 @@ class Span:
         DEPRECATED: Use :py:meth:`debugg_ai_sdk.tracing.Span.continue_from_headers`.
 
         Create a ``Transaction`` with the given params, then add in data pulled from
-        the given ``sentry-trace`` header value before returning the ``Transaction``.
+        the given ``debugg-ai-trace`` header value before returning the ``Transaction``.
         """
         logger.warning(
             "Deprecated: Use Transaction.continue_from_headers(headers, **kwargs) "
@@ -567,7 +567,7 @@ class Span:
             return None
 
         return cls.continue_from_headers(
-            {SENTRY_TRACE_HEADER_NAME: traceparent}, **kwargs
+            {DEBUGG_AI_TRACE_HEADER_NAME: traceparent}, **kwargs
         )
 
     def to_traceparent(self):
@@ -779,17 +779,17 @@ class Span:
 
 class Transaction(Span):
     """The Transaction is the root element that holds all the spans
-    for Sentry performance instrumentation.
+    for DebuggAI performance instrumentation.
 
     :param name: Identifier of the transaction.
-        Will show up in the Sentry UI.
+        Will show up in the DebuggAI UI.
     :param parent_sampled: Whether the parent transaction was sampled.
         If True this transaction will be kept, if False it will be discarded.
     :param baggage: The W3C baggage header value.
         (see https://www.w3.org/TR/baggage/)
     :param source: A string describing the source of the transaction name.
         This will be used to determine the transaction's type.
-        See https://develop.sentry.dev/sdk/event-payloads/transaction/#transaction-annotations
+        See https://develop.debugg-ai.dev/sdk/event-payloads/transaction/#transaction-annotations
         for more information. Default "custom".
     :param kwargs: Additional arguments to be passed to the Span constructor.
         See :py:class:`debugg_ai_sdk.tracing.Span` for available arguments.
@@ -873,7 +873,7 @@ class Transaction(Span):
         if not self._possibly_started():
             logger.debug(
                 "Transaction was entered without being started with debugg_ai_sdk.start_transaction."
-                "The transaction will not be sent to Sentry. To fix, start the transaction by"
+                "The transaction will not be sent to DebuggAI. To fix, start the transaction by"
                 "passing it to debugg_ai_sdk.start_transaction."
             )
 
@@ -947,8 +947,8 @@ class Transaction(Span):
         hub=None,  # type: Optional[debugg_ai_sdk.Hub]
     ):
         # type: (...) -> Optional[str]
-        """Finishes the transaction and sends it to Sentry.
-        All finished spans in the transaction will also be sent to Sentry.
+        """Finishes the transaction and sends it to DebuggAI.
+        All finished spans in the transaction will also be sent to DebuggAI.
 
         :param scope: The Scope to use for this transaction.
             If not provided, the current Scope will be used.
@@ -958,7 +958,7 @@ class Transaction(Span):
             This argument is DEPRECATED. Please use the `scope`
             parameter, instead.
 
-        :return: The event ID if the transaction was sent to Sentry,
+        :return: The event ID if the transaction was sent to DebuggAI,
             otherwise None.
         """
         if self.timestamp is not None:
@@ -1127,7 +1127,7 @@ class Transaction(Span):
         """Returns the :py:class:`~debugg_ai_sdk.tracing_utils.Baggage`
         associated with the Transaction.
 
-        The first time a new baggage with Sentry items is made,
+        The first time a new baggage with DebuggAI items is made,
         it will be frozen."""
         if not self._baggage or self._baggage.mutable:
             self._baggage = Baggage.populate_from_transaction(self)
@@ -1247,7 +1247,7 @@ class NoOpSpan(Span):
         # type: () -> Optional[Transaction]
         return None
 
-    def start_child(self, instrumenter=INSTRUMENTER.SENTRY, **kwargs):
+    def start_child(self, instrumenter=INSTRUMENTER.DEBUGG_AI, **kwargs):
         # type: (str, **Any) -> NoOpSpan
         return NoOpSpan()
 
@@ -1363,7 +1363,7 @@ def trace(func=None):
     """
     from debugg_ai_sdk.tracing_utils import start_child_span_decorator
 
-    # This patterns allows usage of both @sentry_traced and @sentry_traced(...)
+    # This patterns allows usage of both @debugg_ai_traced and @debugg_ai_traced(...)
     # See https://stackoverflow.com/questions/52126071/decorator-with-arguments-avoid-parenthesis-when-no-arguments/52126278
     if func:
         return start_child_span_decorator(func)
@@ -1376,7 +1376,7 @@ def trace(func=None):
 from debugg_ai_sdk.tracing_utils import (
     Baggage,
     EnvironHeaders,
-    extract_sentrytrace_data,
+    extract_debugg_ai_trace_data,
     _generate_sample_rand,
     has_tracing_enabled,
     maybe_create_breadcrumbs_from_span,

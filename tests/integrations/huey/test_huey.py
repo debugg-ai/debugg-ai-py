@@ -14,9 +14,9 @@ HUEY_VERSION = parse_version(HUEY_VERSION)
 
 
 @pytest.fixture
-def init_huey(sentry_init):
+def init_huey(debugg_ai_init):
     def inner():
-        sentry_init(
+        debugg_ai_init(
             integrations=[HueyIntegration()],
             traces_sample_rate=1.0,
             send_default_pii=True,

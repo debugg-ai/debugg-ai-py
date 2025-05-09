@@ -164,7 +164,7 @@ def _update_celery_task_headers(original_headers, span, monitor_beat_tasks):
     # type: (dict[str, Any], Optional[Span], bool) -> dict[str, Any]
     """
     Updates the headers of the Celery task with the tracing information
-    and eventually Sentry Crons monitoring information for beat tasks.
+    and eventually DebuggAI Crons monitoring information for beat tasks.
     """
     updated_headers = original_headers.copy()
     with capture_internal_exceptions():
@@ -177,7 +177,7 @@ def _update_celery_task_headers(original_headers, span, monitor_beat_tasks):
         if monitor_beat_tasks:
             headers.update(
                 {
-                    "sentry-monitor-start-timestamp-s": "%.9f"
+                    "debugg-ai-monitor-start-timestamp-s": "%.9f"
                     % _now_seconds_since_epoch(),
                 }
             )
@@ -185,21 +185,21 @@ def _update_celery_task_headers(original_headers, span, monitor_beat_tasks):
         # Add the time the task was enqueued to the headers
         # This is used in the consumer to calculate the latency
         updated_headers.update(
-            {"sentry-task-enqueued-time": _now_seconds_since_epoch()}
+            {"debugg-ai-task-enqueued-time": _now_seconds_since_epoch()}
         )
 
         if headers:
             existing_baggage = updated_headers.get(BAGGAGE_HEADER_NAME)
-            sentry_baggage = headers.get(BAGGAGE_HEADER_NAME)
+            debugg_ai_baggage = headers.get(BAGGAGE_HEADER_NAME)
 
-            combined_baggage = sentry_baggage or existing_baggage
-            if sentry_baggage and existing_baggage:
-                # Merge incoming and sentry baggage, where the sentry trace information
+            combined_baggage = debugg_ai_baggage or existing_baggage
+            if debugg_ai_baggage and existing_baggage:
+                # Merge incoming and debugg-ai baggage, where the debugg-ai trace information
                 # in the incoming baggage takes precedence and the third-party items
                 # are concatenated.
                 incoming = Baggage.from_incoming_header(existing_baggage)
-                combined = Baggage.from_incoming_header(sentry_baggage)
-                combined.sentry_items.update(incoming.sentry_items)
+                combined = Baggage.from_incoming_header(debugg_ai_baggage)
+                combined.debugg_ai_items.update(incoming.debugg_ai_items)
                 combined.third_party_items = ",".join(
                     [
                         x
@@ -225,10 +225,10 @@ def _update_celery_task_headers(original_headers, span, monitor_beat_tasks):
             if combined_baggage:
                 updated_headers["headers"][BAGGAGE_HEADER_NAME] = combined_baggage
 
-            # Add the Sentry options potentially added in `sentry_apply_entry`
+            # Add the DebuggAI options potentially added in `debugg_ai_apply_entry`
             # to the headers (done when auto-instrumenting Celery Beat tasks)
             for key, value in updated_headers.items():
-                if key.startswith("sentry-"):
+                if key.startswith("debugg-ai-"):
                     updated_headers["headers"][key] = value
 
     return updated_headers
@@ -257,7 +257,7 @@ def _wrap_task_run(f):
 
         kwarg_headers = kwargs.get("headers") or {}
         propagate_traces = kwarg_headers.pop(
-            "sentry-propagate-traces", integration.propagate_traces
+            "debugg-ai-propagate-traces", integration.propagate_traces
         )
 
         if not propagate_traces:
@@ -368,7 +368,7 @@ def _wrap_task_call(task, f):
     # method's name. @ensure_integration_enabled internally calls functools.wraps,
     # but if we ever remove the @ensure_integration_enabled decorator, we need
     # to add @functools.wraps(f) here.
-    # https://github.com/getsentry/sentry-python/issues/421
+    # https://github.com/debugg-ai/debugg-ai-py/issues/421
     @ensure_integration_enabled(CeleryIntegration, f)
     def _inner(*args, **kwargs):
         # type: (*Any, **Any) -> Any
@@ -384,10 +384,10 @@ def _wrap_task_call(task, f):
                 with capture_internal_exceptions():
                     if (
                         task.request.headers is not None
-                        and "sentry-task-enqueued-time" in task.request.headers
+                        and "debugg-ai-task-enqueued-time" in task.request.headers
                     ):
                         latency = _now_seconds_since_epoch() - task.request.headers.pop(
-                            "sentry-task-enqueued-time"
+                            "debugg-ai-task-enqueued-time"
                         )
 
                 if latency is not None:
@@ -423,9 +423,9 @@ def _patch_build_tracer():
 
     original_build_tracer = trace.build_tracer
 
-    def sentry_build_tracer(name, task, *args, **kwargs):
+    def debugg_ai_build_tracer(name, task, *args, **kwargs):
         # type: (Any, Any, *Any, **Any) -> Any
-        if not getattr(task, "_sentry_is_patched", False):
+        if not getattr(task, "_debugg_ai_is_patched", False):
             # determine whether Celery will use __call__ or run and patch
             # accordingly
             if task_has_custom(task, "__call__"):
@@ -436,11 +436,11 @@ def _patch_build_tracer():
             # `build_tracer` is apparently called for every task
             # invocation. Can't wrap every celery task for every invocation
             # or we will get infinitely nested wrapper functions.
-            task._sentry_is_patched = True
+            task._debugg_ai_is_patched = True
 
         return _wrap_tracer(task, original_build_tracer(name, task, *args, **kwargs))
 
-    trace.build_tracer = sentry_build_tracer
+    trace.build_tracer = debugg_ai_build_tracer
 
 
 def _patch_task_apply_async():
@@ -464,7 +464,7 @@ def _patch_worker_exit():
 
     original_workloop = Worker.workloop
 
-    def sentry_workloop(*args, **kwargs):
+    def debugg_ai_workloop(*args, **kwargs):
         # type: (*Any, **Any) -> Any
         try:
             return original_workloop(*args, **kwargs)
@@ -476,7 +476,7 @@ def _patch_worker_exit():
                 ):
                     debugg_ai_sdk.flush()
 
-    Worker.workloop = sentry_workloop
+    Worker.workloop = debugg_ai_workloop
 
 
 def _patch_producer_publish():
@@ -484,7 +484,7 @@ def _patch_producer_publish():
     original_publish = Producer.publish
 
     @ensure_integration_enabled(CeleryIntegration, original_publish)
-    def sentry_publish(self, *args, **kwargs):
+    def debugg_ai_publish(self, *args, **kwargs):
         # type: (Producer, *Any, **Any) -> Any
         kwargs_headers = kwargs.get("headers", {})
         if not isinstance(kwargs_headers, Mapping):
@@ -525,4 +525,4 @@ def _patch_producer_publish():
 
             return original_publish(self, *args, **kwargs)
 
-    Producer.publish = sentry_publish
+    Producer.publish = debugg_ai_publish

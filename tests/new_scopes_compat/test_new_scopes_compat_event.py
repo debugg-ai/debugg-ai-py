@@ -130,9 +130,9 @@ def expected_error(integrations):
             "environment": "checking-compatibility-with-sdk1",
             "server_name": mock.ANY,
             "sdk": {
-                "name": "sentry.python",
+                "name": "debugg-ai.python",
                 "version": mock.ANY,
-                "packages": [{"name": "pypi:sentry-sdk", "version": mock.ANY}],
+                "packages": [{"name": "pypi:debugg-ai-sdk", "version": mock.ANY}],
                 "integrations": integrations,
             },
             "platform": "python",
@@ -219,9 +219,9 @@ def expected_transaction(integrations):
             "environment": "checking-compatibility-with-sdk1",
             "server_name": mock.ANY,
             "sdk": {
-                "name": "sentry.python",
+                "name": "debugg-ai.python",
                 "version": mock.ANY,
-                "packages": [{"name": "pypi:sentry-sdk", "version": mock.ANY}],
+                "packages": [{"name": "pypi:debugg-ai-sdk", "version": mock.ANY}],
                 "integrations": integrations,
             },
             "platform": "python",
@@ -308,8 +308,8 @@ def _generate_event_data(scope=None):
         scope.add_attachment(bytes=b"Hello World", filename="hello.txt")
 
 
-def _init_debugg_ai_sdk(sentry_init):
-    sentry_init(
+def _init_debugg_ai_sdk(debugg_ai_init):
+    debugg_ai_init(
         environment="checking-compatibility-with-sdk1",
         release="0.1.2rc3",
         before_send=_test_before_send,
@@ -330,8 +330,8 @@ def _init_debugg_ai_sdk(sentry_init):
 #
 
 
-def test_event(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_debugg_ai_sdk(sentry_init)
+def test_event(debugg_ai_init, capture_envelopes, expected_error, expected_transaction):
+    _init_debugg_ai_sdk(debugg_ai_init)
 
     envelopes = capture_envelopes()
 
@@ -359,8 +359,8 @@ def test_event(sentry_init, capture_envelopes, expected_error, expected_transact
     assert attachment.payload.bytes == b"Hello World"
 
 
-def test_event2(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_debugg_ai_sdk(sentry_init)
+def test_event2(debugg_ai_init, capture_envelopes, expected_error, expected_transaction):
+    _init_debugg_ai_sdk(debugg_ai_init)
 
     envelopes = capture_envelopes()
 
@@ -395,8 +395,8 @@ def test_event2(sentry_init, capture_envelopes, expected_error, expected_transac
     assert attachment.payload.bytes == b"Hello World"
 
 
-def test_event3(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_debugg_ai_sdk(sentry_init)
+def test_event3(debugg_ai_init, capture_envelopes, expected_error, expected_transaction):
+    _init_debugg_ai_sdk(debugg_ai_init)
 
     envelopes = capture_envelopes()
 
@@ -431,8 +431,8 @@ def test_event3(sentry_init, capture_envelopes, expected_error, expected_transac
     assert attachment.payload.bytes == b"Hello World"
 
 
-def test_event4(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_debugg_ai_sdk(sentry_init)
+def test_event4(debugg_ai_init, capture_envelopes, expected_error, expected_transaction):
+    _init_debugg_ai_sdk(debugg_ai_init)
 
     envelopes = capture_envelopes()
 
@@ -467,8 +467,8 @@ def test_event4(sentry_init, capture_envelopes, expected_error, expected_transac
     assert attachment.payload.bytes == b"Hello World"
 
 
-def test_event5(sentry_init, capture_envelopes, expected_error, expected_transaction):
-    _init_debugg_ai_sdk(sentry_init)
+def test_event5(debugg_ai_init, capture_envelopes, expected_error, expected_transaction):
+    _init_debugg_ai_sdk(debugg_ai_init)
 
     envelopes = capture_envelopes()
 

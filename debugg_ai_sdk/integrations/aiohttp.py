@@ -98,7 +98,7 @@ class AioHttpIntegration(Integration):
             # We better have contextvars or we're going to leak state between
             # requests.
             raise DidNotEnable(
-                "The aiohttp integration for Sentry requires Python 3.7+ "
+                "The aiohttp integration for DebuggAI requires Python 3.7+ "
                 " or aiocontextvars package." + CONTEXTVARS_ERROR_MESSAGE
             )
 
@@ -106,7 +106,7 @@ class AioHttpIntegration(Integration):
 
         old_handle = Application._handle
 
-        async def sentry_app_handle(self, request, *args, **kwargs):
+        async def debugg_ai_app_handle(self, request, *args, **kwargs):
             # type: (Any, Request, *Any, **Any) -> Any
             integration = debugg_ai_sdk.get_client().get_integration(AioHttpIntegration)
             if integration is None:
@@ -169,12 +169,12 @@ class AioHttpIntegration(Integration):
 
                         return response
 
-        Application._handle = sentry_app_handle
+        Application._handle = debugg_ai_app_handle
 
         old_urldispatcher_resolve = UrlDispatcher.resolve
 
         @wraps(old_urldispatcher_resolve)
-        async def sentry_urldispatcher_resolve(self, request):
+        async def debugg_ai_urldispatcher_resolve(self, request):
             # type: (UrlDispatcher, Request) -> UrlMappingMatchInfo
             rv = await old_urldispatcher_resolve(self, request)
 
@@ -202,7 +202,7 @@ class AioHttpIntegration(Integration):
 
             return rv
 
-        UrlDispatcher.resolve = sentry_urldispatcher_resolve
+        UrlDispatcher.resolve = debugg_ai_urldispatcher_resolve
 
         old_client_session_init = ClientSession.__init__
 

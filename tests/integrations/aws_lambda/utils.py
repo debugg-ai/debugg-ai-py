@@ -79,19 +79,19 @@ class LocalLambdaStack(Stack):
         self.template_options.template_format_version = "2010-09-09"
         self.template_options.transforms = ["AWS::Serverless-2016-10-31"]
 
-        print("[LocalLambdaStack] Create Sentry Lambda layer package")
-        filename = "sentry-sdk-lambda-layer.zip"
+        print("[LocalLambdaStack] Create DebuggAI Lambda layer package")
+        filename = "debugg-ai-sdk-lambda-layer.zip"
         build_packaged_zip(
             make_dist=True,
             out_zip_filename=filename,
         )
 
         print(
-            "[LocalLambdaStack] Add Sentry Lambda layer containing the Sentry SDK to the SAM stack"
+            "[LocalLambdaStack] Add DebuggAI Lambda layer containing the DebuggAI SDK to the SAM stack"
         )
-        self.sentry_layer = CfnResource(
+        self.debugg_ai_layer = CfnResource(
             self,
-            "SentryPythonServerlessSDK",
+            "DebuggAIPythonServerlessSDK",
             type="AWS::Serverless::LayerVersion",
             properties={
                 "ContentUri": os.path.join(DIST_PATH, filename),
@@ -102,7 +102,7 @@ class LocalLambdaStack(Stack):
         )
 
         dsn = f"http://123@{get_host_ip()}:9999/0"  # noqa: E231
-        print("[LocalLambdaStack] Using Sentry DSN: %s" % dsn)
+        print("[LocalLambdaStack] Using DebuggAI DSN: %s" % dsn)
 
         print(
             "[LocalLambdaStack] Add all Lambda functions defined in "
@@ -120,17 +120,17 @@ class LocalLambdaStack(Stack):
                 type="AWS::Serverless::Function",
                 properties={
                     "CodeUri": os.path.join(LAMBDA_FUNCTION_DIR, lambda_dir),
-                    "Handler": "debugg_ai_sdk.integrations.init_serverless_sdk.sentry_lambda_handler",
+                    "Handler": "debugg_ai_sdk.integrations.init_serverless_sdk.debugg_ai_lambda_handler",
                     "Runtime": PYTHON_VERSION,
                     "Timeout": LAMBDA_FUNCTION_TIMEOUT,
                     "Layers": [
-                        {"Ref": self.sentry_layer.logical_id}
-                    ],  # Add layer containing the Sentry SDK to function.
+                        {"Ref": self.debugg_ai_layer.logical_id}
+                    ],  # Add layer containing the DebuggAI SDK to function.
                     "Environment": {
                         "Variables": {
                             "DEBUGGAI_INGEST_URL": dsn,
-                            "SENTRY_INITIAL_HANDLER": "index.handler",
-                            "SENTRY_TRACES_SAMPLE_RATE": "1.0",
+                            "DEBUGG_AI_INITIAL_HANDLER": "index.handler",
+                            "DEBUGG_AI_TRACES_SAMPLE_RATE": "1.0",
                         }
                     },
                 },
@@ -153,18 +153,18 @@ class LocalLambdaStack(Stack):
             if os.path.isdir(os.path.join(LAMBDA_FUNCTION_WITH_EMBEDDED_SDK_DIR, d))
         ]
         for lambda_dir in lambda_dirs:
-            # Copy the Sentry SDK into the function directory
+            # Copy the DebuggAI SDK into the function directory
             sdk_path = os.path.join(
                 LAMBDA_FUNCTION_WITH_EMBEDDED_SDK_DIR, lambda_dir, "debugg_ai_sdk"
             )
             if not os.path.exists(sdk_path):
-                # Find the Sentry SDK in the current environment
+                # Find the DebuggAI SDK in the current environment
                 import debugg_ai_sdk as sdk_module
 
                 sdk_source = os.path.dirname(sdk_module.__file__)
                 shutil.copytree(sdk_source, sdk_path)
 
-            # Install the requirements of Sentry SDK into the function directory
+            # Install the requirements of DebuggAI SDK into the function directory
             requirements_file = os.path.join(
                 get_project_root(), "requirements-aws-lambda-layer.txt"
             )
@@ -234,9 +234,9 @@ class LocalLambdaStack(Stack):
                 continue
 
 
-class SentryServerForTesting:
+class DebuggAIServerForTesting:
     """
-    A simple Sentry.io style server that accepts envelopes and stores them in a list.
+    A simple DebuggAI.io style server that accepts envelopes and stores them in a list.
     """
 
     def __init__(self, host="0.0.0.0", port=9999, log_level="warning"):
@@ -248,7 +248,7 @@ class SentryServerForTesting:
 
         @self.app.post("/api/0/envelope/")
         async def envelope(request: Request):
-            print("[SentryServerForTesting] Received envelope")
+            print("[DebuggAIServerForTesting] Received envelope")
             try:
                 raw_body = await request.body()
             except Exception:
@@ -284,11 +284,11 @@ class SentryServerForTesting:
 
     def start(self):
         print(
-            "[SentryServerForTesting] Starting server on %s:%s" % (self.host, self.port)
+            "[DebuggAIServerForTesting] Starting server on %s:%s" % (self.host, self.port)
         )
         server_thread = threading.Thread(target=self.run_server, daemon=True)
         server_thread.start()
 
     def clear_envelopes(self):
-        print("[SentryServerForTesting] Clearing envelopes")
+        print("[DebuggAIServerForTesting] Clearing envelopes")
         self.envelopes = []

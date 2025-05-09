@@ -116,7 +116,7 @@ class ChaliceIntegration(Integration):
                 RestAPIEventHandler._get_view_function_response
             )
 
-        def sentry_event_response(app, view_function, function_args):
+        def debugg_ai_event_response(app, view_function, function_args):
             # type: (Any, F, Dict[str, Any]) -> Any
             wrapped_view_function = _get_view_function_response(
                 app, view_function, function_args
@@ -127,8 +127,8 @@ class ChaliceIntegration(Integration):
             )
 
         if version < (1, 20):
-            Chalice._get_view_function_response = sentry_event_response
+            Chalice._get_view_function_response = debugg_ai_event_response
         else:
-            RestAPIEventHandler._get_view_function_response = sentry_event_response
+            RestAPIEventHandler._get_view_function_response = debugg_ai_event_response
         # for everything else (like events)
         chalice.app.EventSourceHandler = EventSourceHandler

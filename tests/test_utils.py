@@ -28,7 +28,7 @@ from debugg_ai_sdk.utils import (
     safe_str,
     sanitize_url,
     serialize_frame,
-    is_sentry_url,
+    is_debugg_ai_url,
     _get_installed_modules,
     _generate_installed_modules,
     ensure_integration_enabled,
@@ -576,36 +576,36 @@ def test_parse_version(version, expected_result):
 @pytest.fixture
 def mock_client_with_dsn_netloc():
     """
-    Returns a mocked Client with a DSN netloc of "abcd1234.ingest.sentry.io".
+    Returns a mocked Client with a DSN netloc of "abcd1234.ingest.debugg.ai".
     """
     mock_client = mock.Mock(spec=debugg_ai_sdk.Client)
     mock_client.transport = mock.Mock(spec=debugg_ai_sdk.Transport)
     mock_client.transport.parsed_dsn = mock.Mock(spec=Dsn)
 
-    mock_client.transport.parsed_dsn.netloc = "abcd1234.ingest.sentry.io"
+    mock_client.transport.parsed_dsn.netloc = "abcd1234.ingest.debugg.ai"
 
     return mock_client
 
 
 @pytest.mark.parametrize(
-    ["test_url", "is_sentry_url_expected"],
+    ["test_url", "is_debugg_ai_url_expected"],
     [
-        ["https://asdf@abcd1234.ingest.sentry.io/123456789", True],
-        ["https://asdf@abcd1234.ingest.notsentry.io/123456789", False],
+        ["https://asdf@abcd1234.ingest.debugg.ai/123456789", True],
+        ["https://asdf@abcd1234.ingest.notdebugg.ai/123456789", False],
     ],
 )
-def test_is_sentry_url_true(
-    test_url, is_sentry_url_expected, mock_client_with_dsn_netloc
+def test_is_debugg_ai_url_true(
+    test_url, is_debugg_ai_url_expected, mock_client_with_dsn_netloc
 ):
-    ret_val = is_sentry_url(mock_client_with_dsn_netloc, test_url)
+    ret_val = is_debugg_ai_url(mock_client_with_dsn_netloc, test_url)
 
-    assert ret_val == is_sentry_url_expected
+    assert ret_val == is_debugg_ai_url_expected
 
 
-def test_is_sentry_url_no_client():
-    test_url = "https://asdf@abcd1234.ingest.sentry.io/123456789"
+def test_is_debugg_ai_url_no_client():
+    test_url = "https://asdf@abcd1234.ingest.debugg.ai/123456789"
 
-    ret_val = is_sentry_url(None, test_url)
+    ret_val = is_debugg_ai_url(None, test_url)
 
     assert not ret_val
 
@@ -712,14 +712,14 @@ def test_default_release_empty_string():
     assert release is None
 
 
-def test_ensure_integration_enabled_integration_enabled(sentry_init):
+def test_ensure_integration_enabled_integration_enabled(debugg_ai_init):
     def original_function():
         return "original"
 
     def function_to_patch():
         return "patched"
 
-    sentry_init(integrations=[TestIntegration()])
+    debugg_ai_init(integrations=[TestIntegration()])
 
     # Test the decorator by applying to function_to_patch
     patched_function = ensure_integration_enabled(TestIntegration, original_function)(
@@ -730,14 +730,14 @@ def test_ensure_integration_enabled_integration_enabled(sentry_init):
     assert patched_function.__name__ == "original_function"
 
 
-def test_ensure_integration_enabled_integration_disabled(sentry_init):
+def test_ensure_integration_enabled_integration_disabled(debugg_ai_init):
     def original_function():
         return "original"
 
     def function_to_patch():
         return "patched"
 
-    sentry_init(integrations=[])  # TestIntegration is disabled
+    debugg_ai_init(integrations=[])  # TestIntegration is disabled
 
     # Test the decorator by applying to function_to_patch
     patched_function = ensure_integration_enabled(TestIntegration, original_function)(
@@ -748,14 +748,14 @@ def test_ensure_integration_enabled_integration_disabled(sentry_init):
     assert patched_function.__name__ == "original_function"
 
 
-def test_ensure_integration_enabled_no_original_function_enabled(sentry_init):
+def test_ensure_integration_enabled_no_original_function_enabled(debugg_ai_init):
     shared_variable = "original"
 
     def function_to_patch():
         nonlocal shared_variable
         shared_variable = "patched"
 
-    sentry_init(integrations=[TestIntegration])
+    debugg_ai_init(integrations=[TestIntegration])
 
     # Test the decorator by applying to function_to_patch
     patched_function = ensure_integration_enabled(TestIntegration)(function_to_patch)
@@ -765,14 +765,14 @@ def test_ensure_integration_enabled_no_original_function_enabled(sentry_init):
     assert patched_function.__name__ == "function_to_patch"
 
 
-def test_ensure_integration_enabled_no_original_function_disabled(sentry_init):
+def test_ensure_integration_enabled_no_original_function_disabled(debugg_ai_init):
     shared_variable = "original"
 
     def function_to_patch():
         nonlocal shared_variable
         shared_variable = "patched"
 
-    sentry_init(integrations=[])
+    debugg_ai_init(integrations=[])
 
     # Test the decorator by applying to function_to_patch
     patched_function = ensure_integration_enabled(TestIntegration)(function_to_patch)

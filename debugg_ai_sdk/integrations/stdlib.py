@@ -13,7 +13,7 @@ from debugg_ai_sdk.utils import (
     SENSITIVE_DATA_SUBSTITUTE,
     capture_internal_exceptions,
     ensure_integration_enabled,
-    is_sentry_url,
+    is_debugg_ai_url,
     logger,
     safe_repr,
     parse_url,
@@ -70,7 +70,7 @@ def _install_httplib():
         default_port = self.default_port
 
         client = debugg_ai_sdk.get_client()
-        if client.get_integration(StdlibIntegration) is None or is_sentry_url(
+        if client.get_integration(StdlibIntegration) is None or is_debugg_ai_url(
             client, host
         ):
             return real_putrequest(self, method, url, *args, **kwargs)
@@ -116,13 +116,13 @@ def _install_httplib():
                 )
                 self.putheader(key, value)
 
-        self._sentrysdk_span = span  # type: ignore[attr-defined]
+        self._debugg-aisdk_span = span  # type: ignore[attr-defined]
 
         return rv
 
     def getresponse(self, *args, **kwargs):
         # type: (HTTPConnection, *Any, **Any) -> Any
-        span = getattr(self, "_sentrysdk_span", None)
+        span = getattr(self, "_debugg-aisdk_span", None)
 
         if span is None:
             return real_getresponse(self, *args, **kwargs)
@@ -177,7 +177,7 @@ def _install_subprocess():
     old_popen_init = subprocess.Popen.__init__
 
     @ensure_integration_enabled(StdlibIntegration, old_popen_init)
-    def sentry_patched_popen_init(self, *a, **kw):
+    def debugg_ai_patched_popen_init(self, *a, **kw):
         # type: (subprocess.Popen[Any], *Any, **Any) -> None
         # Convert from tuple to list to be able to set values.
         a = list(a)
@@ -229,12 +229,12 @@ def _install_subprocess():
             span.set_tag("subprocess.pid", self.pid)
             return rv
 
-    subprocess.Popen.__init__ = sentry_patched_popen_init  # type: ignore
+    subprocess.Popen.__init__ = debugg_ai_patched_popen_init  # type: ignore
 
     old_popen_wait = subprocess.Popen.wait
 
     @ensure_integration_enabled(StdlibIntegration, old_popen_wait)
-    def sentry_patched_popen_wait(self, *a, **kw):
+    def debugg_ai_patched_popen_wait(self, *a, **kw):
         # type: (subprocess.Popen[Any], *Any, **Any) -> Any
         with debugg_ai_sdk.start_span(
             op=OP.SUBPROCESS_WAIT,
@@ -243,12 +243,12 @@ def _install_subprocess():
             span.set_tag("subprocess.pid", self.pid)
             return old_popen_wait(self, *a, **kw)
 
-    subprocess.Popen.wait = sentry_patched_popen_wait  # type: ignore
+    subprocess.Popen.wait = debugg_ai_patched_popen_wait  # type: ignore
 
     old_popen_communicate = subprocess.Popen.communicate
 
     @ensure_integration_enabled(StdlibIntegration, old_popen_communicate)
-    def sentry_patched_popen_communicate(self, *a, **kw):
+    def debugg_ai_patched_popen_communicate(self, *a, **kw):
         # type: (subprocess.Popen[Any], *Any, **Any) -> Any
         with debugg_ai_sdk.start_span(
             op=OP.SUBPROCESS_COMMUNICATE,
@@ -257,7 +257,7 @@ def _install_subprocess():
             span.set_tag("subprocess.pid", self.pid)
             return old_popen_communicate(self, *a, **kw)
 
-    subprocess.Popen.communicate = sentry_patched_popen_communicate  # type: ignore
+    subprocess.Popen.communicate = debugg_ai_patched_popen_communicate  # type: ignore
 
 
 def get_subprocess_traceparent_headers():

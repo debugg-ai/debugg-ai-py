@@ -13,12 +13,12 @@ from tests.integrations.unleash.testutils import mock_unleash_client
 from tests.conftest import ApproxDict
 
 
-def test_is_enabled(sentry_init, capture_events, uninstall_integration):
+def test_is_enabled(debugg_ai_init, capture_events, uninstall_integration):
     uninstall_integration(UnleashIntegration.identifier)
 
     with mock_unleash_client():
         client = UnleashClient()  # type: ignore[arg-type]
-        sentry_init(integrations=[UnleashIntegration()])
+        debugg_ai_init(integrations=[UnleashIntegration()])
         client.is_enabled("hello")
         client.is_enabled("world")
         client.is_enabled("other")
@@ -36,12 +36,12 @@ def test_is_enabled(sentry_init, capture_events, uninstall_integration):
     }
 
 
-def test_is_enabled_threaded(sentry_init, capture_events, uninstall_integration):
+def test_is_enabled_threaded(debugg_ai_init, capture_events, uninstall_integration):
     uninstall_integration(UnleashIntegration.identifier)
 
     with mock_unleash_client():
         client = UnleashClient()  # type: ignore[arg-type]
-        sentry_init(integrations=[UnleashIntegration()])
+        debugg_ai_init(integrations=[UnleashIntegration()])
         events = capture_events()
 
         def task(flag_key):
@@ -86,13 +86,13 @@ def test_is_enabled_threaded(sentry_init, capture_events, uninstall_integration)
 
 
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher")
-def test_is_enabled_asyncio(sentry_init, capture_events, uninstall_integration):
+def test_is_enabled_asyncio(debugg_ai_init, capture_events, uninstall_integration):
     asyncio = pytest.importorskip("asyncio")
     uninstall_integration(UnleashIntegration.identifier)
 
     with mock_unleash_client():
         client = UnleashClient()  # type: ignore[arg-type]
-        sentry_init(integrations=[UnleashIntegration()])
+        debugg_ai_init(integrations=[UnleashIntegration()])
         events = capture_events()
 
         async def task(flag_key):
@@ -136,7 +136,7 @@ def test_is_enabled_asyncio(sentry_init, capture_events, uninstall_integration):
     }
 
 
-def test_wraps_original(sentry_init, uninstall_integration):
+def test_wraps_original(debugg_ai_init, uninstall_integration):
     with mock_unleash_client():
         client = UnleashClient()  # type: ignore[arg-type]
 
@@ -144,7 +144,7 @@ def test_wraps_original(sentry_init, uninstall_integration):
         client.is_enabled = mock_is_enabled
 
         uninstall_integration(UnleashIntegration.identifier)
-        sentry_init(integrations=[UnleashIntegration()])  # type: ignore
+        debugg_ai_init(integrations=[UnleashIntegration()])  # type: ignore
 
     res = client.is_enabled("test-flag", "arg", kwarg=1)
     assert res == mock_is_enabled.return_value
@@ -154,25 +154,25 @@ def test_wraps_original(sentry_init, uninstall_integration):
     )
 
 
-def test_wrapper_attributes(sentry_init, uninstall_integration):
+def test_wrapper_attributes(debugg_ai_init, uninstall_integration):
     with mock_unleash_client():
         client = UnleashClient()  # type: ignore[arg-type]
 
         original_is_enabled = client.is_enabled
 
         uninstall_integration(UnleashIntegration.identifier)
-        sentry_init(integrations=[UnleashIntegration()])  # type: ignore
+        debugg_ai_init(integrations=[UnleashIntegration()])  # type: ignore
 
         # Mock clients methods have not lost their qualified names after decoration.
         assert client.is_enabled.__name__ == "is_enabled"
         assert client.is_enabled.__qualname__ == original_is_enabled.__qualname__
 
 
-def test_unleash_span_integration(sentry_init, capture_events, uninstall_integration):
+def test_unleash_span_integration(debugg_ai_init, capture_events, uninstall_integration):
     uninstall_integration(UnleashIntegration.identifier)
 
     with mock_unleash_client():
-        sentry_init(traces_sample_rate=1.0, integrations=[UnleashIntegration()])
+        debugg_ai_init(traces_sample_rate=1.0, integrations=[UnleashIntegration()])
         events = capture_events()
         client = UnleashClient()  # type: ignore[arg-type]
         with start_transaction(name="hi"):

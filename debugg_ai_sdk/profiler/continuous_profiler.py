@@ -446,7 +446,7 @@ class ThreadContinuousScheduler(ContinuousScheduler):
     """
 
     mode = "thread"  # type: ContinuousProfilerMode
-    name = "sentry.profiler.ThreadContinuousScheduler"
+    name = "debugg-ai.profiler.ThreadContinuousScheduler"
 
     def __init__(self, frequency, options, sdk_info, capture_func):
         # type: (int, Dict[str, Any], SDKInfo, Callable[[Envelope], None]) -> None

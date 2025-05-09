@@ -63,7 +63,7 @@ else:
         return x
 
 
-class SentryHubDeprecationWarning(DeprecationWarning):
+class DebuggAIHubDeprecationWarning(DeprecationWarning):
     """
     A custom deprecation warning to inform users that the Hub is deprecated.
     """
@@ -72,7 +72,7 @@ class SentryHubDeprecationWarning(DeprecationWarning):
         "`debugg_ai_sdk.Hub` is deprecated and will be removed in a future major release. "
         "Please consult our 1.x to 2.x migration guide for details on how to migrate "
         "`Hub` usage to the new API: "
-        "https://docs.sentry.io/platforms/python/migration/1.x-to-2.x"
+        "https://docs.debugg.ai/platforms/python/migration/1.x-to-2.x"
     )
 
     def __init__(self, *_):
@@ -85,11 +85,11 @@ def _suppress_hub_deprecation_warning():
     # type: () -> Generator[None, None, None]
     """Utility function to suppress deprecation warnings for the Hub."""
     with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=SentryHubDeprecationWarning)
+        warnings.filterwarnings("ignore", category=DebuggAIHubDeprecationWarning)
         yield
 
 
-_local = ContextVar("sentry_current_hub")
+_local = ContextVar("debugg_ai_current_hub")
 
 
 class HubMeta(type):
@@ -97,7 +97,7 @@ class HubMeta(type):
     def current(cls):
         # type: () -> Hub
         """Returns the current instance of the hub."""
-        warnings.warn(SentryHubDeprecationWarning(), stacklevel=2)
+        warnings.warn(DebuggAIHubDeprecationWarning(), stacklevel=2)
         rv = _local.get(None)
         if rv is None:
             with _suppress_hub_deprecation_warning():
@@ -110,7 +110,7 @@ class HubMeta(type):
     def main(cls):
         # type: () -> Hub
         """Returns the main instance of the hub."""
-        warnings.warn(SentryHubDeprecationWarning(), stacklevel=2)
+        warnings.warn(DebuggAIHubDeprecationWarning(), stacklevel=2)
         return GLOBAL_HUB
 
 
@@ -141,7 +141,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         scope=None,  # type: Optional[Any]
     ):
         # type: (...) -> None
-        warnings.warn(SentryHubDeprecationWarning(), stacklevel=2)
+        warnings.warn(DebuggAIHubDeprecationWarning(), stacklevel=2)
 
         current_scope = None
 
@@ -300,7 +300,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
 
         Alias of :py:meth:`debugg_ai_sdk.Scope.capture_event`.
 
-        :param event: A ready-made event that can be directly sent to Sentry.
+        :param event: A ready-made event that can be directly sent to DebuggAI.
 
         :param hint: Contains metadata about the event that can be read from `before_send`, such as the original exception object or a HTTP request object.
 
@@ -332,7 +332,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
 
         Alias of :py:meth:`debugg_ai_sdk.Scope.capture_message`.
 
-        :param message: The string to send as the message to Sentry.
+        :param message: The string to send as the message to DebuggAI.
 
         :param level: If no level is provided, the default level is `info`.
 
@@ -394,14 +394,14 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
 
         Adds a breadcrumb.
 
-        :param crumb: Dictionary with the data as the sentry v7/v8 protocol expects.
+        :param crumb: Dictionary with the data as the debugg-ai v7/v8 protocol expects.
 
         :param hint: An optional value that can be used by `before_breadcrumb`
             to customize the breadcrumbs that are emitted.
         """
         get_isolation_scope().add_breadcrumb(crumb, hint, **kwargs)
 
-    def start_span(self, instrumenter=INSTRUMENTER.SENTRY, **kwargs):
+    def start_span(self, instrumenter=INSTRUMENTER.DEBUGG_AI, **kwargs):
         # type: (str, Any) -> Span
         """
         .. deprecated:: 2.0.0
@@ -414,7 +414,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         typically used as a context manager to start and stop timing in a `with`
         block.
 
-        Only spans contained in a transaction are sent to Sentry. Most
+        Only spans contained in a transaction are sent to DebuggAI. Most
         integrations start a transaction at the appropriate time, for example
         for every incoming HTTP request. Use
         :py:meth:`debugg_ai_sdk.start_transaction` to start a new transaction when
@@ -428,7 +428,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
     def start_transaction(
         self,
         transaction=None,
-        instrumenter=INSTRUMENTER.SENTRY,
+        instrumenter=INSTRUMENTER.DEBUGG_AI,
         custom_sampling_context=None,
         **kwargs
     ):
@@ -456,7 +456,7 @@ class Hub(with_metaclass(HubMeta)):  # type: ignore
         finished at the end of the `with` block. If not using context managers,
         call the `.finish()` method.
 
-        When the transaction is finished, it will be sent to Sentry with all its
+        When the transaction is finished, it will be sent to DebuggAI with all its
         finished child spans.
 
         For supported `**kwargs` see :py:class:`debugg_ai_sdk.tracing.Transaction`.

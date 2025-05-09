@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Attaches the layer `SentryPythonServerlessSDK-local-dev` to a given lambda function.
+# Attaches the layer `DebuggAIPythonServerlessSDK-local-dev` to a given lambda function.
 #
 
 set -euo pipefail
@@ -18,9 +18,9 @@ fi
 
 FUNCTION_NAME=$1
 
-echo "Getting ARN of newest Sentry lambda layer..."
-LAYER_ARN=$(aws lambda list-layer-versions --layer-name SentryPythonServerlessSDK-local-dev --query "LayerVersions[0].LayerVersionArn" | tr -d '"')
-echo "Done getting ARN of newest Sentry lambda layer $LAYER_ARN."
+echo "Getting ARN of newest DebuggAI lambda layer..."
+LAYER_ARN=$(aws lambda list-layer-versions --layer-name DebuggAIPythonServerlessSDK-local-dev --query "LayerVersions[0].LayerVersionArn" | tr -d '"')
+echo "Done getting ARN of newest DebuggAI lambda layer $LAYER_ARN."
 
 echo "Attaching Lamba layer to function $FUNCTION_NAME..."
 echo "Warning: This remove all other layers!"

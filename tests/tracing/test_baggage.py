@@ -6,7 +6,7 @@ def test_third_party_baggage():
     baggage = Baggage.from_incoming_header(header)
 
     assert baggage.mutable
-    assert baggage.sentry_items == {}
+    assert baggage.debugg_ai_items == {}
     assert (
         baggage.third_party_items
         == "other-vendor-value-1=foo;bar;baz,other-vendor-value-2=foo;bar;"
@@ -22,16 +22,16 @@ def test_third_party_baggage():
 
 def test_mixed_baggage():
     header = (
-        "other-vendor-value-1=foo;bar;baz, sentry-trace_id=771a43a4192642f0b136d5159a501700, "
-        "sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=0.01337, "
-        "sentry-user_id=Am%C3%A9lie, sentry-foo=bar, other-vendor-value-2=foo;bar;"
+        "other-vendor-value-1=foo;bar;baz, debugg-ai-trace_id=771a43a4192642f0b136d5159a501700, "
+        "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3, debugg-ai-sample_rate=0.01337, "
+        "debugg-ai-user_id=Am%C3%A9lie, debugg-ai-foo=bar, other-vendor-value-2=foo;bar;"
     )
 
     baggage = Baggage.from_incoming_header(header)
 
     assert not baggage.mutable
 
-    assert baggage.sentry_items == {
+    assert baggage.debugg_ai_items == {
         "public_key": "49d0f7386ad645858ae85020e393bef3",
         "trace_id": "771a43a4192642f0b136d5159a501700",
         "user_id": "Amélie",
@@ -53,16 +53,16 @@ def test_mixed_baggage():
     }
 
     assert baggage.serialize() == (
-        "sentry-trace_id=771a43a4192642f0b136d5159a501700,"
-        "sentry-public_key=49d0f7386ad645858ae85020e393bef3,"
-        "sentry-sample_rate=0.01337,sentry-user_id=Am%C3%A9lie,"
-        "sentry-foo=bar"
+        "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700,"
+        "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3,"
+        "debugg-ai-sample_rate=0.01337,debugg-ai-user_id=Am%C3%A9lie,"
+        "debugg-ai-foo=bar"
     )
 
     assert baggage.serialize(include_third_party=True) == (
-        "sentry-trace_id=771a43a4192642f0b136d5159a501700,"
-        "sentry-public_key=49d0f7386ad645858ae85020e393bef3,"
-        "sentry-sample_rate=0.01337,sentry-user_id=Am%C3%A9lie,sentry-foo=bar,"
+        "debugg-ai-trace_id=771a43a4192642f0b136d5159a501700,"
+        "debugg-ai-public_key=49d0f7386ad645858ae85020e393bef3,"
+        "debugg-ai-sample_rate=0.01337,debugg-ai-user_id=Am%C3%A9lie,debugg-ai-foo=bar,"
         "other-vendor-value-1=foo;bar;baz,other-vendor-value-2=foo;bar;"
     )
 
@@ -72,6 +72,6 @@ def test_malformed_baggage():
 
     baggage = Baggage.from_incoming_header(header)
 
-    assert baggage.sentry_items == {}
+    assert baggage.debugg_ai_items == {}
     assert baggage.third_party_items == ""
     assert baggage.mutable

@@ -36,7 +36,7 @@ class ClientInterceptor:
         return client_call_details
 
 
-class SentryUnaryUnaryClientInterceptor(ClientInterceptor, UnaryUnaryClientInterceptor):  # type: ignore
+class DebuggAIUnaryUnaryClientInterceptor(ClientInterceptor, UnaryUnaryClientInterceptor):  # type: ignore
     async def intercept_unary_unary(
         self,
         continuation: Callable[[ClientCallDetails, Message], UnaryUnaryCall],
@@ -64,7 +64,7 @@ class SentryUnaryUnaryClientInterceptor(ClientInterceptor, UnaryUnaryClientInter
             return response
 
 
-class SentryUnaryStreamClientInterceptor(
+class DebuggAIUnaryStreamClientInterceptor(
     ClientInterceptor, UnaryStreamClientInterceptor  # type: ignore
 ):
     async def intercept_unary_stream(

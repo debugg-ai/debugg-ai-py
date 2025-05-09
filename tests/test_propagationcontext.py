@@ -11,7 +11,7 @@ SAMPLED_FLAG = {
     False: "-0",
     True: "-1",
 }
-"""Maps the `sampled` value to the flag appended to the sentry-trace header."""
+"""Maps the `sampled` value to the flag appended to the debugg-ai-trace header."""
 
 
 def test_empty_context():
@@ -132,7 +132,7 @@ def test_existing_sample_rand_kept():
 def test_sample_rand_filled(parent_sampled, sample_rate, expected_interval):
     """When continuing a trace, we want to fill in the sample_rand value if it's missing."""
     if sample_rate is not None:
-        sample_rate_str = f",sentry-sample_rate={sample_rate}"  # noqa: E231
+        sample_rate_str = f",debugg-ai-sample_rate={sample_rate}"  # noqa: E231
     else:
         sample_rate_str = ""
 
@@ -148,9 +148,9 @@ def test_sample_rand_filled(parent_sampled, sample_rate, expected_interval):
     with mock.patch("debugg_ai_sdk.tracing_utils.Random", mock_random_class):
         ctx = PropagationContext().from_incoming_data(
             {
-                "sentry-trace": f"00000000000000000000000000000000-0000000000000000{SAMPLED_FLAG[parent_sampled]}",
-                # Placeholder is needed, since we only add sample_rand if sentry items are present in baggage
-                "baggage": f"sentry-placeholder=asdf{sample_rate_str}",
+                "debugg-ai-trace": f"00000000000000000000000000000000-0000000000000000{SAMPLED_FLAG[parent_sampled]}",
+                # Placeholder is needed, since we only add sample_rand if debugg-ai items are present in baggage
+                "baggage": f"debugg-ai-placeholder=asdf{sample_rate_str}",
             }
         )
 
@@ -174,8 +174,8 @@ def test_sample_rand_rounds_down():
     with mock.patch("debugg_ai_sdk.tracing_utils.Random", mock_random_class):
         ctx = PropagationContext().from_incoming_data(
             {
-                "sentry-trace": "00000000000000000000000000000000-0000000000000000",
-                "baggage": "sentry-placeholder=asdf",
+                "debugg-ai-trace": "00000000000000000000000000000000-0000000000000000",
+                "baggage": "debugg-ai-placeholder=asdf",
             }
         )
 

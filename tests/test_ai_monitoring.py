@@ -4,8 +4,8 @@ import debugg_ai_sdk
 from debugg_ai_sdk.ai.monitoring import ai_track
 
 
-def test_ai_track(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_ai_track(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     @ai_track("my tool")
@@ -31,8 +31,8 @@ def test_ai_track(sentry_init, capture_events):
     assert ai_run_span["description"] == "my tool"
 
 
-def test_ai_track_with_tags(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+def test_ai_track_with_tags(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     @ai_track("my tool")
@@ -44,7 +44,7 @@ def test_ai_track_with_tags(sentry_init, capture_events):
         tool()
 
     with debugg_ai_sdk.start_transaction():
-        pipeline(sentry_tags={"user": "colin"}, sentry_data={"some_data": "value"})
+        pipeline(debugg_ai_tags={"user": "colin"}, debugg_ai_data={"some_data": "value"})
 
     transaction = events[0]
     assert transaction["type"] == "transaction"
@@ -62,8 +62,8 @@ def test_ai_track_with_tags(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_ai_track_async(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+async def test_ai_track_async(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     @ai_track("my async tool")
@@ -90,8 +90,8 @@ async def test_ai_track_async(sentry_init, capture_events):
 
 
 @pytest.mark.asyncio
-async def test_ai_track_async_with_tags(sentry_init, capture_events):
-    sentry_init(traces_sample_rate=1.0)
+async def test_ai_track_async_with_tags(debugg_ai_init, capture_events):
+    debugg_ai_init(traces_sample_rate=1.0)
     events = capture_events()
 
     @ai_track("my async tool")
@@ -104,7 +104,7 @@ async def test_ai_track_async_with_tags(sentry_init, capture_events):
 
     with debugg_ai_sdk.start_transaction():
         await async_pipeline(
-            sentry_tags={"user": "czyber"}, sentry_data={"some_data": "value"}
+            debugg_ai_tags={"user": "czyber"}, debugg_ai_data={"some_data": "value"}
         )
 
     transaction = events[0]

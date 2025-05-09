@@ -663,7 +663,7 @@ class ThreadScheduler(Scheduler):
     """
 
     mode = "thread"  # type: ProfilerMode
-    name = "sentry.profiler.ThreadScheduler"
+    name = "debugg-ai.profiler.ThreadScheduler"
 
     def __init__(self, frequency):
         # type: (int) -> None
@@ -759,7 +759,7 @@ class GeventScheduler(Scheduler):
     """
 
     mode = "gevent"  # type: ProfilerMode
-    name = "sentry.profiler.GeventScheduler"
+    name = "debugg-ai.profiler.GeventScheduler"
 
     def __init__(self, frequency):
         # type: (int) -> None

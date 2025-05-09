@@ -14,8 +14,8 @@ original_run = Thread.run
 
 
 @pytest.mark.parametrize("integrations", [[ThreadingIntegration()], []])
-def test_handles_exceptions(sentry_init, capture_events, integrations):
-    sentry_init(default_integrations=False, integrations=integrations)
+def test_handles_exceptions(debugg_ai_init, capture_events, integrations):
+    debugg_ai_init(default_integrations=False, integrations=integrations)
     events = capture_events()
 
     def crash():
@@ -37,8 +37,8 @@ def test_handles_exceptions(sentry_init, capture_events, integrations):
 
 
 @pytest.mark.parametrize("propagate_hub", (True, False))
-def test_propagates_hub(sentry_init, capture_events, propagate_hub):
-    sentry_init(
+def test_propagates_hub(debugg_ai_init, capture_events, propagate_hub):
+    debugg_ai_init(
         default_integrations=False,
         integrations=[ThreadingIntegration(propagate_hub=propagate_hub)],
     )
@@ -73,8 +73,8 @@ def test_propagates_hub(sentry_init, capture_events, propagate_hub):
 
 
 @pytest.mark.parametrize("propagate_hub", (True, False))
-def test_propagates_threadpool_hub(sentry_init, capture_events, propagate_hub):
-    sentry_init(
+def test_propagates_threadpool_hub(debugg_ai_init, capture_events, propagate_hub):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[ThreadingIntegration(propagate_hub=propagate_hub)],
     )
@@ -105,8 +105,8 @@ def test_propagates_threadpool_hub(sentry_init, capture_events, propagate_hub):
 
 
 @pytest.mark.skip(reason="Temporarily disable to release SDK 2.0a1.")
-def test_circular_references(sentry_init, request):
-    sentry_init(default_integrations=False, integrations=[ThreadingIntegration()])
+def test_circular_references(debugg_ai_init, request):
+    debugg_ai_init(default_integrations=False, integrations=[ThreadingIntegration()])
 
     gc.collect()
     gc.disable()
@@ -125,8 +125,8 @@ def test_circular_references(sentry_init, request):
     assert unreachable_objects == 0
 
 
-def test_double_patching(sentry_init, capture_events):
-    sentry_init(default_integrations=False, integrations=[ThreadingIntegration()])
+def test_double_patching(debugg_ai_init, capture_events):
+    debugg_ai_init(default_integrations=False, integrations=[ThreadingIntegration()])
     events = capture_events()
 
     # XXX: Workaround for race condition in the py library's magic import
@@ -153,8 +153,8 @@ def test_double_patching(sentry_init, capture_events):
         assert exception["type"] == "ZeroDivisionError"
 
 
-def test_wrapper_attributes(sentry_init):
-    sentry_init(default_integrations=False, integrations=[ThreadingIntegration()])
+def test_wrapper_attributes(debugg_ai_init):
+    debugg_ai_init(default_integrations=False, integrations=[ThreadingIntegration()])
 
     def target():
         assert t.run.__name__ == "run"
@@ -180,8 +180,8 @@ def test_wrapper_attributes(sentry_init):
     (True, False),
     ids=["propagate_scope=True", "propagate_scope=False"],
 )
-def test_scope_data_not_leaked_in_threads(sentry_init, propagate_scope):
-    sentry_init(
+def test_scope_data_not_leaked_in_threads(debugg_ai_init, propagate_scope):
+    debugg_ai_init(
         integrations=[ThreadingIntegration(propagate_scope=propagate_scope)],
     )
 
@@ -216,9 +216,9 @@ def test_scope_data_not_leaked_in_threads(sentry_init, propagate_scope):
     ids=["propagate_scope=True", "propagate_scope=False"],
 )
 def test_spans_from_multiple_threads(
-    sentry_init, capture_events, render_span_tree, propagate_scope
+    debugg_ai_init, capture_events, render_span_tree, propagate_scope
 ):
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[ThreadingIntegration(propagate_scope=propagate_scope)],
     )

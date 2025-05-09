@@ -43,13 +43,13 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
-SENTRY_EVENT_SCHEMA = "./checkouts/data-schemas/relay/event.schema.json"
+DEBUGG_AI_EVENT_SCHEMA = "./checkouts/data-schemas/relay/event.schema.json"
 
-if not os.path.isfile(SENTRY_EVENT_SCHEMA):
-    SENTRY_EVENT_SCHEMA = None
+if not os.path.isfile(DEBUGG_AI_EVENT_SCHEMA):
+    DEBUGG_AI_EVENT_SCHEMA = None
 else:
-    with open(SENTRY_EVENT_SCHEMA) as f:
-        SENTRY_EVENT_SCHEMA = json.load(f)
+    with open(DEBUGG_AI_EVENT_SCHEMA) as f:
+        DEBUGG_AI_EVENT_SCHEMA = json.load(f)
 
 try:
     import pytest_benchmark
@@ -111,7 +111,7 @@ def _capture_internal_warnings():
         except NameError:
             pass
 
-        if "debugg_ai_sdk" not in str(warning.filename) and "sentry-sdk" not in str(
+        if "debugg_ai_sdk" not in str(warning.filename) and "debugg-ai-sdk" not in str(
             warning.filename
         ):
             continue
@@ -161,8 +161,8 @@ def _capture_internal_warnings():
 @pytest.fixture
 def validate_event_schema(tmpdir):
     def inner(event):
-        if SENTRY_EVENT_SCHEMA:
-            jsonschema.validate(instance=event, schema=SENTRY_EVENT_SCHEMA)
+        if DEBUGG_AI_EVENT_SCHEMA:
+            jsonschema.validate(instance=event, schema=DEBUGG_AI_EVENT_SCHEMA)
 
     return inner
 
@@ -187,7 +187,7 @@ def reset_integrations():
 
 @pytest.fixture
 def uninstall_integration():
-    """Use to force the next call to sentry_init to re-install/setup an integration."""
+    """Use to force the next call to debugg_ai_init to re-install/setup an integration."""
 
     def inner(identifier):
         _processed_integrations.discard(identifier)
@@ -197,7 +197,7 @@ def uninstall_integration():
 
 
 @pytest.fixture
-def sentry_init(request):
+def debugg_ai_init(request):
     def inner(*a, **kw):
         kw.setdefault("transport", TestTransport())
         client = debugg_ai_sdk.Client(*a, **kw)

@@ -79,7 +79,7 @@ def _install_httpx_client():
                     )
 
                     if key == BAGGAGE_HEADER_NAME:
-                        _add_sentry_baggage_to_headers(request.headers, value)
+                        _add_debugg_ai_baggage_to_headers(request.headers, value)
                     else:
                         request.headers[key] = value
 
@@ -149,19 +149,19 @@ def _install_httpx_async_client():
     AsyncClient.send = send
 
 
-def _add_sentry_baggage_to_headers(headers, sentry_baggage):
+def _add_debugg_ai_baggage_to_headers(headers, debugg_ai_baggage):
     # type: (MutableMapping[str, str], str) -> None
-    """Add the Sentry baggage to the headers.
+    """Add the DebuggAI baggage to the headers.
 
-    This function directly mutates the provided headers. The provided sentry_baggage
-    is appended to the existing baggage. If the baggage already contains Sentry items,
+    This function directly mutates the provided headers. The provided debugg_ai_baggage
+    is appended to the existing baggage. If the baggage already contains DebuggAI items,
     they are stripped out first.
     """
     existing_baggage = headers.get(BAGGAGE_HEADER_NAME, "")
-    stripped_existing_baggage = Baggage.strip_sentry_baggage(existing_baggage)
+    stripped_existing_baggage = Baggage.strip_debugg_ai_baggage(existing_baggage)
 
     separator = "," if len(stripped_existing_baggage) > 0 else ""
 
     headers[BAGGAGE_HEADER_NAME] = (
-        stripped_existing_baggage + separator + sentry_baggage
+        stripped_existing_baggage + separator + debugg_ai_baggage
     )

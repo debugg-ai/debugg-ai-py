@@ -15,14 +15,14 @@ from tests.conftest import ApproxDict
     "httpx_client",
     (httpx.Client(), httpx.AsyncClient()),
 )
-def test_crumb_capture_and_hint(sentry_init, capture_events, httpx_client, httpx_mock):
+def test_crumb_capture_and_hint(debugg_ai_init, capture_events, httpx_client, httpx_mock):
     httpx_mock.add_response()
 
     def before_breadcrumb(crumb, hint):
         crumb["data"]["extra"] = "foo"
         return crumb
 
-    sentry_init(integrations=[HttpxIntegration()], before_breadcrumb=before_breadcrumb)
+    debugg_ai_init(integrations=[HttpxIntegration()], before_breadcrumb=before_breadcrumb)
 
     url = "http://example.com/"
 
@@ -72,11 +72,11 @@ def test_crumb_capture_and_hint(sentry_init, capture_events, httpx_client, httpx
     ],
 )
 def test_crumb_capture_client_error(
-    sentry_init, capture_events, httpx_client, httpx_mock, status_code, level
+    debugg_ai_init, capture_events, httpx_client, httpx_mock, status_code, level
 ):
     httpx_mock.add_response(status_code=status_code)
 
-    sentry_init(integrations=[HttpxIntegration()])
+    debugg_ai_init(integrations=[HttpxIntegration()])
 
     url = "http://example.com/"
 
@@ -119,10 +119,10 @@ def test_crumb_capture_client_error(
     "httpx_client",
     (httpx.Client(), httpx.AsyncClient()),
 )
-def test_outgoing_trace_headers(sentry_init, httpx_client, httpx_mock):
+def test_outgoing_trace_headers(debugg_ai_init, httpx_client, httpx_mock):
     httpx_mock.add_response()
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[HttpxIntegration()],
     )
@@ -143,7 +143,7 @@ def test_outgoing_trace_headers(sentry_init, httpx_client, httpx_mock):
 
         request_span = transaction._span_recorder.spans[-1]
         assert response.request.headers[
-            "sentry-trace"
+            "debugg-ai-trace"
         ] == "{trace_id}-{parent_span_id}-{sampled}".format(
             trace_id=transaction.trace_id,
             parent_span_id=request_span.span_id,
@@ -156,13 +156,13 @@ def test_outgoing_trace_headers(sentry_init, httpx_client, httpx_mock):
     (httpx.Client(), httpx.AsyncClient()),
 )
 def test_outgoing_trace_headers_append_to_baggage(
-    sentry_init,
+    debugg_ai_init,
     httpx_client,
     httpx_mock,
 ):
     httpx_mock.add_response()
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[HttpxIntegration()],
         release="d08ebdb9309e1b004c6f52202de58a09c2268e42",
@@ -186,7 +186,7 @@ def test_outgoing_trace_headers_append_to_baggage(
 
             request_span = transaction._span_recorder.spans[-1]
             assert response.request.headers[
-                "sentry-trace"
+                "debugg-ai-trace"
             ] == "{trace_id}-{parent_span_id}-{sampled}".format(
                 trace_id=transaction.trace_id,
                 parent_span_id=request_span.span_id,
@@ -194,7 +194,7 @@ def test_outgoing_trace_headers_append_to_baggage(
             )
             assert (
                 response.request.headers["baggage"]
-                == "custom=data,sentry-trace_id=01234567890123456789012345678901,sentry-sample_rand=0.500000,sentry-environment=production,sentry-release=d08ebdb9309e1b004c6f52202de58a09c2268e42,sentry-transaction=/interactions/other-dogs/new-dog,sentry-sample_rate=1.0,sentry-sampled=true"
+                == "custom=data,debugg-ai-trace_id=01234567890123456789012345678901,debugg-ai-sample_rand=0.500000,debugg-ai-environment=production,debugg-ai-release=d08ebdb9309e1b004c6f52202de58a09c2268e42,debugg-ai-transaction=/interactions/other-dogs/new-dog,debugg-ai-sample_rate=1.0,debugg-ai-sampled=true"
             )
 
 
@@ -312,7 +312,7 @@ def test_outgoing_trace_headers_append_to_baggage(
     ],
 )
 def test_option_trace_propagation_targets(
-    sentry_init,
+    debugg_ai_init,
     httpx_client,
     httpx_mock,  # this comes from pytest-httpx
     trace_propagation_targets,
@@ -321,7 +321,7 @@ def test_option_trace_propagation_targets(
 ):
     httpx_mock.add_response()
 
-    sentry_init(
+    debugg_ai_init(
         release="test",
         trace_propagation_targets=trace_propagation_targets,
         traces_sample_rate=1.0,
@@ -337,15 +337,15 @@ def test_option_trace_propagation_targets(
     request_headers = httpx_mock.get_request().headers
 
     if trace_propagated:
-        assert "sentry-trace" in request_headers
+        assert "debugg-ai-trace" in request_headers
     else:
-        assert "sentry-trace" not in request_headers
+        assert "debugg-ai-trace" not in request_headers
 
 
-def test_do_not_propagate_outside_transaction(sentry_init, httpx_mock):
+def test_do_not_propagate_outside_transaction(debugg_ai_init, httpx_mock):
     httpx_mock.add_response()
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         trace_propagation_targets=[MATCH_ALL],
         integrations=[HttpxIntegration()],
@@ -355,14 +355,14 @@ def test_do_not_propagate_outside_transaction(sentry_init, httpx_mock):
     httpx_client.get("http://example.com/")
 
     request_headers = httpx_mock.get_request().headers
-    assert "sentry-trace" not in request_headers
+    assert "debugg-ai-trace" not in request_headers
 
 
 @pytest.mark.tests_internal_exceptions
-def test_omit_url_data_if_parsing_fails(sentry_init, capture_events, httpx_mock):
+def test_omit_url_data_if_parsing_fails(debugg_ai_init, capture_events, httpx_mock):
     httpx_mock.add_response()
 
-    sentry_init(integrations=[HttpxIntegration()])
+    debugg_ai_init(integrations=[HttpxIntegration()])
 
     httpx_client = httpx.Client()
     url = "http://example.com"
@@ -396,10 +396,10 @@ def test_omit_url_data_if_parsing_fails(sentry_init, capture_events, httpx_mock)
     "httpx_client",
     (httpx.Client(), httpx.AsyncClient()),
 )
-def test_span_origin(sentry_init, capture_events, httpx_client, httpx_mock):
+def test_span_origin(debugg_ai_init, capture_events, httpx_client, httpx_mock):
     httpx_mock.add_response()
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[HttpxIntegration()],
         traces_sample_rate=1.0,
     )

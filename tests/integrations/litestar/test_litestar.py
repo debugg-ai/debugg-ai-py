@@ -90,7 +90,7 @@ def litestar_app_factory(middleware=None, debug=True, exception_handlers=None):
     ],
 )
 def test_catch_exceptions(
-    sentry_init,
+    debugg_ai_init,
     capture_exceptions,
     capture_events,
     test_url,
@@ -98,7 +98,7 @@ def test_catch_exceptions(
     expected_message,
     expected_tx_name,
 ):
-    sentry_init(integrations=[LitestarIntegration()])
+    debugg_ai_init(integrations=[LitestarIntegration()])
     litestar_app = litestar_app_factory()
     exceptions = capture_exceptions()
     events = capture_events()
@@ -118,8 +118,8 @@ def test_catch_exceptions(
     assert event["exception"]["values"][0]["mechanism"]["type"] == "litestar"
 
 
-def test_middleware_spans(sentry_init, capture_events):
-    sentry_init(
+def test_middleware_spans(debugg_ai_init, capture_events):
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[LitestarIntegration()],
     )
@@ -160,7 +160,7 @@ def test_middleware_spans(sentry_init, capture_events):
         assert span["description"] == span["tags"]["litestar.middleware_name"]
 
 
-def test_middleware_callback_spans(sentry_init, capture_events):
+def test_middleware_callback_spans(debugg_ai_init, capture_events):
     class SampleMiddleware(AbstractMiddleware):
         async def __call__(self, scope, receive, send) -> None:
             async def do_stuff(message):
@@ -171,7 +171,7 @@ def test_middleware_callback_spans(sentry_init, capture_events):
 
             await self.app(scope, receive, do_stuff)
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[LitestarIntegration()],
     )
@@ -191,12 +191,12 @@ def test_middleware_callback_spans(sentry_init, capture_events):
         },
         {
             "op": "middleware.litestar.send",
-            "description": "SentryAsgiMiddleware._run_app.<locals>._sentry_wrapped_send",
+            "description": "DebuggAIAsgiMiddleware._run_app.<locals>._debugg_ai_wrapped_send",
             "tags": {"litestar.middleware_name": "SampleMiddleware"},
         },
         {
             "op": "middleware.litestar.send",
-            "description": "SentryAsgiMiddleware._run_app.<locals>._sentry_wrapped_send",
+            "description": "DebuggAIAsgiMiddleware._run_app.<locals>._debugg_ai_wrapped_send",
             "tags": {"litestar.middleware_name": "SampleMiddleware"},
         },
     ]
@@ -222,7 +222,7 @@ def test_middleware_callback_spans(sentry_init, capture_events):
         )
 
 
-def test_middleware_receive_send(sentry_init, capture_events):
+def test_middleware_receive_send(debugg_ai_init, capture_events):
     class SampleReceiveSendMiddleware(AbstractMiddleware):
         async def __call__(self, scope, receive, send):
             message = await receive()
@@ -234,7 +234,7 @@ def test_middleware_receive_send(sentry_init, capture_events):
 
             await self.app(scope, receive, send)
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[LitestarIntegration()],
     )
@@ -245,7 +245,7 @@ def test_middleware_receive_send(sentry_init, capture_events):
     client.get("/message")
 
 
-def test_middleware_partial_receive_send(sentry_init, capture_events):
+def test_middleware_partial_receive_send(debugg_ai_init, capture_events):
     class SamplePartialReceiveSendMiddleware(AbstractMiddleware):
         async def __call__(self, scope, receive, send):
             message = await receive()
@@ -266,7 +266,7 @@ def test_middleware_partial_receive_send(sentry_init, capture_events):
 
             await self.app(scope, partial_receive, partial_send)
 
-    sentry_init(
+    debugg_ai_init(
         traces_sample_rate=1.0,
         integrations=[LitestarIntegration()],
     )
@@ -292,7 +292,7 @@ def test_middleware_partial_receive_send(sentry_init, capture_events):
         },
         {
             "op": "middleware.litestar.send",
-            "description": "SentryAsgiMiddleware._run_app.<locals>._sentry_wrapped_send",
+            "description": "DebuggAIAsgiMiddleware._run_app.<locals>._debugg_ai_wrapped_send",
             "tags": {"litestar.middleware_name": "SamplePartialReceiveSendMiddleware"},
         },
     ]
@@ -318,8 +318,8 @@ def test_middleware_partial_receive_send(sentry_init, capture_events):
         )
 
 
-def test_span_origin(sentry_init, capture_events):
-    sentry_init(
+def test_span_origin(debugg_ai_init, capture_events):
+    debugg_ai_init(
         integrations=[LitestarIntegration()],
         traces_sample_rate=1.0,
     )
@@ -361,7 +361,7 @@ def test_span_origin(sentry_init, capture_events):
     ],
 )
 def test_litestar_scope_user_on_exception_event(
-    sentry_init, capture_exceptions, capture_events, is_send_default_pii
+    debugg_ai_init, capture_exceptions, capture_events, is_send_default_pii
 ):
     class TestUserMiddleware(AbstractMiddleware):
         async def __call__(self, scope, receive, send):
@@ -372,7 +372,7 @@ def test_litestar_scope_user_on_exception_event(
             }
             await self.app(scope, receive, send)
 
-    sentry_init(
+    debugg_ai_init(
         integrations=[LitestarIntegration()], send_default_pii=is_send_default_pii
     )
     litestar_app = litestar_app_factory(middleware=[TestUserMiddleware])
@@ -403,7 +403,7 @@ def test_litestar_scope_user_on_exception_event(
 
 @parametrize_test_configurable_status_codes
 def test_configurable_status_codes(
-    sentry_init,
+    debugg_ai_init,
     capture_events,
     failed_request_status_codes,
     status_code,
@@ -414,7 +414,7 @@ def test_configurable_status_codes(
         if failed_request_status_codes is not None
         else {}
     )
-    sentry_init(integrations=[LitestarIntegration(**integration_kwargs)])
+    debugg_ai_init(integrations=[LitestarIntegration(**integration_kwargs)])
 
     events = capture_events()
 

@@ -55,7 +55,7 @@ class TornadoIntegration(Integration):
             # Tornado is async. We better have contextvars or we're going to leak
             # state between requests.
             raise DidNotEnable(
-                "The tornado integration for Sentry requires Python 3.7+ or the aiocontextvars package"
+                "The tornado integration for DebuggAI requires Python 3.7+ or the aiocontextvars package"
                 + CONTEXTVARS_ERROR_MESSAGE
             )
 
@@ -68,7 +68,7 @@ class TornadoIntegration(Integration):
         if awaitable:
             # Starting Tornado 6 RequestHandler._execute method is a standard Python coroutine (async/await)
             # In that case our method should be a coroutine function too
-            async def sentry_execute_request_handler(self, *args, **kwargs):
+            async def debugg_ai_execute_request_handler(self, *args, **kwargs):
                 # type: (RequestHandler, *Any, **Any) -> Any
                 with _handle_request_impl(self):
                     return await old_execute(self, *args, **kwargs)
@@ -76,22 +76,22 @@ class TornadoIntegration(Integration):
         else:
 
             @coroutine  # type: ignore
-            def sentry_execute_request_handler(self, *args, **kwargs):  # type: ignore
+            def debugg_ai_execute_request_handler(self, *args, **kwargs):  # type: ignore
                 # type: (RequestHandler, *Any, **Any) -> Any
                 with _handle_request_impl(self):
                     result = yield from old_execute(self, *args, **kwargs)
                     return result
 
-        RequestHandler._execute = sentry_execute_request_handler
+        RequestHandler._execute = debugg_ai_execute_request_handler
 
         old_log_exception = RequestHandler.log_exception
 
-        def sentry_log_exception(self, ty, value, tb, *args, **kwargs):
+        def debugg_ai_log_exception(self, ty, value, tb, *args, **kwargs):
             # type: (Any, type, BaseException, Any, *Any, **Any) -> Optional[Any]
             _capture_exception(ty, value, tb)
             return old_log_exception(self, ty, value, tb, *args, **kwargs)
 
-        RequestHandler.log_exception = sentry_log_exception
+        RequestHandler.log_exception = debugg_ai_log_exception
 
 
 @contextlib.contextmanager
@@ -116,7 +116,7 @@ def _handle_request_impl(self):
             op=OP.HTTP_SERVER,
             # Like with all other integrations, this is our
             # fallback transaction in case there is no route.
-            # sentry_urldispatcher_resolve is responsible for
+            # debugg_ai_urldispatcher_resolve is responsible for
             # setting a transaction name later.
             name="generic Tornado request",
             source=TransactionSource.ROUTE,

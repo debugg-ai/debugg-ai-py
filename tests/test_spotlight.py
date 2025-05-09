@@ -20,29 +20,29 @@ def capture_spotlight_envelopes(monkeypatch):
     return inner
 
 
-def test_spotlight_off_by_default(sentry_init):
-    sentry_init()
+def test_spotlight_off_by_default(debugg_ai_init):
+    debugg_ai_init()
     assert debugg_ai_sdk.get_client().spotlight is None
 
 
-def test_spotlight_default_url(sentry_init):
-    sentry_init(spotlight=True)
+def test_spotlight_default_url(debugg_ai_init):
+    debugg_ai_init(spotlight=True)
 
     spotlight = debugg_ai_sdk.get_client().spotlight
     assert spotlight is not None
     assert spotlight.url == "http://localhost:8969/stream"
 
 
-def test_spotlight_custom_url(sentry_init):
-    sentry_init(spotlight="http://foobar@test.com/132")
+def test_spotlight_custom_url(debugg_ai_init):
+    debugg_ai_init(spotlight="http://foobar@test.com/132")
 
     spotlight = debugg_ai_sdk.get_client().spotlight
     assert spotlight is not None
     assert spotlight.url == "http://foobar@test.com/132"
 
 
-def test_spotlight_envelope(sentry_init, capture_spotlight_envelopes):
-    sentry_init(spotlight=True)
+def test_spotlight_envelope(debugg_ai_init, capture_spotlight_envelopes):
+    debugg_ai_init(spotlight=True)
     envelopes = capture_spotlight_envelopes()
 
     try:

@@ -18,7 +18,7 @@ from debugg_ai_sdk.integrations._wsgi_common import (
     _is_json_content_type,
     request_body_within_bounds,
 )
-from debugg_ai_sdk.integrations.asgi import SentryAsgiMiddleware
+from debugg_ai_sdk.integrations.asgi import DebuggAIAsgiMiddleware
 from debugg_ai_sdk.scope import should_send_default_pii
 from debugg_ai_sdk.tracing import (
     SOURCE_FOR_STYLE,
@@ -168,7 +168,7 @@ def _enable_span_for_middleware(middleware_class):
             middleware_span.set_tag("starlette.middleware_name", middleware_name)
 
             # Creating spans for the "receive" callback
-            async def _sentry_receive(*args, **kwargs):
+            async def _debugg_ai_receive(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
                 with debugg_ai_sdk.start_span(
                     op=OP.MIDDLEWARE_STARLETTE_RECEIVE,
@@ -179,11 +179,11 @@ def _enable_span_for_middleware(middleware_class):
                     return await receive(*args, **kwargs)
 
             receive_name = getattr(receive, "__name__", str(receive))
-            receive_patched = receive_name == "_sentry_receive"
-            new_receive = _sentry_receive if not receive_patched else receive
+            receive_patched = receive_name == "_debugg_ai_receive"
+            new_receive = _debugg_ai_receive if not receive_patched else receive
 
             # Creating spans for the "send" callback
-            async def _sentry_send(*args, **kwargs):
+            async def _debugg_ai_send(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
                 with debugg_ai_sdk.start_span(
                     op=OP.MIDDLEWARE_STARLETTE_SEND,
@@ -194,15 +194,15 @@ def _enable_span_for_middleware(middleware_class):
                     return await send(*args, **kwargs)
 
             send_name = getattr(send, "__name__", str(send))
-            send_patched = send_name == "_sentry_send"
-            new_send = _sentry_send if not send_patched else send
+            send_patched = send_name == "_debugg_ai_send"
+            new_send = _debugg_ai_send if not send_patched else send
 
             return await old_call(app, scope, new_receive, new_send, **kwargs)
 
     not_yet_patched = old_call.__name__ not in [
         "_create_span_call",
-        "_sentry_authenticationmiddleware_call",
-        "_sentry_exceptionmiddleware_call",
+        "_debugg_ai_authenticationmiddleware_call",
+        "_debugg_ai_exceptionmiddleware_call",
     ]
 
     if not_yet_patched:
@@ -231,18 +231,18 @@ def patch_exception_middleware(middleware_class):
     """
     old_middleware_init = middleware_class.__init__
 
-    not_yet_patched = "_sentry_middleware_init" not in str(old_middleware_init)
+    not_yet_patched = "_debugg_ai_middleware_init" not in str(old_middleware_init)
 
     if not_yet_patched:
 
-        def _sentry_middleware_init(self, *args, **kwargs):
+        def _debugg_ai_middleware_init(self, *args, **kwargs):
             # type: (Any, Any, Any) -> None
             old_middleware_init(self, *args, **kwargs)
 
             # Patch existing exception handlers
             old_handlers = self._exception_handlers.copy()
 
-            async def _sentry_patched_exception_handler(self, *args, **kwargs):
+            async def _debugg_ai_patched_exception_handler(self, *args, **kwargs):
                 # type: (Any, Any, Any) -> None
                 integration = debugg_ai_sdk.get_client().get_integration(
                     StarletteIntegration
@@ -275,37 +275,37 @@ def patch_exception_middleware(middleware_class):
                     return old_handler(self, *args, **kwargs)
 
             for key in self._exception_handlers.keys():
-                self._exception_handlers[key] = _sentry_patched_exception_handler
+                self._exception_handlers[key] = _debugg_ai_patched_exception_handler
 
-        middleware_class.__init__ = _sentry_middleware_init
+        middleware_class.__init__ = _debugg_ai_middleware_init
 
         old_call = middleware_class.__call__
 
-        async def _sentry_exceptionmiddleware_call(self, scope, receive, send):
+        async def _debugg_ai_exceptionmiddleware_call(self, scope, receive, send):
             # type: (Dict[str, Any], Dict[str, Any], Callable[[], Awaitable[Dict[str, Any]]], Callable[[Dict[str, Any]], Awaitable[None]]) -> None
             # Also add the user (that was eventually set by be Authentication middle
             # that was called before this middleware). This is done because the authentication
             # middleware sets the user in the scope and then (in the same function)
             # calls this exception middelware. In case there is no exception (or no handler
             # for the type of exception occuring) then the exception bubbles up and setting the
-            # user information into the sentry scope is done in auth middleware and the
-            # ASGI middleware will then send everything to Sentry and this is fine.
+            # user information into the debugg-ai scope is done in auth middleware and the
+            # ASGI middleware will then send everything to DebuggAI and this is fine.
             # But if there is an exception happening that the exception middleware here
-            # has a handler for, it will send the exception directly to Sentry, so we need
+            # has a handler for, it will send the exception directly to DebuggAI, so we need
             # the user information right now.
             # This is why we do it here.
-            _add_user_to_sentry_scope(scope)
+            _add_user_to_debugg_ai_scope(scope)
             await old_call(self, scope, receive, send)
 
-        middleware_class.__call__ = _sentry_exceptionmiddleware_call
+        middleware_class.__call__ = _debugg_ai_exceptionmiddleware_call
 
 
 @ensure_integration_enabled(StarletteIntegration)
-def _add_user_to_sentry_scope(scope):
+def _add_user_to_debugg_ai_scope(scope):
     # type: (Dict[str, Any]) -> None
     """
     Extracts user information from the ASGI scope and
-    adds it to Sentry's scope.
+    adds it to DebuggAI's scope.
     """
     if "user" not in scope:
         return
@@ -328,27 +328,27 @@ def _add_user_to_sentry_scope(scope):
     if email:
         user_info.setdefault("email", starlette_user.email)
 
-    sentry_scope = debugg_ai_sdk.get_isolation_scope()
-    sentry_scope.user = user_info
+    debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
+    debugg_ai_scope.user = user_info
 
 
 def patch_authentication_middleware(middleware_class):
     # type: (Any) -> None
     """
-    Add user information to Sentry scope.
+    Add user information to DebuggAI scope.
     """
     old_call = middleware_class.__call__
 
-    not_yet_patched = "_sentry_authenticationmiddleware_call" not in str(old_call)
+    not_yet_patched = "_debugg_ai_authenticationmiddleware_call" not in str(old_call)
 
     if not_yet_patched:
 
-        async def _sentry_authenticationmiddleware_call(self, scope, receive, send):
+        async def _debugg_ai_authenticationmiddleware_call(self, scope, receive, send):
             # type: (Dict[str, Any], Dict[str, Any], Callable[[], Awaitable[Dict[str, Any]]], Callable[[Dict[str, Any]], Awaitable[None]]) -> None
             await old_call(self, scope, receive, send)
-            _add_user_to_sentry_scope(scope)
+            _add_user_to_debugg_ai_scope(scope)
 
-        middleware_class.__call__ = _sentry_authenticationmiddleware_call
+        middleware_class.__call__ = _debugg_ai_authenticationmiddleware_call
 
 
 def patch_middlewares():
@@ -359,13 +359,13 @@ def patch_middlewares():
     """
     old_middleware_init = Middleware.__init__
 
-    not_yet_patched = "_sentry_middleware_init" not in str(old_middleware_init)
+    not_yet_patched = "_debugg_ai_middleware_init" not in str(old_middleware_init)
 
     if not_yet_patched:
 
-        def _sentry_middleware_init(self, cls, *args, **kwargs):
+        def _debugg_ai_middleware_init(self, cls, *args, **kwargs):
             # type: (Any, Any, Any, Any) -> None
-            if cls == SentryAsgiMiddleware:
+            if cls == DebuggAIAsgiMiddleware:
                 return old_middleware_init(self, cls, *args, **kwargs)
 
             span_enabled_cls = _enable_span_for_middleware(cls)
@@ -377,23 +377,23 @@ def patch_middlewares():
             if cls == ExceptionMiddleware:
                 patch_exception_middleware(cls)
 
-        Middleware.__init__ = _sentry_middleware_init
+        Middleware.__init__ = _debugg_ai_middleware_init
 
 
 def patch_asgi_app():
     # type: () -> None
     """
-    Instrument Starlette ASGI app using the SentryAsgiMiddleware.
+    Instrument Starlette ASGI app using the DebuggAIAsgiMiddleware.
     """
     old_app = Starlette.__call__
 
-    async def _sentry_patched_asgi_app(self, scope, receive, send):
+    async def _debugg_ai_patched_asgi_app(self, scope, receive, send):
         # type: (Starlette, StarletteScope, Receive, Send) -> None
         integration = debugg_ai_sdk.get_client().get_integration(StarletteIntegration)
         if integration is None:
             return await old_app(self, scope, receive, send)
 
-        middleware = SentryAsgiMiddleware(
+        middleware = DebuggAIAsgiMiddleware(
             lambda *a, **kw: old_app(self, *a, **kw),
             mechanism_type=StarletteIntegration.identifier,
             transaction_style=integration.transaction_style,
@@ -408,7 +408,7 @@ def patch_asgi_app():
         middleware.__call__ = middleware._run_asgi3
         return await middleware(scope, receive, send)
 
-    Starlette.__call__ = _sentry_patched_asgi_app
+    Starlette.__call__ = _debugg_ai_patched_asgi_app
 
 
 # This was vendored in from Starlette to support Starlette 0.19.1 because
@@ -427,14 +427,14 @@ def patch_request_response():
     # type: () -> None
     old_request_response = starlette.routing.request_response
 
-    def _sentry_request_response(func):
+    def _debugg_ai_request_response(func):
         # type: (Callable[[Any], Any]) -> ASGIApp
         old_func = func
 
         is_coroutine = _is_async_callable(old_func)
         if is_coroutine:
 
-            async def _sentry_async_func(*args, **kwargs):
+            async def _debugg_ai_async_func(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
                 integration = debugg_ai_sdk.get_client().get_integration(
                     StarletteIntegration
@@ -450,7 +450,7 @@ def patch_request_response():
                     request,
                 )
 
-                sentry_scope = debugg_ai_sdk.get_isolation_scope()
+                debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
                 extractor = StarletteRequestExtractor(request)
                 info = await extractor.extract_request_info()
 
@@ -472,19 +472,19 @@ def patch_request_response():
 
                     return event_processor
 
-                sentry_scope._name = StarletteIntegration.identifier
-                sentry_scope.add_event_processor(
+                debugg_ai_scope._name = StarletteIntegration.identifier
+                debugg_ai_scope.add_event_processor(
                     _make_request_event_processor(request, integration)
                 )
 
                 return await old_func(*args, **kwargs)
 
-            func = _sentry_async_func
+            func = _debugg_ai_async_func
 
         else:
 
             @functools.wraps(old_func)
-            def _sentry_sync_func(*args, **kwargs):
+            def _debugg_ai_sync_func(*args, **kwargs):
                 # type: (*Any, **Any) -> Any
                 integration = debugg_ai_sdk.get_client().get_integration(
                     StarletteIntegration
@@ -496,14 +496,14 @@ def patch_request_response():
                 if current_scope.transaction is not None:
                     current_scope.transaction.update_active_thread()
 
-                sentry_scope = debugg_ai_sdk.get_isolation_scope()
-                if sentry_scope.profile is not None:
-                    sentry_scope.profile.update_active_thread_id()
+                debugg_ai_scope = debugg_ai_sdk.get_isolation_scope()
+                if debugg_ai_scope.profile is not None:
+                    debugg_ai_scope.profile.update_active_thread_id()
 
                 request = args[0]
 
                 _set_transaction_name_and_source(
-                    sentry_scope, integration.transaction_style, request
+                    debugg_ai_scope, integration.transaction_style, request
                 )
 
                 extractor = StarletteRequestExtractor(request)
@@ -525,18 +525,18 @@ def patch_request_response():
 
                     return event_processor
 
-                sentry_scope._name = StarletteIntegration.identifier
-                sentry_scope.add_event_processor(
+                debugg_ai_scope._name = StarletteIntegration.identifier
+                debugg_ai_scope.add_event_processor(
                     _make_request_event_processor(request, integration)
                 )
 
                 return old_func(*args, **kwargs)
 
-            func = _sentry_sync_func
+            func = _debugg_ai_sync_func
 
         return old_request_response(func)
 
-    starlette.routing.request_response = _sentry_request_response
+    starlette.routing.request_response = _debugg_ai_request_response
 
 
 def patch_templates():
@@ -554,37 +554,37 @@ def patch_templates():
 
     old_jinja2templates_init = Jinja2Templates.__init__
 
-    not_yet_patched = "_sentry_jinja2templates_init" not in str(
+    not_yet_patched = "_debugg_ai_jinja2templates_init" not in str(
         old_jinja2templates_init
     )
 
     if not_yet_patched:
 
-        def _sentry_jinja2templates_init(self, *args, **kwargs):
+        def _debugg_ai_jinja2templates_init(self, *args, **kwargs):
             # type: (Jinja2Templates, *Any, **Any) -> None
-            def add_sentry_trace_meta(request):
+            def add_debugg_ai_trace_meta(request):
                 # type: (Request) -> Dict[str, Any]
                 trace_meta = Markup(
                     debugg_ai_sdk.get_current_scope().trace_propagation_meta()
                 )
                 return {
-                    "sentry_trace_meta": trace_meta,
+                    "debugg_ai_trace_meta": trace_meta,
                 }
 
             kwargs.setdefault("context_processors", [])
 
-            if add_sentry_trace_meta not in kwargs["context_processors"]:
-                kwargs["context_processors"].append(add_sentry_trace_meta)
+            if add_debugg_ai_trace_meta not in kwargs["context_processors"]:
+                kwargs["context_processors"].append(add_debugg_ai_trace_meta)
 
             return old_jinja2templates_init(self, *args, **kwargs)
 
-        Jinja2Templates.__init__ = _sentry_jinja2templates_init
+        Jinja2Templates.__init__ = _debugg_ai_jinja2templates_init
 
 
 class StarletteRequestExtractor:
     """
     Extracts useful information from the Starlette request
-    (like form data or cookies) and adds it to the Sentry event.
+    (like form data or cookies) and adds it to the DebuggAI event.
     """
 
     request = None  # type: Request

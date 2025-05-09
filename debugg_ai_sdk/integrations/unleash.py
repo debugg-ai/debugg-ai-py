@@ -20,7 +20,7 @@ class UnleashIntegration(Integration):
         old_is_enabled = UnleashClient.is_enabled
 
         @wraps(old_is_enabled)
-        def sentry_is_enabled(self, feature, *args, **kwargs):
+        def debugg_ai_is_enabled(self, feature, *args, **kwargs):
             # type: (UnleashClient, str, *Any, **Any) -> Any
             enabled = old_is_enabled(self, feature, *args, **kwargs)
 
@@ -30,4 +30,4 @@ class UnleashIntegration(Integration):
 
             return enabled
 
-        UnleashClient.is_enabled = sentry_is_enabled  # type: ignore
+        UnleashClient.is_enabled = debugg_ai_is_enabled  # type: ignore
