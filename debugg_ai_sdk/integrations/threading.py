@@ -1,9 +1,12 @@
 import sys
 import warnings
+import inspect
+
 from functools import wraps
-from threading import Thread, current_thread
+from threading import current_thread
 
 import debugg_ai_sdk
+from debugg_ai_sdk.worker import ThreadingWrapper
 from debugg_ai_sdk.integrations import Integration
 from debugg_ai_sdk.scope import use_isolation_scope, use_scope
 from debugg_ai_sdk.utils import (
@@ -13,7 +16,7 @@ from debugg_ai_sdk.utils import (
     reraise,
 )
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple, List
 
 if TYPE_CHECKING:
     from typing import Any
@@ -48,7 +51,7 @@ class ThreadingIntegration(Integration):
     @staticmethod
     def setup_once():
         # type: () -> None
-        old_start = Thread.start
+        old_start = ThreadingWrapper.start
 
         try:
             from django import VERSION as django_version  # noqa: N811
@@ -61,7 +64,7 @@ class ThreadingIntegration(Integration):
 
         @wraps(old_start)
         def debugg_ai_start(self, *a, **kw):
-            # type: (Thread, *Any, **Any) -> Any
+            # type: (ThreadingWrapper, *Any, **Any) -> Any
             integration = debugg_ai_sdk.get_client().get_integration(ThreadingIntegration)
             if integration is None:
                 return old_start(self, *a, **kw)
@@ -108,24 +111,52 @@ class ThreadingIntegration(Integration):
 
             return old_start(self, *a, **kw)
 
-        Thread.start = debugg_ai_start  # type: ignore
+        ThreadingWrapper.start = debugg_ai_start  # type: ignore
+
+def check_args_kwargs(func):
+    # type: (Callable[..., Any]) -> Tuple[List[inspect.Parameter], List[inspect.Parameter]]
+    signature = inspect.signature(func)
+    parameters = signature.parameters
+
+    args = [param for param in parameters.values() if param.kind == inspect.Parameter.VAR_POSITIONAL]
+    kwargs = [param for param in parameters.values() if param.kind == inspect.Parameter.VAR_KEYWORD]
+
+    return args, kwargs
+
+def check_name(func):
+    # type: (Callable[..., Any]) -> str
+    return func.__name__
 
 
 def _wrap_run(isolation_scope_to_use, current_scope_to_use, old_run_func):
     # type: (Optional[debugg_ai_sdk.Scope], Optional[debugg_ai_sdk.Scope], F) -> F
+    
     @wraps(old_run_func)
     def run(*a, **kw):
-        # type: (*Any, **Any) -> Any
+    # type: (*Any, **Any) -> Any
+    
         def _run_old_run_func(*args, **kwargs):
-            # type: (*Any, **Any) -> Any
+        # type: (*Any, **Any) -> Any
             try:
                 self = current_thread()
-                if (hasattr(self, "_args") and not self._args) and (hasattr(self, "_kwargs") and not self._kwargs):
-                    self._args = a
-                    self._kwargs = kw
+                # func_name = check_name(old_run_func)
+                # if not func_name in ["run", "_run_old_run_func", "old_run_func", "_wrap_run"]:
+                #     has_args, has_kwargs = check_args_kwargs(old_run_func) 
+                #     if has_args and has_kwargs:
+                #         return old_run_func(self, *args, **kwargs)
+                #     elif has_args and len(has_args) > 1: # check to ensure more than just self is passed
+                #         return old_run_func(self, *args)
+                    
                 return old_run_func(self)
             except Exception:
-                reraise(*_capture_exception(*args, **kwargs))
+                has_args, has_kwargs = check_args_kwargs(_capture_exception)
+                if has_args and has_kwargs:
+                    capture = _capture_exception(*args, **kwargs)
+                elif has_args:
+                    capture = _capture_exception(*args)
+                else:
+                    capture = _capture_exception()
+                reraise(*capture)
 
         if isolation_scope_to_use is not None and current_scope_to_use is not None:
             with use_isolation_scope(isolation_scope_to_use):

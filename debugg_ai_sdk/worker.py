@@ -16,6 +16,11 @@ if TYPE_CHECKING:
 
 _TERMINATOR = object()
 
+class ThreadingWrapper(threading.Thread):
+    def run(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super(ThreadingWrapper, self).run()
+
 
 class BackgroundWorker:
     def __init__(self, queue_size=DEFAULT_QUEUE_SIZE):
@@ -34,8 +39,8 @@ class BackgroundWorker:
             return False
         return self._thread.is_alive()
 
-    def _ensure_thread(self):
-        # type: () -> None
+    def _ensure_thread(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
         if not self.is_alive:
             self.start()
 
@@ -61,7 +66,7 @@ class BackgroundWorker:
         # type: (Any, Any) -> None
         with self._lock:
             if not self.is_alive:
-                self._thread = threading.Thread(
+                self._thread = ThreadingWrapper(
                     target=self._target, name="debugg-ai-sdk.BackgroundWorker"
                 )
                 self._thread.daemon = True

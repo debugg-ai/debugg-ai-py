@@ -36,8 +36,8 @@ class Monitor:
         self._thread_for_pid = None  # type: Optional[int]
         self._running = True
 
-    def _ensure_running(self):
-        # type: () -> None
+    def _ensure_running(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
         """
         Check that the monitor has an active thread to run in, or create one if not.
 
@@ -52,8 +52,8 @@ class Monitor:
             if self._thread_for_pid == os.getpid() and self._thread is not None:
                 return None
 
-            def _thread():
-                # type: (...) -> None
+            def _thread(*args, **kwargs):
+                # type: (*Any, **Any) -> None
                 while self._running:
                     time.sleep(self.interval)
                     if self._running:
@@ -74,8 +74,8 @@ class Monitor:
 
         return None
 
-    def run(self):
-        # type: () -> None
+    def run(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
         self.check_health()
         self.set_downsample_factor()
 

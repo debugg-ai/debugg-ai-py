@@ -25,7 +25,7 @@ def get_file_text(file_name):
 
 setup(
     name="debugg-ai-sdk",
-    version="0.1.8",
+    version="0.1.12",
     description="Debugg AI's official Python sdk for connecting your personal AI QA engineer",
     author="Debugg AI Team",
     author_email="support@debugg.ai",
